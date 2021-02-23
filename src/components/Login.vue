@@ -1,3 +1,5 @@
+<!-- @format -->
+
 <template>
   <div class="login_container">
     <div class="login_box">
@@ -44,8 +46,8 @@ export default {
     return {
       // 这是登录表单的数据保存
       loginForm: {
-        username: "",
-        password: "",
+        username: "admin",
+        password: "123456",
       },
       // 表单的规则对象
       loginFormRules: {
