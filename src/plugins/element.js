@@ -1,3 +1,5 @@
+/** @format */
+
 import Vue from "vue";
 import {
   Button,
@@ -23,6 +25,7 @@ import {
   Tooltip,
   Pagination,
   Dialog,
+  MessageBox,
 } from "element-ui";
 // 导入弹框提示组建
 
@@ -50,3 +53,4 @@ Vue.use(Button)
   .use(Pagination)
   .use(Dialog);
 Vue.prototype.$message = Message;
+Vue.prototype.$confirm = MessageBox.confirm;
