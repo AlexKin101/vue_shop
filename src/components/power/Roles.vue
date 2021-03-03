@@ -287,7 +287,7 @@ export default {
         return this.$message.error("获取角色列表失败");
 
       this.roleList = res.data;
-      console.log(this.roleList);
+      // console.log(this.roleList);
     },
 
     //监听添加角色对话框的关闭事件
@@ -330,7 +330,7 @@ export default {
     // 修改角色信息并提交
     editRolesInfo() {
       this.$refs.editFormRef.validate(async (valid) => {
-        console.log(valid);
+        // console.log(valid);
         if (!valid) return;
         //可以发起修改角色的网络请求
         const { data: res } = await this.$http.put(

@@ -340,17 +340,17 @@ export default {
         return this.$message.error("获取用户列表失败！");
       this.userList = res.data.users;
       this.total = res.data.total;
-      console.log(res);
+      //console.log(res);
     },
     // 监听pagesize改变的事件
     handleSizeChange(newSize) {
-      console.log(newSize);
+      // console.log(newSize);
       this.queryInfo.pagesize = newSize;
       this.getUserList();
     },
     // 监听页码值改变的事件
     handleCurrentChange(newPage) {
-      console.log(newPage);
+      // console.log(newPage);
       this.queryInfo.pagenum = newPage;
       this.getUserList();
     },
@@ -393,7 +393,7 @@ export default {
 
       this.editForm = res.data;
       this.editDialogVisible = true;
-      console.log(this.editForm);
+      // console.log(this.editForm);
     },
     //监听修改用户对话框的关闭事件
     editDialogClosed() {
@@ -402,7 +402,7 @@ export default {
     // 修改用户信息并提交
     editUserInfo() {
       this.$refs.editFormRef.validate(async (valid) => {
-        console.log(valid);
+        // console.log(valid);
         if (!valid) return;
         //可以发起修改用户的网络请求
         const { data: res } = await this.$http.put(
