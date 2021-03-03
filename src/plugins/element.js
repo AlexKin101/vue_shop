@@ -26,6 +26,10 @@ import {
   Pagination,
   Dialog,
   MessageBox,
+  Tag,
+  Tree,
+  Select,
+  Option,
 } from "element-ui";
 // 导入弹框提示组建
 
@@ -51,6 +55,10 @@ Vue.use(Button)
   .use(Switch)
   .use(Tooltip)
   .use(Pagination)
-  .use(Dialog);
+  .use(Dialog)
+  .use(Tag)
+  .use(Tree)
+  .use(Select)
+  .use(Option);
 Vue.prototype.$message = Message;
 Vue.prototype.$confirm = MessageBox.confirm;

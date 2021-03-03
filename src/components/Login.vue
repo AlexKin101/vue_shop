@@ -59,7 +59,7 @@ export default {
         // 验证密码是否合法
         password: [
           { required: true, message: "请输入登录密码", trigger: "blur" },
-          { min: 6, max: 15, message: "长度在6到15个字符", trigger: "blur" },
+          { min: 3, max: 15, message: "长度在3到15个字符", trigger: "blur" },
         ],
       },
     };
@@ -72,7 +72,7 @@ export default {
     },
     login() {
       this.$refs.loginFormRef.validate(async (vaild) => {
-        //console.log(vaild);
+        console.log(vaild);
         if (!vaild) return;
         const { data: res } = await this.$http.post("login", this.loginForm);
         if (res.meta.status !== 200) return this.$message.error("登录失败");
