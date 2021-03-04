@@ -31,6 +31,9 @@ import {
   Select,
   Option,
   Cascader,
+  Alert,
+  Tabs,
+  TabPane,
 } from "element-ui";
 // 导入弹框提示组建
 
@@ -61,6 +64,9 @@ Vue.use(Button)
   .use(Tree)
   .use(Select)
   .use(Option)
-  .use(Cascader);
+  .use(Cascader)
+  .use(Alert)
+  .use(Tabs)
+  .use(TabPane);
 Vue.prototype.$message = Message;
 Vue.prototype.$confirm = MessageBox.confirm;
