@@ -290,12 +290,12 @@ export default {
           },
         ],
         email: [
-          { required: false, message: "请输入邮箱", trigger: "blur" },
+          { required: true, message: "请输入邮箱", trigger: "blur" },
           { validator: checkEmail, trigger: "blur" },
         ],
         mobile: [
           {
-            required: false,
+            required: true,
             message: "请输入手机号",
             trigger: "blur",
           },
