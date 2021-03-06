@@ -36,6 +36,9 @@ import {
   TabPane,
   Steps,
   Step,
+  CheckboxGroup,
+  Checkbox,
+  Upload,
 } from "element-ui";
 // 导入弹框提示组建
 
@@ -71,6 +74,9 @@ Vue.use(Button)
   .use(Tabs)
   .use(TabPane)
   .use(Steps)
-  .use(Step);
+  .use(Step)
+  .use(Checkbox)
+  .use(CheckboxGroup)
+  .use(Upload);
 Vue.prototype.$message = Message;
 Vue.prototype.$confirm = MessageBox.confirm;
