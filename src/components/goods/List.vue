@@ -83,7 +83,7 @@
                 type="primary"
                 icon="el-icon-edit"
                 size="mini"
-                @click="showEditDialog(scope.row.goods_id)"
+                @click="goEditPage(scope.row.goods_id)"
               ></el-button>
             </el-tooltip>
 
@@ -149,7 +149,7 @@ export default {
       if (res.meta.status !== 200)
         return this.$message.error("获取商品列表失败");
       //   为总数据条数赋值
-      this.$message.success("获取商品列表成功");
+      //  this.$message.success("获取商品列表成功");
       this.total = res.data.total;
       this.goodsList = res.data.goods;
     },
@@ -194,6 +194,15 @@ export default {
 
     goAddPage() {
       this.$router.push("/goods/add");
+    },
+
+    goEditPage(goods_id) {
+      // this.$router.push("/goods/edit", { id: goods_id });
+      // this.$router.push({ path: "/goods/edit/goods_id=" + this.$route.path });
+      this.$router.push({
+        path: "/goods/edit",
+        query: { id: goods_id },
+      });
     },
   },
 };
