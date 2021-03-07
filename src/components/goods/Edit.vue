@@ -47,7 +47,7 @@
         >
           <el-tab-pane label="基本信息" name="0">
             <el-form-item label="商品名称" prop="goods_name">
-              <el-input v-model="editForm.goods_name" disabled></el-input>
+              <el-input v-model="editForm.goods_name"></el-input>
             </el-form-item>
             <el-form-item label="商品价格" prop="goods_price">
               <el-input v-model="editForm.goods_price" type="number"></el-input>
@@ -118,6 +118,9 @@
               list-type="picture"
               :headers="headerObj"
               :on-success="handleSuccess"
+              show-file-list
+              auto-upload
+              :file-list="fileList"
             >
               <el-tooltip
                 class="item"
@@ -156,6 +159,10 @@ import _ from "lodash";
 export default {
   data() {
     return {
+      uploadDisabled: false,
+      baseURL: "http://1.15.39.179:8088",
+      // 已上传文件列表
+      fileList: [],
       activeIndex: "0",
       // 添加商品的表单数据对象
       editForm: {
@@ -235,6 +242,7 @@ export default {
   created() {
     this.getCateList();
     this.getGoodsList();
+    this.getGoodsListPic();
   },
   methods: {
     async getGoodsList() {
@@ -246,6 +254,19 @@ export default {
 
       this.editForm = res.data;
       this.editForm.goods_cat = [];
+      console.log(res.data);
+
+      this.showFileList();
+    },
+
+    async getGoodsListPic() {
+      const { data: res } = await this.$http.get(
+        `goods/${this.$route.query.id}`
+      );
+      if (res.meta.status !== 200)
+        return this.$message.error("获取商品信息失败");
+
+      this.editForm.pics = res.data.pics;
       console.log(res.data);
     },
 
@@ -269,15 +290,6 @@ export default {
       }
     },
 
-    //  重新赋值前先调用此方法
-    // this.$refs.locationCascader：这个值基于你之前在dom上定义的ref
-    // resetCasadeSelector() {
-    //   if (this.$refs.locationCascader) {
-    //     this.$refs.locationCascader.$refs.panel.activePath = [];
-    //     this.$refs.locationCascader.$refs.panel.calculateCheckedNodePaths();
-    //   }
-    // },
-
     beforeTabLeave(activeName, oldActiveName) {
       // console.log("即将离开的标签页名字是" + oldActiveName);
       // console.log("即将进入的标签页名字是" + activeName);
@@ -287,6 +299,20 @@ export default {
         this.$message.error("请先选择商品分类");
         return false;
       }
+    },
+
+    // 图片添加页显示
+    showFileList() {
+      console.log(this.editForm.pics);
+      let urlStr = this.editForm.pics;
+      var i = 1;
+      urlStr.forEach((item) => {
+        let obj = new Object();
+        obj = item;
+        obj.url = this.baseURL + item.pics_mid;
+        obj.name = "pic_" + i++;
+        this.fileList.push(obj);
+      });
     },
 
     async getParamsList(parmas) {
@@ -331,31 +357,44 @@ export default {
       }
     },
 
+    unique(arr) {
+      // 根据唯一标识orderId来对数组进行过滤
+      const res = new Map(); //定义常量 res,值为一个Map对象实例 //返回arr数组过滤后的结果，结果为一个数组   过滤条件是，如果res中没有某个键，就设置这个键的值为1
+      return arr.filter(
+        (arr) => !res.has(arr.pics_id) && res.set(arr.pics_id, 1)
+      );
+    },
+
     // 处理图片预览效果
     handlePreview(file) {
-      this.previewPath =
-        "http://1.15.39.179:8088/" + file.response.data.tmp_path;
-      console.log(this.previewPath);
+      console.log(file);
+      this.previewPath = file.url;
+      // console.log(this.previewPath);
       this.previewVisible = true;
     },
 
     // 处理图片移除操作
     handleRemove(file) {
       //   1.获取将要删除的图片的临时路径
-      const filePath = { pic: file.response.data.tmp_path };
+      const fileUid = file.uid;
       //   2.从pics数组中，找到这个图片的索引值
-      const i = this.editForm.pics.findIndex((x) => x.pic === filePath);
+      const i = this.editForm.pics.findIndex((x) => x.pic === fileUid);
       //   3.调用数组的splice方法，把图片信息对象，从pics数组中移除
       this.editForm.pics.splice(i, 1);
     },
 
     // 监听图片上传成功的事件
     handleSuccess(response) {
-      const picInfo = { pic: response.data.tmp_path };
       //   1.拼接得到一个图片信息对象
       // 2.将图片信息对象，push到pics数组中
+      // console.log(file);
+      const picInfo = { pic: response.data.tmp_path };
+      if (response.meta.status !== 200) return;
       this.editForm.pics.push(picInfo);
+      //console.log(this.editForm.pics);
     },
+
+    handleChange() {},
 
     // 编辑商品
     edit() {

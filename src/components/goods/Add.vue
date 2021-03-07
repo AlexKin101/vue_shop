@@ -325,6 +325,7 @@ export default {
       //   1.拼接得到一个图片信息对象
       // 2.将图片信息对象，push到pics数组中
       this.addForm.pics.push(picInfo);
+      console.log(this.addForm.pics);
     },
 
     // 添加商品
