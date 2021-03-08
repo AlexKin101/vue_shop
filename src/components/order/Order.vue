@@ -40,13 +40,13 @@
         <el-table-column
           label="订单价格（元）"
           prop="order_price"
-          width="95px"
+          width="70px"
           align="center"
         ></el-table-column>
         <el-table-column
           label="是否付款"
           prop="pay_status"
-          width="80px"
+          width="100px"
           align="center"
         >
           <template slot-scope="scope">
@@ -65,7 +65,7 @@
         <el-table-column
           label="下单时间"
           prop="update_time"
-          width="140px"
+          width="150px"
           align="center"
         >
           <template slot-scope="scope">
