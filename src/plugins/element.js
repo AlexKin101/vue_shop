@@ -39,6 +39,8 @@ import {
   CheckboxGroup,
   Checkbox,
   Upload,
+  Timeline,
+  TimelineItem,
 } from "element-ui";
 // 导入弹框提示组建
 
@@ -77,6 +79,8 @@ Vue.use(Button)
   .use(Step)
   .use(Checkbox)
   .use(CheckboxGroup)
-  .use(Upload);
+  .use(Upload)
+  .use(Timeline)
+  .use(TimelineItem);
 Vue.prototype.$message = Message;
 Vue.prototype.$confirm = MessageBox.confirm;
