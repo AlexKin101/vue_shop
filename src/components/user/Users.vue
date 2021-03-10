@@ -36,12 +36,20 @@
 
       <!-- 用户列表区域 -->
       <el-table :data="userList" stripe border>
-        <el-table-column label="#" type="index"></el-table-column>
+        <el-table-column
+          label="#"
+          type="index"
+          align="center"
+        ></el-table-column>
         <el-table-column label="姓名" prop="username"></el-table-column>
         <el-table-column label="邮箱" prop="email"></el-table-column>
-        <el-table-column label="手机号" prop="tel"></el-table-column>
+        <el-table-column
+          label="手机号"
+          prop="tel"
+          width="200px"
+        ></el-table-column>
         <el-table-column label="角色" prop="rolename"></el-table-column>
-        <el-table-column label="状态">
+        <el-table-column label="状态" align="center" width="100px">
           <template slot-scope="scope">
             <!-- {{ scope.row }} -->
             <el-switch
@@ -267,7 +275,7 @@ export default {
         username: "",
         password: "",
         email: "",
-        mobile: "",
+        tel: "",
       },
       // 添加表单的验证规则对象
       addFormRules: {
@@ -293,7 +301,7 @@ export default {
           { required: true, message: "请输入邮箱", trigger: "blur" },
           { validator: checkEmail, trigger: "blur" },
         ],
-        mobile: [
+        tel: [
           {
             required: true,
             message: "请输入手机号",
@@ -314,7 +322,7 @@ export default {
           { required: false, message: "请输入邮箱", trigger: "blur" },
           { validator: checkEmail, trigger: "blur" },
         ],
-        mobile: [
+        tel: [
           {
             required: false,
             message: "请输入手机号",
@@ -338,22 +346,29 @@ export default {
       });
       if (res.meta.status !== 200)
         return this.$message.error("获取用户列表失败！");
+      this.queryInfo.pagenum = res.data.pageable.pageNumber + 1;
+      this.queryInfo.pagesize = res.data.size;
+      this.total = res.data.totalElements;
       this.userList = res.data.content;
-      //this.total = res.data.total;
-      console.log(res);
+
+      // console.log(res);
+      // console.log(this.queryInfo);
     },
+
     // 监听pagesize改变的事件
     handleSizeChange(newSize) {
       // console.log(newSize);
       this.queryInfo.pagesize = newSize;
       this.getUserList();
     },
+
     // 监听页码值改变的事件
     handleCurrentChange(newPage) {
       // console.log(newPage);
       this.queryInfo.pagenum = newPage;
       this.getUserList();
     },
+
     //监听switch开关状态的改变
     async userStateChanged(userInfo) {
       const { data: res } = await this.$http.put(
@@ -365,10 +380,12 @@ export default {
       }
       this.$message.success("更新用户状态成功！");
     },
+
     //监听添加用户对话框的关闭事件
     addDialogClosed() {
       this.$refs.addFormRef.resetFields();
     },
+
     //点击按钮,添加新用户
     addUser() {
       this.$refs.addFormRef.validate(async (valid) => {
@@ -385,6 +402,7 @@ export default {
         this.$message.success("添加用户成功");
       });
     },
+
     // 展示编辑用户的对话框
     async showEditDialog(id) {
       // console.log(id);
@@ -395,10 +413,12 @@ export default {
       this.editDialogVisible = true;
       // console.log(this.editForm);
     },
+
     //监听修改用户对话框的关闭事件
     editDialogClosed() {
       this.$refs.editFormRef.resetFields();
     },
+
     // 修改用户信息并提交
     editUserInfo() {
       this.$refs.editFormRef.validate(async (valid) => {
@@ -408,10 +428,7 @@ export default {
         console.log(this.editForm);
         const { data: res } = await this.$http.put(
           `users/update/${this.editForm.id}`,
-          {
-            email: this.editForm.email,
-            tel: this.editForm.mobile,
-          }
+          this.editForm
         );
 
         if (res.meta.status !== 200)
@@ -424,6 +441,7 @@ export default {
         this.$message.success("修改用户信息成功");
       });
     },
+
     // 根据Id删除对应的用户信息
     async removeUserById(id) {
       //弹窗询问用户是否删除数据
