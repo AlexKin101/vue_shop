@@ -13,10 +13,14 @@
     <!-- 页面主体区 -->
     <el-container>
       <!-- 侧边栏 -->
+
       <el-aside :width="isCollapse ? '64px' : '200px'">
-        <div class="toggle-button" @click="toggleCollapse">|||</div>
+        <div class="toggle-button" @click="toggleCollapse">
+          |||
+        </div>
         <!-- 侧边栏菜单区域 -->
         <el-menu
+          class="el-menu-vertical"
           background-color="#333744"
           text-color="#fff"
           active-text-color="#409EFF"
@@ -37,7 +41,7 @@
               <!-- 图标 -->
               <i :class="iconsObj[item.id]"></i>
               <!-- 文本 -->
-              <span>{{ item.authName }}</span>
+              <span>{{ item.name }}</span>
             </template>
 
             <!-- 二级菜单 -->
@@ -52,12 +56,13 @@
                 <!-- 图标 -->
                 <i class="el-icon-menu"></i>
                 <!-- 文本 -->
-                <span>{{ subItem.authName }}</span>
+                <span>{{ subItem.name }}</span>
               </template>
             </el-menu-item>
           </el-submenu>
         </el-menu>
       </el-aside>
+
       <!-- 右侧内容 -->
       <el-main>
         <!-- 路由占位符 -->
@@ -98,7 +103,8 @@ export default {
     //获取所有的菜单
     async getMenuList() {
       const { data: res } = await this.$http.get("menus");
-      if (res.meta.status !== 200) return this.$message.error(res.meta.msg);
+      if (res.meta.status !== 200)
+        return this.$message.error("左侧菜单栏请求数据失败");
       this.menulist = res.data;
       // console.log(res);
     },
