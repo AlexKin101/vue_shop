@@ -106,7 +106,7 @@ export default {
       if (res.meta.status !== 200)
         return this.$message.error("左侧菜单栏请求数据失败");
       this.menulist = res.data;
-      console.log(res);
+      // console.log(res);
     },
     //点击按钮,切换菜单的折叠与展开
     toggleCollapse() {

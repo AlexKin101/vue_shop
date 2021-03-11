@@ -27,7 +27,7 @@
           <template slot-scope="scope">
             <el-row
               :class="['bdbottom', i1 === 0 ? 'bdtop' : '', 'vcenter']"
-              v-for="(item1, i1) in scope.row.children"
+              v-for="(item1, i1) in scope.row.rights"
               :key="item1.id"
             >
               <!-- 渲染一级权限 -->
@@ -74,8 +74,8 @@
         </el-table-column>
         <!-- 索引列 -->
         <el-table-column label="#" type="index"></el-table-column>
-        <el-table-column label="角色名称" prop="roleName"></el-table-column>
-        <el-table-column label="角色描述" prop="roleDesc"></el-table-column>
+        <el-table-column label="角色名称" prop="name"></el-table-column>
+        <el-table-column label="角色描述" prop="desc"></el-table-column>
         <el-table-column label="操作" width="300px" align="center">
           <template slot-scope="scope">
             <!-- 编辑按钮 -->
@@ -150,11 +150,11 @@
         ref="addFormRef"
         label-width="80px"
       >
-        <el-form-item label="角色名称" prop="roleName">
-          <el-input v-model="addForm.roleName"></el-input>
+        <el-form-item label="角色名称" prop="name">
+          <el-input v-model="addForm.name"></el-input>
         </el-form-item>
-        <el-form-item label="角色描述" prop="roleDesc">
-          <el-input v-model="addForm.roleDesc"></el-input>
+        <el-form-item label="角色描述" prop="desc">
+          <el-input v-model="addForm.desc"></el-input>
         </el-form-item>
       </el-form>
       <!-- 底部区域 -->
@@ -179,11 +179,11 @@
         ref="editFormRef"
         label-width="80px"
       >
-        <el-form-item label="角色名称" prop="roleName">
-          <el-input v-model="editForm.roleName"></el-input>
+        <el-form-item label="角色名称" prop="name">
+          <el-input v-model="editForm.name"></el-input>
         </el-form-item>
-        <el-form-item label="角色描述" prop="roleDesc">
-          <el-input v-model="editForm.roleDesc"></el-input>
+        <el-form-item label="角色描述" prop="desc">
+          <el-input v-model="editForm.desc"></el-input>
         </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
@@ -244,12 +244,12 @@ export default {
       roleId: "",
       //   添加角色的表单数据
       addForm: {
-        roleName: "",
-        roleDesc: "",
+        name: "",
+        desc: "",
       },
       // 添加表单的验证规则对象
       addFormRules: {
-        roleName: [
+        name: [
           { required: true, message: "请输入角色名", trigger: "blur" },
           {
             min: 3,
@@ -260,11 +260,14 @@ export default {
         ],
       },
       // 查询到的用户信息对象
-      editForm: {},
+      editForm: {
+        id: 0,
+        name: "",
+        desc: "",
+      },
       //修改表单的验证规则对象
-      editForm: {},
       editFormRules: {
-        roleName: [
+        name: [
           { required: true, message: "请输入角色名", trigger: "blur" },
           {
             min: 3,
@@ -287,7 +290,7 @@ export default {
         return this.$message.error("获取角色列表失败");
 
       this.roleList = res.data;
-      // console.log(this.roleList);
+      console.log(this.roleList);
     },
 
     //监听添加角色对话框的关闭事件
@@ -302,7 +305,7 @@ export default {
         // 可以发起添加角色的网络请求
         const { data: res } = await this.$http.post("roles", this.addForm);
 
-        if (res.meta.status !== 201) return this.$message.error("添加角色失败");
+        if (res.meta.status !== 200) return this.$message.error("添加角色失败");
         //隐藏添加角色的对话框
         this.addDialogVisible = false;
         //重新获取角色列表
@@ -320,7 +323,7 @@ export default {
 
       this.editForm = res.data;
       this.editDialogVisible = true;
-      //console.log(this.editForm);
+      console.log(this.editForm);
     },
     //监听修改角色对话框的关闭事件
     editDialogClosed() {
@@ -334,11 +337,8 @@ export default {
         if (!valid) return;
         //可以发起修改角色的网络请求
         const { data: res } = await this.$http.put(
-          `roles/${this.editForm.roleId}`,
-          {
-            roleName: this.editForm.roleName,
-            roleDesc: this.editForm.roleDesc,
-          }
+          `roles/update/${this.editForm.id}`,
+          this.editForm
         );
 
         if (res.meta.status !== 200)
@@ -369,7 +369,7 @@ export default {
       if (confirmResult !== "confirm") {
         return this.$message.info("已取消删除");
       }
-      const { data: res } = await this.$http.delete(`roles/${id}`);
+      const { data: res } = await this.$http.delete(`roles/delete/${id}`);
       if (res.meta.status !== 200) return this.$message.error("删除角色失败");
       this.$message.success("删除角色成功");
       //重新获取用户列表
