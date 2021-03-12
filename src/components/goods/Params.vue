@@ -30,8 +30,8 @@
             @change="handleChange"
             :props="{
               expandTrigger: 'hover',
-              value: 'cat_id',
-              label: 'cat_name',
+              value: 'id',
+              label: 'catName',
               children: 'children',
               //checkStrictly: 'false',
             }"
@@ -296,6 +296,13 @@ export default {
           },
         ],
       },
+
+      // 查询条件
+      queryInfo: {
+        type: 0,
+        pagenum: 0,
+        pagesize: 0,
+      },
     };
   },
   created() {
@@ -305,11 +312,13 @@ export default {
   methods: {
     //   获取所有商品分类列表
     async getCateList() {
-      const { data: res } = await this.$http.get("categories");
+      const { data: res } = await this.$http.get("categories", {
+        params: this.queryInfo,
+      });
 
       if (res.meta.status !== 200)
         return this.$message.error("获取商品分类数据失败");
-      //   console.log(res.data);
+      console.log(res.data);
       //   把数据列表赋值给cateList
       this.cateList = res.data;
 

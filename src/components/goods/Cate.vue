@@ -35,19 +35,15 @@
         <template v-slot:isOk="scope">
           <i
             class="el-icon-success"
-            v-if="scope.row.cat_deleted === false"
+            v-if="scope.row.deleted !== false"
             style="color:green"
           ></i>
           <i class="el-icon-error" v-else style="color:red"></i>
         </template>
         <!-- 排序 -->
         <template v-slot:order="scope">
-          <el-tag v-if="scope.row.cat_level === 0" size="mini">一级</el-tag>
-          <el-tag
-            v-else-if="scope.row.cat_level === 1"
-            type="success"
-            size="mini"
-          >
+          <el-tag v-if="scope.row.level === 0" size="mini">一级</el-tag>
+          <el-tag v-else-if="scope.row.level === 1" type="success" size="mini">
             二级
           </el-tag>
           <el-tag v-else type="warning" size="mini">三级</el-tag>
@@ -58,7 +54,7 @@
             type="primary"
             icon="el-icon-edit"
             size="mini"
-            @click="showEditDialog(scope.row.cat_id)"
+            @click="showEditDialog(scope.row.id)"
           >
             编辑
           </el-button>
@@ -66,7 +62,7 @@
             type="danger"
             icon="el-icon-delete"
             size="mini"
-            @click="removeCateById(scope.row.cat_id)"
+            @click="removeCateById(scope.row.id)"
           >
             删除
           </el-button>
@@ -99,7 +95,7 @@
         label-width="100px"
       >
         <el-form-item label="分类名称：" prop="cat_name">
-          <el-input v-model="addCateForm.cat_name"></el-input>
+          <el-input v-model="addCateForm.catName"></el-input>
         </el-form-item>
         <el-form-item label="父级分类：">
           <!-- options 用来指定数据源 , props 用来指定配置对象 -->
@@ -108,8 +104,8 @@
             :options="parentCateList"
             :props="{
               expandTrigger: 'hover',
-              value: 'cat_id',
-              label: 'cat_name',
+              value: 'id',
+              label: 'catName',
               children: 'children',
               checkStrictly: 'true',
             }"
@@ -139,8 +135,8 @@
         ref="editFormRef"
         label-width="95px"
       >
-        <el-form-item label="分类名称：" prop="cat_name">
-          <el-input v-model="editForm.cat_name"></el-input>
+        <el-form-item label="分类名称：" prop="catName">
+          <el-input v-model="editForm.catName"></el-input>
         </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
@@ -171,7 +167,7 @@ export default {
       columns: [
         {
           label: "分类名称",
-          prop: "cat_name",
+          prop: "catName",
         },
         {
           label: "是否有效",
@@ -200,15 +196,15 @@ export default {
       // 添加分类的表单数据对象
       addCateForm: {
         //将要添加的分类的名称
-        cat_name: "",
+        catName: "",
         //父级分类的id
-        cat_pid: 0,
+        pid: 0,
         //分类的等级，默认添加的是一级分类
-        cat_level: 0,
+        level: 0,
       },
       // 添加分类的表单的验证规则对象
       addCateFormRules: {
-        cat_name: [
+        catName: [
           { required: true, message: "请输入分类名称", trigger: "blur" },
         ],
       },
@@ -220,12 +216,12 @@ export default {
       editCateDialogVisible: false,
       // 编辑分类的表单数据对象
       editForm: {
-        cat_id: 0,
-        cat_name: "",
+        id: 0,
+        catName: "",
       },
       // 编辑分类的表单的验证规则对象
       editFormRules: {
-        cat_name: [
+        catName: [
           { required: true, message: "请输入分类名称", trigger: "blur" },
         ],
       },
@@ -245,9 +241,9 @@ export default {
         return this.$message.error("获取商品分类数据失败");
       // console.log(res.data);
       //   把数据列表赋值给cateList
-      this.cateList = res.data.result;
+      this.cateList = res.data.content;
       //   为总数据条数赋值
-      this.total = res.data.total;
+      this.total = res.data.totalElements;
     },
 
     // 监听pagesize改变
