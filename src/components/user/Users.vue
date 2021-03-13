@@ -48,7 +48,7 @@
           prop="tel"
           width="200px"
         ></el-table-column>
-        <el-table-column label="角色" prop="rolename"></el-table-column>
+        <el-table-column label="角色" prop="role.name"></el-table-column>
         <el-table-column label="状态" align="center" width="100px">
           <template slot-scope="scope">
             <!-- {{ scope.row }} -->
@@ -104,7 +104,7 @@
                 type="warning"
                 icon="el-icon-setting"
                 size="small"
-                @click="setRole(scope.row)"
+                @click="setRole(scope.row, scope.row.role.name)"
               ></el-button>
             </el-tooltip>
           </template>
@@ -199,14 +199,14 @@
     >
       <div align="left">
         <p>当前的用户： {{ userInfo.username }}</p>
-        <p>当前的角色： {{ userInfo.role_name }}</p>
+        <p>当前的角色： {{ this.roleName }}</p>
         <p>
           分配新角色：
           <el-select v-model="selectedRoleId" placeholder="请选择">
             <el-option
               v-for="item in rolesList"
               :key="item.id"
-              :label="item.roleName"
+              :label="item.name"
               :value="item.id"
             ></el-option>
           </el-select>
@@ -270,6 +270,8 @@ export default {
       rolesList: [],
       // 已选中的角色Id
       selectedRoleId: "",
+      //  选中用户的角色名
+      roleName: "",
       //   添加用户的表单数据
       addForm: {
         username: "",
@@ -425,7 +427,7 @@ export default {
         // console.log(valid);
         if (!valid) return;
         //可以发起修改用户的网络请求
-        console.log(this.editForm);
+        // console.log(this.editForm);
         const { data: res } = await this.$http.put(
           `users/update/${this.editForm.id}`,
           this.editForm
@@ -467,14 +469,15 @@ export default {
     },
 
     // 展示分配角色的对话框
-    async setRole(userInfo) {
+    async setRole(userInfo, roleName) {
       this.userInfo = userInfo;
+      this.roleName = roleName;
 
       // 在展示对话框之前，获取所有角色列表
       const { data: res } = await this.$http.get("roles");
       if (res.meta.status !== 200)
         return this.$message.error("获取角色列表失败");
-
+      // console.log(res.data);
       this.rolesList = res.data;
       this.setRoleDialogVisibile = true;
     },
@@ -483,12 +486,11 @@ export default {
     async saveRoleInfo() {
       if (!this.selectedRoleId)
         return this.$message.error("请选择要分配的角色");
+      // console.log(this.selectedRoleId);
       const { data: res } = await this.$http.put(
-        `users/${this.userInfo.id}/role`,
-        {
-          rid: this.selectedRoleId,
-        }
+        `users/${this.userInfo.id}/role/${this.selectedRoleId}`
       );
+
       if (res.meta.status !== 200) return this.$message.error("更新角色失败");
       this.$message.success("更新角色成功");
 
