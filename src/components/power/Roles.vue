@@ -27,7 +27,7 @@
           <template slot-scope="scope">
             <el-row
               :class="['bdbottom', i1 === 0 ? 'bdtop' : '', 'vcenter']"
-              v-for="(item1, i1) in scope.row.rights"
+              v-for="(item1, i1) in scope.row.children"
               :key="item1.id"
             >
               <!-- 渲染一级权限 -->
@@ -323,7 +323,7 @@ export default {
 
       this.editForm = res.data;
       this.editDialogVisible = true;
-      console.log(this.editForm);
+      // console.log(this.editForm);
     },
     //监听修改角色对话框的关闭事件
     editDialogClosed() {
@@ -395,26 +395,28 @@ export default {
         `roles/${role.id}/rights/${rightId}`
       );
 
+      console.log(res.data);
+
       if (res.meta.status !== 200) return this.$message.error("删除权限失败");
-      role.children = res.data;
+      role.children = res.data.children;
     },
 
     //展示分配权限的对话框
     async showSetRightDialog(role) {
+      console.log(role);
       this.roleId = role.id;
       // 获取所有权限的数据
       const { data: res } = await this.$http.get("rights/tree");
-      this.setRightDialogVisible = true;
       if (res.meta.status !== 200)
         return this.$message.error("获取权限列表失败");
 
       // 把获取到的权限数据保存到data中
       this.rightsList = res.data;
-      //console.log(this.rightsList);
+      // console.log(res.data);
 
       //递归获取三级节点的Id
       this.getLeafKeys(role, this.defKeys);
-
+      console.log(this.defKeys);
       this.setRightDialogVisible = true;
     },
 
@@ -443,7 +445,8 @@ export default {
 
       const { data: res } = await this.$http.post(
         `roles/${this.roleId}/rights`,
-        { rids: idStr }
+        null,
+        { params: { rids: idStr } }
       );
       if (res.meta.status !== 200) return this.$message.error("分配权限失败");
 
