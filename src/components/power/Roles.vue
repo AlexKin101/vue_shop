@@ -290,7 +290,7 @@ export default {
         return this.$message.error("获取角色列表失败");
 
       this.roleList = res.data;
-      console.log(this.roleList);
+      // console.log(this.roleList);
     },
 
     //监听添加角色对话框的关闭事件
@@ -395,7 +395,7 @@ export default {
         `roles/${role.id}/rights/${rightId}`
       );
 
-      console.log(res.data);
+      // console.log(res.data);
 
       if (res.meta.status !== 200) return this.$message.error("删除权限失败");
       role.children = res.data.children;
@@ -416,7 +416,7 @@ export default {
 
       //递归获取三级节点的Id
       this.getLeafKeys(role, this.defKeys);
-      console.log(this.defKeys);
+      // console.log(this.defKeys);
       this.setRightDialogVisible = true;
     },
 

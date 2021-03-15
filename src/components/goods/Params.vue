@@ -59,7 +59,7 @@
               <template slot-scope="scope">
                 <!-- 循环渲染tag标签 -->
                 <el-tag
-                  v-for="(item, i) in scope.row.attr_vals"
+                  v-for="(item, i) in scope.row.values"
                   :key="i"
                   closable
                   @close="handleClosed(i, scope.row)"
@@ -89,17 +89,14 @@
             </el-table-column>
             <!-- 索引列 -->
             <el-table-column type="index" label="#"></el-table-column>
-            <el-table-column
-              label="参数名称"
-              prop="attr_name"
-            ></el-table-column>
+            <el-table-column label="参数名称" prop="name"></el-table-column>
             <el-table-column label="操作">
               <template slot-scope="scope">
                 <el-button
                   type="primary"
                   icon="el-icon-edit"
                   size="mini"
-                  @click="showEditDialog(scope.row.attr_id)"
+                  @click="showEditDialog(scope.row.id)"
                 >
                   编辑
                 </el-button>
@@ -107,7 +104,7 @@
                   type="danger"
                   icon="el-icon-delete"
                   size="mini"
-                  @click="removeParams(scope.row.attr_id)"
+                  @click="removeParams(scope.row.id)"
                 >
                   删除
                 </el-button>
@@ -133,7 +130,7 @@
               <template slot-scope="scope">
                 <!-- 循环渲染tag标签 -->
                 <el-tag
-                  v-for="(item, i) in scope.row.attr_vals"
+                  v-for="(item, i) in scope.row.values"
                   :key="i"
                   closable
                   @close="handleClosed(i, scope.row)"
@@ -163,17 +160,14 @@
             </el-table-column>
             <!-- 索引列 -->
             <el-table-column type="index" label="#"></el-table-column>
-            <el-table-column
-              label="属性名称"
-              prop="attr_name"
-            ></el-table-column>
+            <el-table-column label="属性名称" prop="name"></el-table-column>
             <el-table-column label="操作">
               <template slot-scope="scope">
                 <el-button
                   type="primary"
                   icon="el-icon-edit"
                   size="mini"
-                  @click="showEditDialog(scope.row.attr_id)"
+                  @click="showEditDialog(scope.row.id)"
                 >
                   编辑
                 </el-button>
@@ -181,7 +175,7 @@
                   type="danger"
                   icon="el-icon-delete"
                   size="mini"
-                  @click="removeParams(scope.row.attr_id)"
+                  @click="removeParams(scope.row.id)"
                 >
                   删除
                 </el-button>
@@ -318,7 +312,7 @@ export default {
 
       if (res.meta.status !== 200)
         return this.$message.error("获取商品分类数据失败");
-      console.log(res.data);
+      // console.log(res.data);
       //   把数据列表赋值给cateList
       this.cateList = res.data;
 
@@ -361,6 +355,8 @@ export default {
         }
       );
 
+      // console.log(res.data);
+
       if (res.meta.status !== 200)
         return this.$message.error("获取" + this.titleText + "列表失败");
 
@@ -369,7 +365,7 @@ export default {
         item.inputVisible = false;
         // 文本框输入的值;
         item.inputValue = "";
-        item.attr_vals = item.attr_vals ? item.attr_vals.split(" ") : [];
+        item.values = item.values ? item.values.split(",") : [];
       });
 
       // console.log(res.data);
@@ -391,12 +387,15 @@ export default {
         if (!valid) return;
         const { data: res } = await this.$http.post(
           `categories/${this.cateId}/attributes`,
+          null,
           {
-            attr_name: this.addForm.attr_name,
-            attr_sel: this.activeName,
+            params: {
+              name: this.addForm.attr_name,
+              sel: this.activeName,
+            },
           }
         );
-        if (res.meta.status !== 201) return this.$message.error("添加失败");
+        if (res.meta.status !== 200) return this.$message.error("添加失败");
 
         this.$message.success("添加成功");
         this.addDialogVisible = false;
@@ -410,14 +409,15 @@ export default {
       const { data: res } = await this.$http.get(
         `categories/${this.cateId}/attributes/${attr_id}`,
         {
-          params: { attr_sel: this.activeName },
+          params: { sel: this.activeName },
         }
       );
 
       // console.log(res.data);
       if (res.meta.status !== 200)
         return this.$message.error("获取" + this.titleText + "失败");
-      this.editForm = res.data;
+      this.editForm.attr_id = res.data.id;
+      this.editForm.attr_name = res.data.name;
       this.editDialogVisible = true;
     },
 
@@ -426,10 +426,13 @@ export default {
       this.$refs.editFormRef.validate(async (valid) => {
         if (!valid) return;
         const { data: res } = await this.$http.put(
-          `categories/${this.cateId}/attributes/${this.editForm.attr_id}`,
+          `categories/${this.cateId}/editAttributes/${this.editForm.attr_id}`,
+          null,
           {
-            attr_name: this.editForm.attr_name,
-            attr_sel: this.activeName,
+            params: {
+              name: this.editForm.attr_name,
+              sel: this.activeName,
+            },
           }
         );
         if (res.meta.status !== 200)
@@ -480,7 +483,7 @@ export default {
         return;
       }
       // 如果没有return，则证明输入的内容，需要做后续处理
-      row.attr_vals.push(row.inputValue.trim());
+      row.values.push(row.inputValue.trim());
       row.inputValue = "";
       row.inputVisible = false;
 
@@ -489,13 +492,17 @@ export default {
 
     // 将对attr_vals的操作，保存到数据库中
     async saveAttrVals(row) {
+      console.log(row);
       // 需要发起请求，保存这次操作
       const { data: res } = await this.$http.put(
-        `categories/${this.cateId}/attributes/${row.attr_id}`,
+        `categories/${this.cateId}/attributes/${row.id}`,
+        null,
         {
-          attr_name: row.attr_name,
-          attr_sel: row.attr_sel,
-          attr_vals: row.attr_vals.join(" "),
+          params: {
+            name: row.name,
+            sel: row.sel,
+            values: row.values.join(","),
+          },
         }
       );
 
@@ -516,7 +523,7 @@ export default {
 
     // 删除对应的参数可选项
     handleClosed(i, row) {
-      row.attr_vals.splice(i, 1);
+      row.values.splice(i, 1);
       this.saveAttrVals(row);
     },
   },
