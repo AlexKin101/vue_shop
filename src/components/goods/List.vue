@@ -45,27 +45,27 @@
           type="index"
           align="center"
         ></el-table-column>
-        <el-table-column label="商品名称" prop="goods_name"></el-table-column>
+        <el-table-column label="商品名称" prop="name"></el-table-column>
         <el-table-column
           label="商品价格（元）"
-          prop="goods_price"
+          prop="price"
           width="95px"
           align="center"
         ></el-table-column>
         <el-table-column
           label="商品重量"
-          prop="goods_weight"
+          prop="weight"
           width="70px"
           align="center"
         ></el-table-column>
         <el-table-column
           label="创建时间"
-          prop="add_time"
+          prop="addTime"
           width="140px"
           align="center"
         >
           <template slot-scope="scope">
-            {{ scope.row.add_time | dataFormat }}
+            {{ scope.row.addTime | dataFormat }}
           </template>
         </el-table-column>
 
@@ -150,8 +150,12 @@ export default {
         return this.$message.error("获取商品列表失败");
       //   为总数据条数赋值
       //  this.$message.success("获取商品列表成功");
-      this.total = res.data.total;
-      this.goodsList = res.data.goods;
+      // this.total = res.data.total;
+      // this.goodsList = res.data.goods;
+      this.queryInfo.pagenum = res.data.pageable.pageNumber + 1;
+      this.queryInfo.pagesize = res.data.size;
+      this.total = res.data.totalElements;
+      this.goodsList = res.data.content;
     },
 
     // 监听pagesize改变
