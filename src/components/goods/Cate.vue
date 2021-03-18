@@ -94,7 +94,7 @@
         ref="addCateFormRef"
         label-width="100px"
       >
-        <el-form-item label="分类名称：" prop="cat_name">
+        <el-form-item label="分类名称：" prop="catName">
           <el-input v-model="addCateForm.catName"></el-input>
         </el-form-item>
         <el-form-item label="父级分类：">
@@ -266,12 +266,12 @@ export default {
     // 获取父级分类的数据列表
     async getParentCateList() {
       const { data: res } = await this.$http.get("categories", {
-        params: { type: 2 },
+        params: { pagenum: 0, pagesize: 0, type: 2 },
       });
       if (res.meta.status !== 200)
         return this.$message.error("获取父级分类数据失败");
 
-      console.log(res.data);
+      // console.log(res.data);
       this.parentCateList = res.data;
     },
 
@@ -282,16 +282,14 @@ export default {
       //   反之，就说明没有选中任何父级分类
       if (this.selectedKeys.length > 0) {
         //父级分类的Id
-        this.addCateForm.cat_pid = this.selectedKeys[
-          this.selectedKeys.length - 1
-        ];
+        this.addCateForm.pid = this.selectedKeys[this.selectedKeys.length - 1];
         // 为当前分类的等级赋值
-        this.addCateForm.cat_level = this.selectedKeys.length;
+        this.addCateForm.level = this.selectedKeys.length;
         return;
       } else {
-        this.addCateForm.cat_pid = 0;
+        this.addCateForm.pid = 0;
         // 为当前分类的等级赋值
-        this.addCateForm.cat_level = 0;
+        this.addCateForm.level = 0;
       }
     },
 
@@ -299,11 +297,12 @@ export default {
     addCate() {
       this.$refs.addCateFormRef.validate(async (valid) => {
         if (!valid) return;
+        console.log(this.addCateForm);
         const { data: res } = await this.$http.post(
           "categories",
           this.addCateForm
         );
-        if (res.meta.status !== 201) return this.$message.error("添加分类失败");
+        if (res.meta.status !== 200) return this.$message.error("添加分类失败");
         this.$message.success("添加分类成功");
         this.getCateList();
         this.addCateDialogVisible = false;
@@ -314,8 +313,8 @@ export default {
     addCateDialogClosed() {
       this.$refs.addCateFormRef.resetFields();
       this.selectedKeys = [];
-      this.addCateForm.cat_pid = 0;
-      this.addCateForm.cat_level = 0;
+      this.addCateForm.pid = 0;
+      this.addCateForm.level = 0;
     },
 
     // 展示编辑分类的对话框
@@ -341,9 +340,12 @@ export default {
         if (!valid) return;
         //可以发起编辑分类的网络请求
         const { data: res } = await this.$http.put(
-          `categories/${this.editForm.cat_id}`,
+          `categories/${this.editForm.id}`,
+          null,
           {
-            cat_name: this.editForm.cat_name,
+            params: {
+              cat_name: this.editForm.catName,
+            },
           }
         );
 

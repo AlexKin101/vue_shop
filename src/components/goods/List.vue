@@ -47,6 +47,12 @@
         ></el-table-column>
         <el-table-column label="商品名称" prop="name"></el-table-column>
         <el-table-column
+          label="商品分类"
+          prop="categories.catName"
+          width="95px"
+          align="center"
+        ></el-table-column>
+        <el-table-column
           label="商品价格（元）"
           prop="price"
           width="95px"
