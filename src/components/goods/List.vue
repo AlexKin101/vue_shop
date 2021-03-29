@@ -89,7 +89,7 @@
                 type="primary"
                 icon="el-icon-edit"
                 size="mini"
-                @click="goEditPage(scope.row.goods_id)"
+                @click="goEditPage(scope.row.id)"
               ></el-button>
             </el-tooltip>
 
@@ -105,7 +105,7 @@
                 type="danger"
                 icon="el-icon-delete"
                 size="mini"
-                @click="removeGoodsById(scope.row.goods_id)"
+                @click="removeGoodsById(scope.row.id)"
               ></el-button>
             </el-tooltip>
           </template>
@@ -206,12 +206,12 @@ export default {
       this.$router.push("/goods/add");
     },
 
-    goEditPage(goods_id) {
+    goEditPage(id) {
       // this.$router.push("/goods/edit", { id: goods_id });
       // this.$router.push({ path: "/goods/edit/goods_id=" + this.$route.path });
       this.$router.push({
         path: "/goods/edit",
-        query: { id: goods_id },
+        query: { id: id },
       });
     },
   },

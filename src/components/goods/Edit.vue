@@ -46,20 +46,17 @@
           :before-leave="beforeTabLeave"
         >
           <el-tab-pane label="基本信息" name="0">
-            <el-form-item label="商品名称" prop="goods_name">
-              <el-input v-model="editForm.goods_name"></el-input>
+            <el-form-item label="商品名称" prop="name">
+              <el-input v-model="editForm.name"></el-input>
             </el-form-item>
-            <el-form-item label="商品价格" prop="goods_price">
-              <el-input v-model="editForm.goods_price" type="number"></el-input>
+            <el-form-item label="商品价格" prop="price">
+              <el-input v-model="editForm.price" type="number"></el-input>
             </el-form-item>
-            <el-form-item label="商品重量" prop="goods_weight">
-              <el-input
-                v-model="editForm.goods_weight"
-                type="number"
-              ></el-input>
+            <el-form-item label="商品重量" prop="weight">
+              <el-input v-model="editForm.weight" type="number"></el-input>
             </el-form-item>
-            <el-form-item label="商品数量" prop="goods_number">
-              <el-input v-model="editForm.goods_number"></el-input>
+            <el-form-item label="商品数量" prop="number">
+              <el-input v-model="editForm.number"></el-input>
             </el-form-item>
 
             <el-form-item label="商品分类" prop="goods_cat">
@@ -70,8 +67,8 @@
                 @change="handleChange"
                 :props="{
                   expandTrigger: 'hover',
-                  value: 'cat_id',
-                  label: 'cat_name',
+                  value: 'id',
+                  label: 'catName',
                   children: 'children',
                   //checkStrictly: 'false',
                 }"
@@ -83,15 +80,15 @@
           <el-tab-pane label="商品参数" name="1">
             <!-- 渲染表单的Item项 -->
             <el-form-item
-              :label="item.attr_name"
+              :label="item.name"
               v-for="item in manyTableData"
-              :key="item.attr_id"
+              :key="item.id"
             >
               <!-- 复选框组 -->
-              <el-checkbox-group v-model="item.attr_vals">
+              <el-checkbox-group v-model="item.values">
                 <el-checkbox
                   :label="cb"
-                  v-for="(cb, i) in item.attr_vals"
+                  v-for="(cb, i) in item.values"
                   :key="i"
                   border
                 ></el-checkbox>
@@ -101,11 +98,11 @@
 
           <el-tab-pane label="基本属性" name="2">
             <el-form-item
-              :label="item.attr_name"
+              :label="item.name"
               v-for="item in onlyTableData"
-              :key="item.attr_id"
+              :key="item.id"
             >
-              <el-input v-model="item.attr_vals"></el-input>
+              <el-input v-model="item.values"></el-input>
             </el-form-item>
           </el-tab-pane>
 
@@ -136,7 +133,7 @@
           </el-tab-pane>
           <el-tab-pane label="商品内容" name="4">
             <!-- 富文本编辑器组件 -->
-            <quill-editor v-model="editForm.goods_introduce"></quill-editor>
+            <quill-editor v-model="editForm.intro"></quill-editor>
             <!-- 添加商品的按钮 -->
             <el-button type="primary" class="btnEdit" @click="edit">
               编辑商品
@@ -160,46 +157,46 @@ export default {
   data() {
     return {
       uploadDisabled: false,
-      baseURL: "http://1.15.39.179:8088",
+      baseURL: "http://localhost:1106",
       // 已上传文件列表
       fileList: [],
       activeIndex: "0",
       // 添加商品的表单数据对象
       editForm: {
-        goods_name: "",
-        goods_price: 0,
-        goods_weight: 0,
-        goods_number: 0,
+        name: "",
+        price: 0,
+        weight: 0,
+        number: 0,
         goods_cat: [], //  商品所属的分类数组
         // 图片数组
         pics: [],
         // 商品详情描述
-        goods_introduce: "",
+        intro: "",
         attrs: [],
       },
       editFormRules: {
-        goods_name: [
+        name: [
           {
             required: true,
             message: "请输入商品名称",
             trigger: "blur",
           },
         ],
-        goods_price: [
+        price: [
           {
             required: true,
             message: "请输入商品价格",
             trigger: "blur",
           },
         ],
-        goods_weight: [
+        weight: [
           {
             required: true,
             message: "请输入商品重量",
             trigger: "blur",
           },
         ],
-        goods_number: [
+        number: [
           {
             required: true,
             message: "请输入商品数量",
@@ -223,7 +220,7 @@ export default {
       //  静态属性列表数据
       onlyTableData: [],
       //  上传图片的URL
-      uploadURL: "http://1.15.39.179:8088/api/private/v1/upload/",
+      uploadURL: "http://localhost:1106/upload",
 
       // 图片上传组件的headers请求头
       headerObj: {
@@ -272,7 +269,9 @@ export default {
 
     //   获取所有商品分类数据
     async getCateList() {
-      const { data: res } = await this.$http.get("categories");
+      const { data: res } = await this.$http.get("categories", {
+        params: { pagenum: 0, pagesize: 0, type: 3 },
+      });
 
       if (res.meta.status !== 200)
         return this.$message.error("获取商品分类数据失败");

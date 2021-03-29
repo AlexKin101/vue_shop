@@ -46,17 +46,17 @@
           @tab-click="tabClicked"
         >
           <el-tab-pane label="基本信息" name="0">
-            <el-form-item label="商品名称" prop="goods_name">
-              <el-input v-model="addForm.goods_name"></el-input>
+            <el-form-item label="商品名称" prop="name">
+              <el-input v-model="addForm.name"></el-input>
             </el-form-item>
-            <el-form-item label="商品价格" prop="goods_price">
-              <el-input v-model="addForm.goods_price" type="number"></el-input>
+            <el-form-item label="商品价格" prop="price">
+              <el-input v-model="addForm.price" type="number"></el-input>
             </el-form-item>
-            <el-form-item label="商品重量" prop="goods_weight">
-              <el-input v-model="addForm.goods_weight" type="number"></el-input>
+            <el-form-item label="商品重量" prop="weight">
+              <el-input v-model="addForm.weight" type="number"></el-input>
             </el-form-item>
-            <el-form-item label="商品数量" prop="goods_number">
-              <el-input v-model="addForm.goods_number"></el-input>
+            <el-form-item label="商品数量" prop="number">
+              <el-input v-model="addForm.number"></el-input>
             </el-form-item>
             <el-form-item label="商品分类" prop="goods_cat">
               <!-- 选择商品分类的级联选择框 -->
@@ -66,8 +66,8 @@
                 @change="handleChange"
                 :props="{
                   expandTrigger: 'hover',
-                  value: 'cat_id',
-                  label: 'cat_name',
+                  value: 'id',
+                  label: 'catName',
                   children: 'children',
                   //checkStrictly: 'false',
                 }"
@@ -79,15 +79,15 @@
           <el-tab-pane label="商品参数" name="1">
             <!-- 渲染表单的Item项 -->
             <el-form-item
-              :label="item.attr_name"
+              :label="item.name"
               v-for="item in manyTableData"
-              :key="item.attr_id"
+              :key="item.id"
             >
               <!-- 复选框组 -->
-              <el-checkbox-group v-model="item.attr_vals">
+              <el-checkbox-group v-model="item.values">
                 <el-checkbox
                   :label="cb"
-                  v-for="(cb, i) in item.attr_vals"
+                  v-for="(cb, i) in item.values"
                   :key="i"
                   border
                 ></el-checkbox>
@@ -97,11 +97,11 @@
 
           <el-tab-pane label="基本属性" name="2">
             <el-form-item
-              :label="item.attr_name"
+              :label="item.name"
               v-for="item in onlyTableData"
-              :key="item.attr_id"
+              :key="item.id"
             >
-              <el-input v-model="item.attr_vals"></el-input>
+              <el-input v-model="item.values"></el-input>
             </el-form-item>
           </el-tab-pane>
 
@@ -129,7 +129,7 @@
           </el-tab-pane>
           <el-tab-pane label="商品内容" name="4">
             <!-- 富文本编辑器组件 -->
-            <quill-editor v-model="addForm.goods_introduce"></quill-editor>
+            <quill-editor v-model="addForm.intro"></quill-editor>
             <!-- 添加商品的按钮 -->
             <el-button type="primary" class="btnAdd" @click="add">
               添加商品
@@ -155,40 +155,40 @@ export default {
       activeIndex: "0",
       // 添加商品的表单数据对象
       addForm: {
-        goods_name: "",
-        goods_price: 0,
-        goods_weight: 0,
-        goods_number: 0,
+        name: "",
+        price: 0,
+        weight: 0,
+        number: 0,
         goods_cat: [], //  商品所属的分类数组
         // 图片数组
         pics: [],
         // 商品详情描述
-        goods_introduce: "",
+        intro: "",
         attrs: [],
       },
       addFormRules: {
-        goods_name: [
+        name: [
           {
             required: true,
             message: "请输入商品名称",
             trigger: "blur",
           },
         ],
-        goods_price: [
+        price: [
           {
             required: true,
             message: "请输入商品价格",
             trigger: "blur",
           },
         ],
-        goods_weight: [
+        weight: [
           {
             required: true,
             message: "请输入商品重量",
             trigger: "blur",
           },
         ],
-        goods_number: [
+        number: [
           {
             required: true,
             message: "请输入商品数量",
@@ -212,7 +212,7 @@ export default {
       //  静态属性列表数据
       onlyTableData: [],
       //  上传图片的URL
-      uploadURL: "http://1.15.39.179:8088/api/private/v1/upload/",
+      uploadURL: "http://localhost:1106/upload",
 
       // 图片上传组件的headers请求头
       headerObj: {
@@ -232,7 +232,9 @@ export default {
   methods: {
     //   获取所有商品分类数据
     async getCateList() {
-      const { data: res } = await this.$http.get("categories");
+      const { data: res } = await this.$http.get("categories", {
+        params: { pagenum: 0, pagesize: 0, type: 3 },
+      });
 
       if (res.meta.status !== 200)
         return this.$message.error("获取商品分类数据失败");
@@ -262,13 +264,14 @@ export default {
     },
 
     async getParamsList(parmas) {
+      console.log(this.addForm);
       const { data: res } = await this.$http.get(
-        `categories/${this.cateId}}/attributes`,
+        `categories/${this.cateId}/attributes`,
         {
           params: { sel: parmas },
         }
       );
-
+      console.log(res.data);
       if (res.meta.status != 200) {
         if (params === "mnay")
           return this.$message.error("获取动态参数列表失败");
@@ -284,13 +287,12 @@ export default {
         // 访问动态参数面板
         case "1": {
           const { data: res } = await this.getParamsList("many");
-
           res.data.forEach((item) => {
-            item.attr_vals =
-              item.attr_vals.length === 0 ? [] : item.attr_vals.split(" ");
+            item.values =
+              item.values.length === 0 ? [] : item.values.split(" ");
           });
-
           this.manyTableData = res.data;
+          console.log(res.data);
           break;
         }
 
@@ -302,10 +304,10 @@ export default {
         }
       }
     },
+
     // 处理图片预览效果
     handlePreview(file) {
-      this.previewPath =
-        "http://1.15.39.179:8088/" + file.response.data.tmp_path;
+      this.previewPath = "http://localhost:1106" + file.response.data.tmp_path;
       console.log(this.previewPath);
       this.previewVisible = true;
     },
@@ -313,7 +315,7 @@ export default {
     // 处理图片移除操作
     handleRemove(file) {
       //   1.获取将要删除的图片的临时路径
-      const filePath = { pic: file.response.data.tmp_path };
+      const filePath = { pic: file.response.data };
       //   2.从pics数组中，找到这个图片的索引值
       const i = this.addForm.pics.findIndex((x) => x.pic === filePath);
       //   3.调用数组的splice方法，把图片信息对象，从pics数组中移除
@@ -322,7 +324,8 @@ export default {
 
     // 监听图片上传成功的事件
     handleSuccess(response) {
-      const picInfo = { pic: response.data.tmp_path };
+      console.log(response);
+      const picInfo = { pic: response.data };
       //   1.拼接得到一个图片信息对象
       // 2.将图片信息对象，push到pics数组中
       this.addForm.pics.push(picInfo);
@@ -343,16 +346,16 @@ export default {
         // 处理动态参数
         this.manyTableData.forEach((item) => {
           const newInfo = {
-            attr_id: item.attr_id,
-            attr_value: item.attr_vals === [] ? "" : item.attr_vals.join(" "),
+            id: item.id,
+            values: item.values === [] ? "" : item.values.join(" "),
           };
           this.addForm.attrs.push(newInfo);
         });
         // 处理静态属性
         this.onlyTableData.forEach((item) => {
           const newInfo = {
-            attr_id: item.attr_id,
-            attr_value: item.attr_vals === [] ? "" : item.attr_vals,
+            id: item.id,
+            values: item.values === [] ? "" : item.values,
           };
           this.addForm.attrs.push(newInfo);
         });
@@ -361,8 +364,10 @@ export default {
 
         // 发起请求添加商品
         // 商品的名称，必须是唯一的
+        console.log(form);
+        console.log(this.addForm);
         const { data: res } = await this.$http.post("goods", form);
-        if (res.meta.status != 201) {
+        if (res.meta.status != 200) {
           return this.$message.error("添加商品失败");
         }
         this.$message.success("添加商品成功");
