@@ -361,7 +361,7 @@ export default {
       const { data: res } = await this.$http.get(`orders/${id}`);
 
       if (res.meta.status !== 200) return this.$message.error("查询失败");
-
+      console.log(res.data);
       this.statusForm = res.data;
       this.statusForm.number = res.data.goodsNumber;
 
@@ -430,6 +430,39 @@ export default {
 
     // 修改订单状态
     editStatus() {
+      this.$refs.statusFormRef.validate(async (valid) => {
+        // console.log(valid);
+        if (!valid) return;
+
+        if (this.statusForm.isSend === true) {
+          this.statusForm.isSend = 1;
+        } else {
+          this.statusForm.isSend = 0;
+        }
+
+        //可以发起修改订单状态的网络请求
+        // console.log(this.statusForm);
+        const { data: res } = await this.$http.put(
+          `orders/${this.statusForm.id}`,
+          null,
+          {
+            params: {
+              isSend: this.statusForm.isSend,
+              price: this.statusForm.price,
+              numbers: this.statusForm.number,
+            },
+          }
+        );
+
+        if (res.meta.status !== 200)
+          return this.$message.error("修改订单状态失败");
+        //隐藏修改订单状态的对话框
+        this.editStatusDialogVisible = false;
+        //重新获取用户列表
+        this.getOrdersList();
+        //提示修改订单状态失败
+        this.$message.success("修改订单状态失败");
+      });
       this.editStatusDialogVisible = false;
     },
   },
