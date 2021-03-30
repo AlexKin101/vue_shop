@@ -253,6 +253,7 @@ export default {
       this.editForm.goods_cat = [];
       console.log(res.data);
 
+      this.editForm.attrs = [];
       this.showFileList();
     },
 
@@ -315,12 +316,9 @@ export default {
     },
 
     async getParamsList(parmas) {
-      const { data: res } = await this.$http.get(
-        `categories/${this.cateId}}/attributes`,
-        {
-          params: { sel: parmas },
-        }
-      );
+      const { data: res } = await this.$http.get(`goods/attributes`, {
+        params: { id: this.$route.query.id, sel: parmas },
+      });
 
       if (res.meta.status != 200) {
         if (params === "mnay")
@@ -339,17 +337,18 @@ export default {
           const { data: res } = await this.getParamsList("many");
 
           res.data.forEach((item) => {
-            item.attr_vals =
-              item.attr_vals.length === 0 ? [] : item.attr_vals.split(" ");
+            item.values =
+              item.values.length === 0 ? [] : item.values.split(" ");
           });
 
+          console.log(res.data);
           this.manyTableData = res.data;
           break;
         }
 
         case "2": {
           const { data: res } = await this.getParamsList("only");
-          console.log(res.data);
+          // console.log(res.data);
           this.onlyTableData = res.data;
           break;
         }
@@ -397,6 +396,7 @@ export default {
 
     // 编辑商品
     edit() {
+      console.log(this.editForm);
       this.$refs.editFormRef.validate(async (valid) => {
         if (!valid) {
           return this.$message.error("请填写必要的表单项");
@@ -409,16 +409,16 @@ export default {
         // 处理动态参数
         this.manyTableData.forEach((item) => {
           const newInfo = {
-            attr_id: item.attr_id,
-            attr_value: item.attr_vals === [] ? "" : item.attr_vals.join(" "),
+            id: item.id,
+            values: item.values === [] ? "" : item.values.join(" "),
           };
           this.editForm.attrs.push(newInfo);
         });
         // 处理静态属性
         this.onlyTableData.forEach((item) => {
           const newInfo = {
-            attr_id: item.attr_id,
-            attr_value: item.attr_vals === [] ? "" : item.attr_vals,
+            id: item.id,
+            values: item.values === [] ? "" : item.values,
           };
           this.editForm.attrs.push(newInfo);
         });
@@ -428,10 +428,10 @@ export default {
         // 发起请求编辑商品
         // 商品的名称，必须是唯一的
         const { data: res } = await this.$http.put(
-          `goods/${this.editForm.goods_id}}`,
+          "goods/" + this.editForm.id,
           form
         );
-        console.log(res);
+        // console.log(res);
         if (res.meta.status != 200) {
           return this.$message.error("编辑商品失败");
         }
