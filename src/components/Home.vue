@@ -4,7 +4,7 @@
   <el-container class="home-container">
     <!-- 头部区域 -->
     <el-header>
-      <div>
+      <div id="app">
         <img src="../assets/vue.png" alt="" />
         <span>电商后台管理系统</span>
       </div>
@@ -30,6 +30,11 @@
           router
           :default-active="activePath"
         >
+          <el-menu-item index="/welcome">
+            <i class="iconfont icon-baobiao"></i>
+            <span slot="title">首页</span>
+          </el-menu-item>
+
           <!-- 一级菜单 -->
           <el-submenu
             :index="item.id + ''"
@@ -83,7 +88,7 @@ export default {
         "103": "iconfont icon-tijikongjian",
         "101": "iconfont icon-shangpin",
         "102": "iconfont icon-danju",
-        "145": "iconfont icon-baobiao",
+        "100": "iconfont icon-baobiao",
       },
       //是否折叠
       isCollapse: false,
@@ -151,6 +156,10 @@ export default {
   background-color: #eaedf1;
 }
 .iconfont {
+  margin-right: 10px;
+}
+
+.el-icon-more {
   margin-right: 10px;
 }
 .toggle-button {

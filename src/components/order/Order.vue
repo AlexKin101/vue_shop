@@ -36,44 +36,75 @@
           type="index"
           align="center"
         ></el-table-column>
-        <el-table-column label="订单编号" prop="order_number"></el-table-column>
+        <el-table-column
+          label="订单编号"
+          prop="number"
+          width="250px"
+        ></el-table-column>
+        <el-table-column label="商品名称" prop="goodsName"></el-table-column>
         <el-table-column
           label="订单价格（元）"
-          prop="order_price"
+          prop="price"
           width="70px"
           align="center"
         ></el-table-column>
         <el-table-column
           label="是否付款"
-          prop="pay_status"
+          prop="payStatus"
           width="100px"
           align="center"
         >
           <template slot-scope="scope">
-            <el-tag type="success" v-if="scope.row.is_send === 1">
+            <el-tag type="success" v-if="scope.row.payStatus === 1">
               已付款
+            </el-tag>
+            <el-tag type="danger" v-else>未付款</el-tag>
+          </template>
+        </el-table-column>
+
+        <el-table-column
+          label="付款方式"
+          prop="pay"
+          width="100px"
+          align="center"
+        >
+          <template slot-scope="scope">
+            <el-tag type="Brand Color" v-if="scope.row.pay === 1">
+              支付宝
+            </el-tag>
+            <el-tag type="success" v-else-if="scope.row.pay === 2">
+              微信
             </el-tag>
             <el-tag type="danger" v-else>未付款</el-tag>
           </template>
         </el-table-column>
         <el-table-column
           label="是否发货"
-          prop="is_send"
-          width="70px"
+          prop="isSend"
+          width="90px"
           align="center"
-        ></el-table-column>
+        >
+          <template slot-scope="scope">
+            <el-tag type="Brand Color" v-if="scope.row.isSend === 0">
+              未发货
+            </el-tag>
+            <el-tag type="success" v-else-if="scope.row.isSend === 1">
+              已发货
+            </el-tag>
+          </template>
+        </el-table-column>
         <el-table-column
           label="下单时间"
-          prop="update_time"
+          prop="updateTime"
           width="150px"
           align="center"
         >
           <template slot-scope="scope">
-            {{ scope.row.update_time | dataFormat }}
+            {{ scope.row.updateTime | dataFormat }}
           </template>
         </el-table-column>
 
-        <el-table-column label="操作" width="130px" align="center">
+        <el-table-column label="操作" width="180px" align="center">
           <template slot-scope="scope">
             <!-- 修改地址按钮 -->
             <el-tooltip
@@ -88,6 +119,22 @@
                 icon="el-icon-edit"
                 size="mini"
                 @click="showBox"
+              ></el-button>
+            </el-tooltip>
+
+            <!-- 修改订单状态按钮 -->
+            <el-tooltip
+              class="item"
+              effect="dark"
+              content="修改订单状态"
+              placement="top"
+              :enterable="false"
+            >
+              <el-button
+                type="warning"
+                icon="el-icon-setting"
+                size="mini"
+                @click="showStatusBox(scope.row.id)"
               ></el-button>
             </el-tooltip>
 
@@ -155,6 +202,41 @@
       </span>
     </el-dialog>
 
+    <!-- 修改订单状态的对话框 -->
+    <el-dialog
+      title="修改订单状态"
+      :visible.sync="editStatusDialogVisible"
+      width="50%"
+      @close="editStatusDialogClosed"
+    >
+      <el-form
+        :model="statusForm"
+        :rules="statusFormRules"
+        ref="statusFormRef"
+        label-width="90px"
+      >
+        <el-form-item label="是否已发货" prop="isSend">
+          <el-switch
+            v-model="statusForm.isSend"
+            active-text="已发货"
+            inactive-text="未发货"
+          ></el-switch>
+        </el-form-item>
+        <el-form-item label="订单价格" prop="price">
+          <el-input type="number" v-model="statusForm.price"></el-input>
+        </el-form-item>
+        <el-form-item label="订单数量" prop="number">
+          <el-input type="number" v-model="statusForm.number"></el-input>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="editStatusDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="editStatus">
+          确 定
+        </el-button>
+      </span>
+    </el-dialog>
+
     <!-- 展示物流进度的对话框 -->
     <el-dialog
       title="物流进度"
@@ -202,6 +284,30 @@ export default {
       // 控制展示物流进度的对话框
       progressDialogVisible: false,
 
+      // 控制修改订单状态的对话框
+      editStatusDialogVisible: false,
+
+      statusForm: {
+        isSend: 0,
+        price: 0.0,
+        number: 0,
+      },
+
+      statusFormRules: {
+        price: [
+          {
+            required: true,
+            message: "请输入订单价格",
+            trigger: "blur",
+          },
+        ],
+        number: {
+          required: true,
+          message: "请输入订单数量",
+          trigger: "blur",
+        },
+      },
+
       addressForm: {
         address1: [],
         address2: "",
@@ -239,13 +345,33 @@ export default {
       const { data: res } = await this.$http.get("orders", {
         params: this.queryInfo,
       });
+
       console.log(res);
       if (res.meta.status !== 200)
         return this.$message.error("获取订单列表失败");
       //   为总数据条数赋值
       //  this.$message.success("获取订单列表成功");
-      this.total = res.data.total;
-      this.ordersList = res.data.goods;
+      this.queryInfo.pagenum = res.data.pageable.pageNumber + 1;
+      this.queryInfo.pagesize = res.data.size;
+      this.total = res.data.totalElements;
+      this.ordersList = res.data.content;
+    },
+
+    async getOrder(id) {
+      const { data: res } = await this.$http.get(`orders/${id}`);
+
+      if (res.meta.status !== 200) return this.$message.error("查询失败");
+
+      this.statusForm = res.data;
+      this.statusForm.number = res.data.goodsNumber;
+
+      if (this.statusForm.isSend === 1) {
+        this.statusForm.isSend = true;
+      } else {
+        this.statusForm.isSend = false;
+      }
+
+      this.editStatusDialogVisible = true;
     },
 
     // 监听pagesize改变
@@ -288,6 +414,33 @@ export default {
       this.progressDialogVisible = true;
 
       console.log(this.progressInfo);
+    },
+
+    // 展示修改订单状态的对话框
+    showStatusBox(id) {
+      this.getOrder(id);
+      console.log(this.statusForm);
+      this.editStatusDialogVisible = true;
+    },
+
+    // 修改订单状态的对话框关闭
+    editStatusDialogClosed() {
+      this.$refs.statusFormRef.resetFields();
+    },
+
+    // 修改订单状态
+    editStatus() {
+      this.editStatusDialogVisible = false;
+    },
+  },
+
+  computed: {
+    booleanTransfer(isSend) {
+      if (isSend === 1) {
+        return true;
+      } else {
+        return false;
+      }
     },
   },
 };

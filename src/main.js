@@ -7,7 +7,9 @@ import "./plugins/element.js";
 // 导入全局样式表
 import "./assets/css/global.css";
 // 导入全局样式表
-import "./assets/fonts/iconfont.css";
+// import "./assets/fonts/iconfont.css";
+import "./assets/iconfont.css";
+// import "./assets/iconfont.css";
 import TreeTable from "vue-table-with-tree-grid";
 
 // 导入富文本编辑器
@@ -17,6 +19,16 @@ import VueQuillEditor from "vue-quill-editor";
 import "quill/dist/quill.core.css"; // import styles
 import "quill/dist/quill.snow.css"; // for snow theme
 import "quill/dist/quill.bubble.css"; // for bubble theme
+
+// 把echarts挂载到 Vue原型上，以便在全局访问
+
+import echarts from "echarts";
+Vue.prototype.$echarts = echarts;
+
+// 引入主题
+import "./assets/lib/theme/chalk";
+import "./assets/lib/theme/vintage";
+import "./assets/lib/theme/westeros";
 
 import axios from "axios";
 // 配置请求的根路径
