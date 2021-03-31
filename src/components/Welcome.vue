@@ -2,9 +2,6 @@
 
 <template>
   <div class="welcome">
-    <div id="github">
-      <github-corner></github-corner>
-    </div>
     <!-- 四个卡片 -->
     <el-row :gutter="12">
       <el-col :span="6" v-for="(item, index) in cardData" :key="index">
@@ -27,6 +24,133 @@
         </el-card>
       </el-col>
     </el-row>
+
+    <!-- 待处理事务 -->
+    <el-card id="work">
+      <div class="layout-title">待处理事务</div>
+      <div class="un-handle-content">
+        <el-col :gutter="20">
+          <el-col :span="8">
+            <div class="un-handle-item">
+              <span class="font-medium">待付款订单</span>
+              <span style="float: right" class="color-danger">(10)</span>
+            </div>
+          </el-col>
+          <el-col :span="8">
+            <div class="un-handle-item">
+              <span class="font-medium">已完成订单</span>
+              <span style="float: right" class="color-danger">(10)</span>
+            </div>
+          </el-col>
+          <el-col :span="8">
+            <div class="un-handle-item">
+              <span class="font-medium">待确认收货订单</span>
+              <span style="float: right" class="color-danger">(10)</span>
+            </div>
+          </el-col>
+        </el-col>
+        <el-row :gutter="20">
+          <el-col :span="8">
+            <div class="un-handle-item">
+              <span class="font-medium">待发货订单</span>
+              <span style="float: right" class="color-danger">(10)</span>
+            </div>
+          </el-col>
+          <el-col :span="8">
+            <div class="un-handle-item">
+              <span class="font-medium">待处理退款申请</span>
+              <span style="float: right" class="color-danger">(10)</span>
+            </div>
+          </el-col>
+          <el-col :span="8">
+            <div class="un-handle-item">
+              <span class="font-medium">已发货订单</span>
+              <span style="float: right" class="color-danger">(10)</span>
+            </div>
+          </el-col>
+        </el-row>
+      </div>
+    </el-card>
+
+    <div class="overview-layout">
+      <el-row :gutter="20">
+        <el-col :span="12">
+          <el-card>
+            <el-row :span="12">
+              <div class="layout-title">商品总览</div>
+            </el-row>
+            <el-row>
+              <div style="padding: 40px">
+                <el-col>
+                  <el-col :span="6" class="color-danger overview-item-value">
+                    100
+                  </el-col>
+                  <el-col :span="6" class="color-danger overview-item-value">
+                    400
+                  </el-col>
+                  <el-col :span="6" class="color-danger overview-item-value">
+                    50
+                  </el-col>
+                  <el-col :span="6" class="color-danger overview-item-value">
+                    500
+                  </el-col>
+                </el-col>
+                <el-col class="font-medium">
+                  <el-col :span="6" class="overview-item-title">已下架</el-col>
+                  <el-col :span="6" class="overview-item-title">已上架</el-col>
+                  <el-col :span="6" class="overview-item-title">
+                    库存紧张
+                  </el-col>
+                  <el-col :span="6" class="overview-item-title">
+                    全部商品
+                  </el-col>
+                </el-col>
+              </div>
+            </el-row>
+          </el-card>
+        </el-col>
+
+        <el-col :span="12">
+          <el-card>
+            <el-row :span="12">
+              <div class="layout-title">用户总览</div>
+            </el-row>
+            <el-row>
+              <div style="padding: 40px">
+                <el-col>
+                  <el-col :span="6" class="color-danger overview-item-value">
+                    100
+                  </el-col>
+                  <el-col :span="6" class="color-danger overview-item-value">
+                    200
+                  </el-col>
+                  <el-col :span="6" class="color-danger overview-item-value">
+                    1000
+                  </el-col>
+                  <el-col :span="6" class="color-danger overview-item-value">
+                    5000
+                  </el-col>
+                </el-col>
+                <el-col class="font-medium">
+                  <el-col :span="6" class="overview-item-title">
+                    今日新增
+                  </el-col>
+                  <el-col :span="6" class="overview-item-title">
+                    昨日新增
+                  </el-col>
+                  <el-col :span="6" class="overview-item-title">
+                    本月新增
+                  </el-col>
+                  <el-col :span="6" class="overview-item-title">
+                    会员总数
+                  </el-col>
+                </el-col>
+              </div>
+            </el-row>
+          </el-card>
+        </el-col>
+      </el-row>
+    </div>
 
     <!-- 折线图 -->
     <el-card id="line">
@@ -101,58 +225,6 @@ export default {
           icon: "",
         },
         {
-          title: "昨日访问量一览",
-          legendData: ["真实访问量", "预估访问量"],
-          xData: [
-            "0:00",
-            "02:00",
-            "04:00",
-            "06:00",
-            "08:00",
-            "10:00",
-            "12:00",
-            "14:00",
-            "16:00",
-            "18:00",
-            "20:00",
-            "22:00",
-            "24:00",
-          ],
-          // 真实数据
-          realData: [
-            150,
-            280,
-            90,
-            100,
-            80,
-            70,
-            140,
-            130,
-            90,
-            100,
-            420,
-            60,
-            120,
-          ],
-          // 推测数据
-          guessData: [
-            120,
-            140,
-            180,
-            250,
-            80,
-            70,
-            90,
-            100,
-            80,
-            60,
-            200,
-            240,
-            140,
-          ],
-          icon: "",
-        },
-        {
           title: "2021年总成交量",
           legendData: ["真实成交量", "预估成交量"],
           xData: [
@@ -206,48 +278,76 @@ export default {
           title: "昨日成交量",
           legendData: ["真实成交量", "预估成交量"],
           xData: [
-            "1月",
-            "2月",
-            "3月",
-            "4月",
-            "5月",
-            "6月",
-            "7月",
-            "8月",
-            "9月",
-            "10月",
-            "11月",
-            "12月",
+            "0点",
+            "2点",
+            "4点",
+            "6点",
+            "8点",
+            "10点",
+            "12点",
+            "14点",
+            "16点",
+            "18点",
+            "20点",
+            "22点",
+            "24点",
           ],
           // 真实数据
-          realData: [
-            2418,
-            3023,
-            4823,
-            5815,
-            6502,
-            7312,
-            4525,
-            8432,
-            5010,
-            3106,
-            8510,
-            6500,
-          ],
+          realData: [70, 80, 20, 10, 30, 50, 250, 300, 400, 300, 510, 680, 600],
           // 推测数据
           guessData: [
-            1418,
-            2023,
-            3823,
-            6815,
-            7502,
-            6312,
-            4500,
-            5532,
-            6610,
-            4106,
-            8910,
-            7483,
+            90,
+            20,
+            20,
+            10,
+            40,
+            70,
+            200,
+            300,
+            500,
+            200,
+            500,
+            600,
+            600,
+          ],
+          // icon
+          icon: "￥",
+        },
+        {
+          title: "今日成交量",
+          legendData: ["真实成交量", "预估成交量"],
+          xData: [
+            "0点",
+            "2点",
+            "4点",
+            "6点",
+            "8点",
+            "10点",
+            "12点",
+            "14点",
+            "16点",
+            "18点",
+            "20点",
+            "22点",
+            "24点",
+          ],
+          // 真实数据
+          realData: [70, 80, 20, 10, 30, 50, 250, 300, 400, 300, 510, 680, 700],
+          // 推测数据
+          guessData: [
+            90,
+            20,
+            20,
+            10,
+            40,
+            70,
+            200,
+            300,
+            500,
+            200,
+            500,
+            600,
+            600,
           ],
           // icon
           icon: "￥",
@@ -263,12 +363,6 @@ export default {
           color: "#40C9C6",
         },
         {
-          icon: "icon-user",
-          title: "昨日访问量",
-          data: null,
-          color: "#36A3F7",
-        },
-        {
           icon: "icon-cart",
           title: "总成交量",
           data: "1025018￥",
@@ -279,6 +373,12 @@ export default {
           title: "昨日成交量",
           data: "2253￥",
           color: "#34BFA3",
+        },
+        {
+          icon: "icon-checkmark",
+          title: "今日成交量",
+          data: "1999￥",
+          color: "#DEBC51",
         },
       ],
       // axios实例对象
@@ -491,15 +591,9 @@ export default {
 </script>
 
 <style lang="less" scope>
-#github {
-  position: absolute;
-  top: 0;
-  right: 0;
-  border: none;
-}
 .welcome {
   margin-top: 10px;
-  padding: 0 10px;
+  padding: 0 20px;
 
   .el-row {
     .el-card__body {
@@ -529,5 +623,41 @@ export default {
   #line {
     margin-top: 15px;
   }
+  #work {
+    margin-top: 10px;
+  }
+}
+//未处理事务
+.un-handle-content {
+  padding: 20px 40px;
+}
+.un-handle-item {
+  border-bottom: 1px solid #ebeef5;
+  padding: 10px;
+}
+//正文
+.font-medium {
+  font-size: 16px;
+  color: #606266;
+}
+.color-danger {
+  color: #f56c6c;
+}
+.overview-layout {
+  margin-top: 20px;
+}
+.overview-item-value {
+  font-size: 20px;
+  text-align: center;
+}
+.overview-item-title {
+  margin-top: 10px;
+  text-align: center;
+}
+.layout-title {
+  color: #606266;
+  padding: 15px 20px;
+  background: #f2f6fc;
+  font-weight: bold;
 }
 </style>

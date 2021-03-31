@@ -65,6 +65,12 @@
           align="center"
         ></el-table-column>
         <el-table-column
+          label="商品数量"
+          prop="number"
+          width="70px"
+          align="center"
+        ></el-table-column>
+        <el-table-column
           label="创建时间"
           prop="addTime"
           width="140px"
