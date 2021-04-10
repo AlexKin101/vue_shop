@@ -17,6 +17,7 @@ import Order from "../components/order/Order";
 import Return from "../components/order/Return";
 import ReturnInfo from "../components/order/ReturnInfo";
 import Report from "../components/report/Report";
+import Brand from "../components/goods/Brand";
 
 Vue.use(Router);
 
@@ -38,6 +39,7 @@ const router = new Router({
         { path: "/goods", component: GoodsList },
         { path: "/goods/add", component: Add },
         { path: "/goods/edit", component: Edit },
+        { path: "/brands", component: Brand },
         { path: "/orders", component: Order },
         { path: "/reports", component: Report },
         { path: "/returns", component: Return },

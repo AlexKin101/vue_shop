@@ -30,8 +30,8 @@
           router
           :default-active="activePath"
         >
-          <el-menu-item index="/welcome">
-            <i class="iconfont icon-baobiao"></i>
+          <el-menu-item index="/home" @click="saveNavState('/home')">
+            <i class="el-icon-s-platform"></i>
             <span slot="title">首页</span>
           </el-menu-item>
 
@@ -84,11 +84,13 @@ export default {
       // 左侧菜单数据
       menulist: [],
       iconsObj: {
-        "125": "iconfont icon-user",
-        "103": "iconfont icon-tijikongjian",
-        "101": "iconfont icon-shangpin",
-        "102": "iconfont icon-danju",
+        "125": "el-icon-user-solid",
+        "103": "el-icon-s-management",
+        "101": "el-icon-s-goods",
+        "102": "el-icon-s-order",
         "100": "iconfont icon-baobiao",
+        "147": "el-icon-s-finance",
+        "148": "el-icon-s-claim",
       },
       //是否折叠
       isCollapse: false,
@@ -113,10 +115,12 @@ export default {
       this.menulist = res.data;
       // console.log(res);
     },
+
     //点击按钮,切换菜单的折叠与展开
     toggleCollapse() {
       this.isCollapse = !this.isCollapse;
     },
+
     // 保存链接的激活状态
     saveNavState(activePath) {
       window.sessionStorage.setItem("activePath", activePath);

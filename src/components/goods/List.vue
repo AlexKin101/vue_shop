@@ -10,7 +10,6 @@
     </el-breadcrumb>
 
     <!-- 卡片视图区域 -->
-
     <el-card>
       <!-- gutter每个格子之间的距离，相当于列间距 -->
       <!-- span相当于列的宽度 -->
@@ -45,10 +44,22 @@
           type="index"
           align="center"
         ></el-table-column>
+        <el-table-column
+          label="商品编号"
+          prop="id"
+          width="70px"
+          align="center"
+        ></el-table-column>
         <el-table-column label="商品名称" prop="name"></el-table-column>
         <el-table-column
           label="商品分类"
           prop="categories.catName"
+          width="95px"
+          align="center"
+        ></el-table-column>
+        <el-table-column
+          label="商品品牌"
+          prop="brands.name"
           width="95px"
           align="center"
         ></el-table-column>
@@ -59,7 +70,7 @@
           align="center"
         ></el-table-column>
         <el-table-column
-          label="商品重量"
+          label="商品重量（kg）"
           prop="weight"
           width="70px"
           align="center"
@@ -78,6 +89,16 @@
         >
           <template slot-scope="scope">
             {{ scope.row.addTime | dataFormat }}
+          </template>
+        </el-table-column>
+
+        <el-table-column label="状态" align="center" width="100px" prop="state">
+          <template slot-scope="scope">
+            <!-- {{ scope.row }} -->
+            <el-switch
+              v-model="scope.row.state"
+              @change="goodsStateChanged(scope.row)"
+            ></el-switch>
           </template>
         </el-table-column>
 
@@ -179,6 +200,18 @@ export default {
     handleCurrentChange(newPage) {
       this.queryInfo.pagenum = newPage;
       this.getGoodsList();
+    },
+
+    //监听switch开关状态的改变
+    async goodsStateChanged(goodsInfo) {
+      const { data: res } = await this.$http.put(
+        `goods/${goodsInfo.id}/state/${goodsInfo.state}`
+      );
+      if (res.meta.status !== 200) {
+        goodsInfo.state = !goodsInfo.state;
+        return this.$message.error("更新商品状态失败！");
+      }
+      this.$message.success("更新商品状态成功！");
     },
 
     //显示编辑对话框

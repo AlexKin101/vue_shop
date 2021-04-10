@@ -52,28 +52,15 @@
             <el-form-item label="商品价格" prop="price">
               <el-input v-model="editForm.price" type="number"></el-input>
             </el-form-item>
-            <el-form-item label="商品重量" prop="weight">
-              <el-input v-model="editForm.weight" type="number"></el-input>
+            <el-form-item label="商品重量（kg）" prop="weight">
+              <el-input
+                v-model="editForm.weight"
+                type="number"
+                oninput="value=value.replace(/[^\d.]/g,'')"
+              ></el-input>
             </el-form-item>
             <el-form-item label="商品数量" prop="number">
               <el-input v-model="editForm.number"></el-input>
-            </el-form-item>
-
-            <el-form-item label="商品分类" prop="goods_cat">
-              <!-- 选择商品分类的级联选择框 -->
-              <el-cascader
-                v-model="editForm.goods_cat"
-                :options="cateList"
-                @change="handleChange"
-                :props="{
-                  expandTrigger: 'hover',
-                  value: 'id',
-                  label: 'catName',
-                  children: 'children',
-                  //checkStrictly: 'false',
-                }"
-                clearable
-              ></el-cascader>
             </el-form-item>
           </el-tab-pane>
 
@@ -165,9 +152,8 @@ export default {
       editForm: {
         name: "",
         price: 0,
-        weight: 0,
+        weight: 0.0,
         number: 0,
-        goods_cat: [], //  商品所属的分类数组
         // 图片数组
         pics: [],
         // 商品详情描述
@@ -203,16 +189,12 @@ export default {
             trigger: "blur",
           },
         ],
-        goods_cat: [
-          {
-            required: true,
-            message: "请选择商品分类",
-            trigger: "change",
-          },
-        ],
       },
       //   商品分类列表
       cateList: [],
+
+      //   商品品牌列表
+      brandsList: [],
 
       //  动态参数列表数据
       manyTableData: [],
@@ -237,9 +219,10 @@ export default {
     };
   },
   created() {
-    this.getCateList();
+    // this.getCateList();
     this.getGoodsList();
     this.getGoodsListPic();
+    // this.getBrandsList();
   },
   methods: {
     async getGoodsList() {
@@ -250,7 +233,8 @@ export default {
         return this.$message.error("获取商品信息失败");
 
       this.editForm = res.data;
-      this.editForm.goods_cat = [];
+      // this.editForm.goods_cat = [];
+      // this.editForm.goods_brands = [];
       console.log(res.data);
 
       this.editForm.attrs = [];
@@ -269,41 +253,42 @@ export default {
     },
 
     //   获取所有商品分类数据
-    async getCateList() {
-      const { data: res } = await this.$http.get("categories", {
-        params: { pagenum: 0, pagesize: 0, type: 3 },
-      });
+    // async getCateList() {
+    //   const { data: res } = await this.$http.get("categories", {
+    //     params: { pagenum: 0, pagesize: 0, type: 3 },
+    //   });
 
-      if (res.meta.status !== 200)
-        return this.$message.error("获取商品分类数据失败");
-      //   把数据列表赋值给cateList
-      this.cateList = res.data;
-      //   console.log(res.data);
-    },
+    //   if (res.meta.status !== 200)
+    //     return this.$message.error("获取商品分类数据失败");
+    //   //   把数据列表赋值给cateList
+    //   this.cateList = res.data;
+    //   //   console.log(res.data);
+    // },
 
     // 级联选择框选中项变化，会触发这个函数
-    handleChange() {
-      console.log(this.editForm.goods_cat);
-      if (!this.cateId && this.editForm.goods_cat.length !== 0) {
-        this.editForm.goods_cat = [];
-        this.$message.warning("注意：只允许选择第三级分类");
-      }
-    },
+    // handleChange() {
+    //   console.log(this.editForm.goods_cat);
+    //   if (!this.cateId && this.editForm.goods_cat.length !== 0) {
+    //     this.editForm.goods_cat = [];
+    //     this.$message.warning("注意：只允许选择第三级分类");
+    //   }
+    // },
 
-    beforeTabLeave(activeName, oldActiveName) {
-      // console.log("即将离开的标签页名字是" + oldActiveName);
-      // console.log("即将进入的标签页名字是" + activeName);
-      // return false;
+    // beforeTabLeave(activeName, oldActiveName) {
+    //   // console.log("即将离开的标签页名字是" + oldActiveName);
+    //   // console.log("即将进入的标签页名字是" + activeName);
+    //   // return false;
 
-      if (oldActiveName === "0" && this.editForm.goods_cat.length !== 3) {
-        this.$message.error("请先选择商品分类");
-        return false;
-      }
-    },
+    //   if (oldActiveName === "0" && this.editForm.goods_cat.length !== 3) {
+    //     this.$message.error("请先选择商品分类");
+    //     return false;
+    //   }
+    // },
 
     // 图片添加页显示
     showFileList() {
-      console.log(this.editForm.pics);
+      // console.log(this.editForm.pics);
+      if (this.editForm.pics === []) return;
       let urlStr = this.editForm.pics;
       var i = 1;
       urlStr.forEach((item) => {
@@ -330,6 +315,15 @@ export default {
       return { data: res };
     },
 
+    // async getBrandsList() {
+    //   const { data: res } = await this.$http.get("brands/list");
+    //   if (res.meta.status !== 200)
+    //     return this.$message.error("获取商品品牌列表数据失败");
+    //   //   把数据列表赋值给brandsList
+    //   // console.log(res.data);
+    //   this.brandsList = res.data;
+    // },
+
     async tabClicked() {
       switch (this.activeIndex) {
         // 访问动态参数面板
@@ -338,7 +332,7 @@ export default {
 
           res.data.forEach((item) => {
             item.values =
-              item.values.length === 0 ? [] : item.values.split(" ");
+              item.values.length === 0 ? [] : item.values.split(",");
           });
 
           console.log(res.data);
@@ -404,13 +398,14 @@ export default {
         // 执行添加的业务逻辑
         // lodash cloneDeep(obj)深拷贝
         const form = _.cloneDeep(this.editForm);
-        form.goods_cat = form.goods_cat.join(",");
+        // form.goods_cat = form.goods_cat.join(",");
+        // form.goods_brands = form.goods_brands.join(",");
 
         // 处理动态参数
         this.manyTableData.forEach((item) => {
           const newInfo = {
             id: item.id,
-            values: item.values === [] ? "" : item.values.join(" "),
+            values: item.values === [] ? "" : item.values.join(","),
           };
           this.editForm.attrs.push(newInfo);
         });
@@ -431,7 +426,7 @@ export default {
           "goods/" + this.editForm.id,
           form
         );
-        // console.log(res);
+        console.log(form);
         if (res.meta.status != 200) {
           return this.$message.error("编辑商品失败");
         }

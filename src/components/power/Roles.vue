@@ -33,7 +33,7 @@
               <!-- 渲染一级权限 -->
               <el-col :span="5">
                 <el-tag closable @close="removeRightById(scope.row, item1.id)">
-                  {{ item1.authName }}
+                  {{ item1.name }}
                 </el-tag>
                 <i class="el-icon-caret-right"></i>
               </el-col>
@@ -51,7 +51,7 @@
                       closable
                       @close="removeRightById(scope.row, item2.id)"
                     >
-                      {{ item2.authName }}
+                      {{ item2.name }}
                     </el-tag>
                     <i class="el-icon-caret-right"></i>
                   </el-col>
@@ -63,7 +63,7 @@
                       closable
                       @close="removeRightById(scope.row, item3.id)"
                     >
-                      {{ item3.authName }}
+                      {{ item3.name }}
                     </el-tag>
                   </el-col>
                 </el-row>
@@ -235,7 +235,7 @@ export default {
       setRightDialogVisible: false, //控制分配权限的对话框
       // 树形控件的属性绑定对象
       treeProps: {
-        label: "authName",
+        label: "name",
         children: "children",
       },
       // 默认选中的节点Id值数组
@@ -290,7 +290,7 @@ export default {
         return this.$message.error("获取角色列表失败");
 
       this.roleList = res.data;
-      // console.log(this.roleList);
+      console.log(this.roleList);
     },
 
     //监听添加角色对话框的关闭事件

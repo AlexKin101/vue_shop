@@ -40,12 +40,13 @@
           label="订单编号"
           prop="number"
           width="250px"
+          align="center"
         ></el-table-column>
         <el-table-column label="商品名称" prop="goodsName"></el-table-column>
         <el-table-column
           label="订单价格（元）"
           prop="price"
-          width="70px"
+          width="90px"
           align="center"
         ></el-table-column>
         <el-table-column
@@ -95,12 +96,12 @@
         </el-table-column>
         <el-table-column
           label="下单时间"
-          prop="updateTime"
+          prop="createTime"
           width="150px"
           align="center"
         >
           <template slot-scope="scope">
-            {{ scope.row.updateTime | dataFormat }}
+            {{ scope.row.createTime | dataFormat }}
           </template>
         </el-table-column>
 
@@ -460,8 +461,8 @@ export default {
         this.editStatusDialogVisible = false;
         //重新获取用户列表
         this.getOrdersList();
-        //提示修改订单状态失败
-        this.$message.success("修改订单状态失败");
+        //提示修改订单状态成功
+        this.$message.success("修改订单状态成功");
       });
       this.editStatusDialogVisible = false;
     },

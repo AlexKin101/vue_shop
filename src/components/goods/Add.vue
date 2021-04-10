@@ -52,28 +52,55 @@
             <el-form-item label="商品价格" prop="price">
               <el-input v-model="addForm.price" type="number"></el-input>
             </el-form-item>
-            <el-form-item label="商品重量" prop="weight">
-              <el-input v-model="addForm.weight" type="number"></el-input>
+            <el-form-item label="商品重量（kg）" prop="weight">
+              <el-input
+                v-model="addForm.weight"
+                type="number"
+                oninput="value=value.replace(/[^\d.]/g,'')"
+              ></el-input>
             </el-form-item>
             <el-form-item label="商品数量" prop="number">
               <el-input v-model="addForm.number"></el-input>
             </el-form-item>
-            <el-form-item label="商品分类" prop="goods_cat">
-              <!-- 选择商品分类的级联选择框 -->
-              <el-cascader
-                v-model="addForm.goods_cat"
-                :options="cateList"
-                @change="handleChange"
-                :props="{
-                  expandTrigger: 'hover',
-                  value: 'id',
-                  label: 'catName',
-                  children: 'children',
-                  //checkStrictly: 'false',
-                }"
-                clearable
-              ></el-cascader>
-            </el-form-item>
+
+            <el-row :gutter="20">
+              <el-col :span="8">
+                <el-form-item label="商品分类" prop="goods_cat">
+                  <!-- 选择商品分类的级联选择框 -->
+                  <el-cascader
+                    v-model="addForm.goods_cat"
+                    :options="cateList"
+                    @change="handleChange"
+                    :props="{
+                      expandTrigger: 'hover',
+                      value: 'id',
+                      label: 'catName',
+                      children: 'children',
+                      //checkStrictly: 'false',
+                    }"
+                    clearable
+                  ></el-cascader>
+                </el-form-item>
+              </el-col>
+
+              <el-col :span="4">
+                <el-form-item label="商品品牌" prop="goods_brands">
+                  <!-- 选择商品品牌的级联选择框 -->
+                  <el-cascader
+                    v-model="addForm.goods_brands"
+                    :options="brandsList"
+                    @change="handleChange"
+                    :props="{
+                      expandTrigger: 'hover',
+                      value: 'id',
+                      label: 'name',
+                      //checkStrictly: 'false',
+                    }"
+                    clearable
+                  ></el-cascader>
+                </el-form-item>
+              </el-col>
+            </el-row>
           </el-tab-pane>
 
           <el-tab-pane label="商品参数" name="1">
@@ -157,7 +184,7 @@ export default {
       addForm: {
         name: "",
         price: 0,
-        weight: 0,
+        weight: 0.0,
         number: 0,
         goods_cat: [], //  商品所属的分类数组
         // 图片数组
@@ -165,6 +192,7 @@ export default {
         // 商品详情描述
         intro: "",
         attrs: [],
+        goods_brands: [],
       },
       addFormRules: {
         name: [
@@ -202,9 +230,19 @@ export default {
             trigger: "change",
           },
         ],
+        goods_brands: [
+          {
+            required: true,
+            message: "请选择商品品牌",
+            trigger: "change",
+          },
+        ],
       },
       //   商品分类列表
       cateList: [],
+
+      //   商品品牌列表
+      brandsList: [],
 
       //  动态参数列表数据
       manyTableData: [],
@@ -228,6 +266,7 @@ export default {
   },
   created() {
     this.getCateList();
+    this.getBrandsList();
   },
   methods: {
     //   获取所有商品分类数据
@@ -263,8 +302,17 @@ export default {
       }
     },
 
+    async getBrandsList() {
+      const { data: res } = await this.$http.get("brands/list");
+      if (res.meta.status !== 200)
+        return this.$message.error("获取商品品牌列表数据失败");
+      //   把数据列表赋值给brandsList
+      console.log(res.data);
+      this.brandsList = res.data;
+    },
+
     async getParamsList(parmas) {
-      console.log(this.addForm);
+      // console.log(this.addForm);
       const { data: res } = await this.$http.get(
         `categories/${this.cateId}/attributes`,
         {
@@ -289,7 +337,7 @@ export default {
           const { data: res } = await this.getParamsList("many");
           res.data.forEach((item) => {
             item.values =
-              item.values.length === 0 ? [] : item.values.split(" ");
+              item.values.length === 0 ? [] : item.values.split(",");
           });
           this.manyTableData = res.data;
           console.log(res.data);
@@ -342,12 +390,13 @@ export default {
         // lodash cloneDeep(obj)深拷贝
         const form = _.cloneDeep(this.addForm);
         form.goods_cat = form.goods_cat.join(",");
+        form.goods_brands = form.goods_brands.join(",");
 
         // 处理动态参数
         this.manyTableData.forEach((item) => {
           const newInfo = {
             id: item.id,
-            values: item.values === [] ? "" : item.values.join(" "),
+            values: item.values === [] ? "" : item.values.join(","),
           };
           this.addForm.attrs.push(newInfo);
         });

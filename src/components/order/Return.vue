@@ -6,7 +6,7 @@
     <el-breadcrumb separator="/">
       <el-breadcrumb-item :to="{ path: '/home' }">首页</el-breadcrumb-item>
       <el-breadcrumb-item>订单管理</el-breadcrumb-item>
-      <el-breadcrumb-item :to="{ path: '/returns' }">
+      <el-breadcrumb-item>
         退换货管理
       </el-breadcrumb-item>
     </el-breadcrumb>
@@ -41,7 +41,8 @@
         <el-table-column
           label="服务单号"
           prop="number"
-          width="200px"
+          width="100px"
+          align="center"
         ></el-table-column>
         <el-table-column
           label="申请时间"
@@ -53,6 +54,7 @@
             {{ scope.row.applyTime | dataFormat }}
           </template>
         </el-table-column>
+        <el-table-column label="商品名称" prop="goods.name"></el-table-column>
         <el-table-column
           label="退款金额（元）"
           prop="price"
@@ -63,6 +65,7 @@
           label="用户账号"
           prop="user.username"
           align="center"
+          width="180px"
         ></el-table-column>
         <el-table-column
           label="申请情况"
@@ -123,13 +126,13 @@
           align="center"
         >
           <template slot-scope="scope">
-            {{ scope.row.applyTime | dataFormat }}
+            {{ scope.row.handleTime | dataFormat }}
           </template>
         </el-table-column>
 
-        <el-table-column label="操作" width="100px" align="center">
+        <el-table-column label="操作" width="150px" align="center">
           <template slot-scope="scope">
-            <!-- 修改地址按钮 -->
+            <!-- 修改按钮 -->
             <el-tooltip
               class="item"
               effect="dark"
@@ -142,6 +145,23 @@
                 icon="el-icon-edit"
                 size="mini"
                 @click="gotoReturnInfoPage(scope.row.id)"
+              ></el-button>
+            </el-tooltip>
+
+            <!-- 确认完成按钮 -->
+            <el-tooltip
+              class="item"
+              effect="dark"
+              content="确认完成"
+              placement="top"
+              :enterable="false"
+            >
+              <el-button
+                type="success"
+                icon="el-icon-check"
+                size="mini"
+                @click="affirm(scope.row.id)"
+                :disabled="scope.row.status === 2 ? true : false"
               ></el-button>
             </el-tooltip>
           </template>
@@ -214,6 +234,37 @@ export default {
         path: "/returns/returninfo",
         query: { id: id },
       });
+    },
+
+    // 确认服务单完成
+    async affirm(id) {
+      const confirmResult = await this.$confirm(
+        "该服务单是否已经处理完毕?",
+        "提示",
+        {
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          type: "warning",
+        }
+      ).catch((err) => err);
+
+      if (confirmResult !== "confirm") {
+        return this.$message.info("已取消");
+      }
+
+      const { data: res } = await this.$http.put(
+        `return/handle/${id}/status`,
+        null,
+        {
+          params: { status: 2 },
+        }
+      );
+
+      if (res.meta.status !== 200) return this.$message.error("处理失败");
+
+      this.$message.success("处理成功");
+
+      this.getReturnOrdersList();
     },
   },
 };
