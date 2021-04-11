@@ -47,7 +47,7 @@
         <el-table-column
           label="申请时间"
           prop="applyTime"
-          width="180px"
+          width="150px"
           align="center"
         >
           <template slot-scope="scope">
@@ -65,7 +65,7 @@
           label="用户账号"
           prop="user.username"
           align="center"
-          width="180px"
+          width="130px"
         ></el-table-column>
         <el-table-column
           label="申请情况"
@@ -122,7 +122,7 @@
         <el-table-column
           label="处理时间"
           prop="handleTime"
-          width="180px"
+          width="150px"
           align="center"
         >
           <template slot-scope="scope">

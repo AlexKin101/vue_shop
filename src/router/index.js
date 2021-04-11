@@ -18,6 +18,7 @@ import Return from "../components/order/Return";
 import ReturnInfo from "../components/order/ReturnInfo";
 import Report from "../components/report/Report";
 import Brand from "../components/goods/Brand";
+import Activity from "../components/marketing/Activity";
 
 Vue.use(Router);
 
@@ -44,6 +45,7 @@ const router = new Router({
         { path: "/reports", component: Report },
         { path: "/returns", component: Return },
         { path: "/returns/returninfo", component: ReturnInfo },
+        { path: "/activities", component: Activity },
       ],
     },
   ],

@@ -134,7 +134,6 @@ export default {
       );
 
       // 4、准备数据和配置项
-
       var options = {
         title: {
           text: this.selectYear + "年的月销售额(元)",
