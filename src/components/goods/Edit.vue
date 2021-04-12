@@ -43,7 +43,6 @@
           v-model="activeIndex"
           :tab-position="'left'"
           @tab-click="tabClicked"
-          :before-leave="beforeTabLeave"
         >
           <el-tab-pane label="基本信息" name="0">
             <el-form-item label="商品名称" prop="name">
@@ -105,6 +104,7 @@
               show-file-list
               auto-upload
               :file-list="fileList"
+              :limit="1"
             >
               <el-tooltip
                 class="item"
@@ -144,7 +144,7 @@ export default {
   data() {
     return {
       uploadDisabled: false,
-      baseURL: "http://localhost:1106",
+      baseURL: "http://localhost:1106/upload",
       // 已上传文件列表
       fileList: [],
       activeIndex: "0",
@@ -154,8 +154,8 @@ export default {
         price: 0,
         weight: 0.0,
         number: 0,
-        // 图片数组
-        pics: [],
+        // 图片url
+        pics: "",
         // 商品详情描述
         intro: "",
         attrs: [],
@@ -219,10 +219,7 @@ export default {
     };
   },
   created() {
-    // this.getCateList();
     this.getGoodsList();
-    this.getGoodsListPic();
-    // this.getBrandsList();
   },
   methods: {
     async getGoodsList() {
@@ -233,24 +230,26 @@ export default {
         return this.$message.error("获取商品信息失败");
 
       this.editForm = res.data;
+      this.editForm.pics = res.data.bigLogo;
       // this.editForm.goods_cat = [];
       // this.editForm.goods_brands = [];
       console.log(res.data);
+      console.log(this.editForm);
 
       this.editForm.attrs = [];
       this.showFileList();
     },
 
-    async getGoodsListPic() {
-      const { data: res } = await this.$http.get(
-        `goods/${this.$route.query.id}`
-      );
-      if (res.meta.status !== 200)
-        return this.$message.error("获取商品信息失败");
+    // async getGoodsListPic() {
+    //   const { data: res } = await this.$http.get(
+    //     `goods/${this.$route.query.id}`
+    //   );
+    //   if (res.meta.status !== 200)
+    //     return this.$message.error("获取商品信息失败");
 
-      this.editForm.pics = res.data.pics;
-      console.log(res.data);
-    },
+    //   this.editForm.pics = res.data;
+    //   console.log(res.data);
+    // },
 
     //   获取所有商品分类数据
     // async getCateList() {
@@ -288,16 +287,20 @@ export default {
     // 图片添加页显示
     showFileList() {
       // console.log(this.editForm.pics);
-      if (this.editForm.pics === []) return;
-      let urlStr = this.editForm.pics;
-      var i = 1;
-      urlStr.forEach((item) => {
-        let obj = new Object();
-        obj = item;
-        obj.url = this.baseURL + item.pics_mid;
-        obj.name = "pic_" + i++;
-        this.fileList.push(obj);
-      });
+
+      if (this.editForm.bigLogo == "[]") {
+        this.fileList = [];
+        return;
+      }
+
+      let obj = new Object();
+      obj.url = this.editForm.pics;
+      obj.name = "pic";
+      this.fileList.push(obj);
+
+      // this.editForm.pics = this.editForm.pics.split(",");
+      // let urlStr = ;
+      // var i = 1;
     },
 
     async getParamsList(parmas) {
@@ -349,13 +352,13 @@ export default {
       }
     },
 
-    unique(arr) {
-      // 根据唯一标识orderId来对数组进行过滤
-      const res = new Map(); //定义常量 res,值为一个Map对象实例 //返回arr数组过滤后的结果，结果为一个数组   过滤条件是，如果res中没有某个键，就设置这个键的值为1
-      return arr.filter(
-        (arr) => !res.has(arr.pics_id) && res.set(arr.pics_id, 1)
-      );
-    },
+    // unique(arr) {
+    //   // 根据唯一标识orderId来对数组进行过滤
+    //   const res = new Map(); //定义常量 res,值为一个Map对象实例 //返回arr数组过滤后的结果，结果为一个数组   过滤条件是，如果res中没有某个键，就设置这个键的值为1
+    //   return arr.filter(
+    //     (arr) => !res.has(arr.pics_id) && res.set(arr.pics_id, 1)
+    //   );
+    // },
 
     // 处理图片预览效果
     handlePreview(file) {
@@ -367,26 +370,26 @@ export default {
 
     // 处理图片移除操作
     handleRemove(file) {
+      // console.log(file);
       //   1.获取将要删除的图片的临时路径
-      const fileUid = file.uid;
+      // const fileUid = file.uid;
       //   2.从pics数组中，找到这个图片的索引值
-      const i = this.editForm.pics.findIndex((x) => x.pic === fileUid);
+      // const i = this.editForm.pics.findIndex((x) => x.pic ==-= fileUid);
       //   3.调用数组的splice方法，把图片信息对象，从pics数组中移除
-      this.editForm.pics.splice(i, 1);
+      this.editForm.pics = [];
     },
 
     // 监听图片上传成功的事件
     handleSuccess(response) {
       //   1.拼接得到一个图片信息对象
       // 2.将图片信息对象，push到pics数组中
-      // console.log(file);
-      const picInfo = { pic: response.data.tmp_path };
+      console.log(response);
+      // this.editForm.pics.splice(0, 1);
+      // const picInfo = { pic: response.data.tmp_path };
       if (response.meta.status !== 200) return;
-      this.editForm.pics.push(picInfo);
+      this.editForm.pics = response.data;
       //console.log(this.editForm.pics);
     },
-
-    handleChange() {},
 
     // 编辑商品
     edit() {

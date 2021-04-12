@@ -19,6 +19,7 @@ import ReturnInfo from "../components/order/ReturnInfo";
 import Report from "../components/report/Report";
 import Brand from "../components/goods/Brand";
 import Activity from "../components/marketing/Activity";
+import Carousel from "../components/marketing/Carousel";
 
 Vue.use(Router);
 
@@ -46,6 +47,7 @@ const router = new Router({
         { path: "/returns", component: Return },
         { path: "/returns/returninfo", component: ReturnInfo },
         { path: "/activities", component: Activity },
+        { path: "/carousel", component: Carousel },
       ],
     },
   ],

@@ -141,6 +141,7 @@
               list-type="picture"
               :headers="headerObj"
               :on-success="handleSuccess"
+              :limit="1"
             >
               <el-tooltip
                 class="item"
@@ -188,7 +189,7 @@ export default {
         number: 0,
         goods_cat: [], //  商品所属的分类数组
         // 图片数组
-        pics: [],
+        pics: "",
         // 商品详情描述
         intro: "",
         attrs: [],
@@ -355,13 +356,15 @@ export default {
 
     // 处理图片预览效果
     handlePreview(file) {
-      this.previewPath = "http://localhost:1106" + file.response.data.tmp_path;
+      console.log(file);
+      this.previewPath = file.response.data;
       console.log(this.previewPath);
       this.previewVisible = true;
     },
 
     // 处理图片移除操作
     handleRemove(file) {
+      // console.log(file);
       //   1.获取将要删除的图片的临时路径
       const filePath = { pic: file.response.data };
       //   2.从pics数组中，找到这个图片的索引值
@@ -372,12 +375,12 @@ export default {
 
     // 监听图片上传成功的事件
     handleSuccess(response) {
-      console.log(response);
-      const picInfo = { pic: response.data };
+      // console.log(response.data);
+      // const picInfo = pic: response.data;
       //   1.拼接得到一个图片信息对象
       // 2.将图片信息对象，push到pics数组中
-      this.addForm.pics.push(picInfo);
-      console.log(this.addForm.pics);
+      this.addForm.pics = response.data;
+      // console.log(this.addForm.pics);
     },
 
     // 添加商品
