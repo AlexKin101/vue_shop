@@ -40,14 +40,14 @@
           ></i>
           <i class="el-icon-error" v-else style="color:red"></i>
         </template>
-        <!-- 排序 -->
+        <!-- 排序
         <template v-slot:order="scope">
           <el-tag v-if="scope.row.level === 0" size="mini">一级</el-tag>
           <el-tag v-else-if="scope.row.level === 1" type="success" size="mini">
             二级
           </el-tag>
           <el-tag v-else type="warning" size="mini">三级</el-tag>
-        </template>
+        </template> -->
         <!-- 操作 -->
         <template v-slot:opt="scope">
           <el-button
@@ -94,24 +94,11 @@
         ref="addCateFormRef"
         label-width="100px"
       >
-        <el-form-item label="分类名称：" prop="catName">
-          <el-input v-model="addCateForm.catName"></el-input>
+        <el-form-item label="分类名称：" prop="name">
+          <el-input v-model="addCateForm.name"></el-input>
         </el-form-item>
-        <el-form-item label="父级分类：">
-          <!-- options 用来指定数据源 , props 用来指定配置对象 -->
-          <el-cascader
-            v-model="selectedKeys"
-            :options="parentCateList"
-            :props="{
-              expandTrigger: 'hover',
-              value: 'id',
-              label: 'catName',
-              children: 'children',
-              checkStrictly: 'true',
-            }"
-            @change="parentCateChange"
-            clearable
-          ></el-cascader>
+        <el-form-item label="分类描述：" prop="describe">
+          <el-input v-model="addCateForm.describe"></el-input>
         </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
@@ -135,8 +122,12 @@
         ref="editFormRef"
         label-width="95px"
       >
-        <el-form-item label="分类名称：" prop="catName">
-          <el-input v-model="editForm.catName"></el-input>
+        <el-form-item label="分类名称：" prop="name">
+          <el-input v-model="editForm.name"></el-input>
+        </el-form-item>
+
+        <el-form-item label="分类描述：" prop="describe">
+          <el-input v-model="editForm.describe"></el-input>
         </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
@@ -167,22 +158,26 @@ export default {
       columns: [
         {
           label: "分类名称",
-          prop: "catName",
+          prop: "name",
         },
         {
-          label: "是否有效",
-          // 表示将当前列定义为模版列
-          type: "template",
-          // 表示当前这一列使用的模版名称
-          template: "isOk",
+          label: "分类描述",
+          prop: "describe",
         },
-        {
-          label: "排序",
-          // 表示将当前列定义为模版列
-          type: "template",
-          // 表示当前这一列使用的模版名称
-          template: "order",
-        },
+        // {
+        //   label: "是否有效",
+        //   // 表示将当前列定义为模版列
+        //   type: "template",
+        //   // 表示当前这一列使用的模版名称
+        //   template: "isOk",
+        // },
+        // {
+        //   label: "排序",
+        //   // 表示将当前列定义为模版列
+        //   type: "template",
+        //   // 表示当前这一列使用的模版名称
+        //   template: "order",
+        // },
         {
           label: "操作",
           // 表示将当前列定义为模版列
@@ -196,17 +191,12 @@ export default {
       // 添加分类的表单数据对象
       addCateForm: {
         //将要添加的分类的名称
-        catName: "",
-        //父级分类的id
-        pid: 0,
-        //分类的等级，默认添加的是一级分类
-        level: 0,
+        name: "",
+        describe: "",
       },
       // 添加分类的表单的验证规则对象
       addCateFormRules: {
-        catName: [
-          { required: true, message: "请输入分类名称", trigger: "blur" },
-        ],
+        name: [{ required: true, message: "请输入分类名称", trigger: "blur" }],
       },
       //   父级分类的列表
       parentCateList: [],
@@ -217,13 +207,12 @@ export default {
       // 编辑分类的表单数据对象
       editForm: {
         id: 0,
-        catName: "",
+        name: "",
+        describe: "",
       },
       // 编辑分类的表单的验证规则对象
       editFormRules: {
-        catName: [
-          { required: true, message: "请输入分类名称", trigger: "blur" },
-        ],
+        name: [{ required: true, message: "请输入分类名称", trigger: "blur" }],
       },
     };
   },
@@ -275,24 +264,6 @@ export default {
       this.parentCateList = res.data;
     },
 
-    // 选择项发生变化触发这个函数
-    parentCateChange() {
-      //console.log(this.selectedKeys);
-      //   如果selectedKeys数组length大于0，证明选中的父级分类；
-      //   反之，就说明没有选中任何父级分类
-      if (this.selectedKeys.length > 0) {
-        //父级分类的Id
-        this.addCateForm.pid = this.selectedKeys[this.selectedKeys.length - 1];
-        // 为当前分类的等级赋值
-        this.addCateForm.level = this.selectedKeys.length;
-        return;
-      } else {
-        this.addCateForm.pid = 0;
-        // 为当前分类的等级赋值
-        this.addCateForm.level = 0;
-      }
-    },
-
     // 点击按钮，添加新的分类
     addCate() {
       this.$refs.addCateFormRef.validate(async (valid) => {
@@ -312,9 +283,6 @@ export default {
     // 监听对话框的关闭事件，重置表单数据
     addCateDialogClosed() {
       this.$refs.addCateFormRef.resetFields();
-      this.selectedKeys = [];
-      this.addCateForm.pid = 0;
-      this.addCateForm.level = 0;
     },
 
     // 展示编辑分类的对话框
@@ -344,7 +312,8 @@ export default {
           null,
           {
             params: {
-              cat_name: this.editForm.catName,
+              cat_name: this.editForm.name,
+              cat_desc: this.editForm.describe,
             },
           }
         );
