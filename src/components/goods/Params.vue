@@ -23,7 +23,7 @@
             style="margin-right:24px"
             :props="{
               expandTrigger: 'hover',
-              value: 'id',
+              value: 'name',
               label: 'name',
               //checkStrictly: 'false',
             }"

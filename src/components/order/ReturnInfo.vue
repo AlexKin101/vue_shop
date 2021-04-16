@@ -26,16 +26,20 @@
       <el-table border script class="standard-margin" :data="goodsInfoList">
         <el-table-column label="商品名称" align="center">
           <template slot-scope="scope">
-            {{ scope.row.goods.name }}
+            {{ scope.row.orders.products.name }}
           </template>
         </el-table-column>
         <el-table-column label="价格/货号" width="180" align="center">
           <template slot-scope="scope">
             <span class="font-small">价格：</span>
-            <span class="font-small">{{ scope.row.goods.price }}</span>
+            <span class="font-small">
+              {{ scope.row.orders.products.outPrice }}
+            </span>
             <br />
             <span class="font-small">货号：</span>
-            <span class="font-small">{{ scope.row.goods.id }}</span>
+            <span class="font-small">
+              {{ scope.row.orders.products.number }}
+            </span>
           </template>
         </el-table-column>
         <el-table-column label="小计" width="100" align="center">
@@ -43,7 +47,7 @@
         </el-table-column>
         <el-table-column label="数量" width="100" align="center">
           <template slot-scope="scope">
-            {{ scope.row.goodsNumber }}
+            {{ scope.row.orders.amount }}
           </template>
         </el-table-column>
       </el-table>
@@ -63,8 +67,8 @@
         :closable="false"
       ></el-alert>
       <el-alert
-        :title="'当前状态：' + judgeStatus(this.serviceForm.status)"
-        :type="judgeType(this.serviceForm.status)"
+        :title="'当前状态：' + this.serviceForm.state"
+        type="info"
         effect="dark"
         center
         :closable="false"
@@ -84,53 +88,37 @@
               {{ this.serviceForm.id }}
             </el-form-item>
             <el-form-item label="申请状态:" prop="status">
-              {{ judgeStatus(this.serviceForm.status) }}
+              {{ this.serviceForm.state }}
             </el-form-item>
-            <el-form-item label="订单编号:" prop="orderId">
-              {{ this.serviceForm.orders.number }}
+            <el-form-item label="订单编号:" prop="number">
+              {{ this.serviceForm.number }}
             </el-form-item>
-            <el-form-item label="下单时间:" prop="applyTime">
-              {{ this.serviceForm.orders.createTime | dataFormat }}
+            <el-form-item label="下单时间:" prop="addTime">
+              {{ this.serviceForm.addTime | dataFormat }}
             </el-form-item>
             <el-form-item label="申请时间:" prop="applyTime">
               {{ this.serviceForm.applyTime | dataFormat }}
             </el-form-item>
             <el-form-item label="用户名称:" prop="username">
-              {{ this.serviceForm.username }}
+              {{ this.serviceForm.userName }}
             </el-form-item>
             <el-form-item label="联系电话:" prop="tel">
               {{ this.serviceForm.tel }}
             </el-form-item>
             <el-form-item label="退货原因:" prop="cause">
-              {{ this.serviceForm.cause }}
-            </el-form-item>
-            <el-form-item label="问题描述:" prop="cause">
-              {{ this.serviceForm.intro }}
+              {{ this.serviceForm.reason }}
             </el-form-item>
           </el-col>
-
           <el-col :span="8">
             <el-form-item label="订单金额:" prop="price">
-              {{ this.serviceForm.orders.price }} 元
+              {{ this.serviceForm.price }} 元
             </el-form-item>
-            <el-form-item
-              label="确认退款金额:"
-              prop="price"
-              label-width="100px"
-            >
+            <el-form-item label="确认退款金额:" label-width="100px">
               <el-input
                 oninput="value=value.replace(/[^\d.]/g,'')"
                 placeholder="请输入退款金额"
-                v-model="serviceForm.price"
-                :disabled="this.serviceForm.status === 0 ? false : true"
-                clearable
-              ></el-input>
-            </el-form-item>
-            <el-form-item label="处理备注:" prop="comment" label-width="100px">
-              <el-input
-                placeholder="请输入处理备注"
-                v-model="serviceForm.comment"
-                :disabled="this.serviceForm.status === 0 ? false : true"
+                v-model="serviceForm.returnPrice"
+                :disabled="this.judgeDisable(this.serviceForm.state)"
                 clearable
               ></el-input>
             </el-form-item>
@@ -144,17 +132,17 @@
                   type="primary"
                   @click="agree"
                   style="margin-bottom:15px"
-                  :disabled="this.serviceForm.status === 0 ? false : true"
+                  :disabled="this.judgeDisable(this.serviceForm.state)"
                 >
-                  同意退货
+                  同意退款
                 </el-button>
                 <br />
                 <el-button
                   type="info"
                   @click="reject"
-                  :disabled="this.serviceForm.status === 0 ? false : true"
+                  :disabled="this.judgeDisable(this.serviceForm.state)"
                 >
-                  拒绝退货
+                  拒绝退款
                 </el-button>
               </el-form-item>
             </div>
@@ -172,15 +160,20 @@ export default {
       // 商品信息
       goodsInfoList: [],
 
+      serviceInfo: [],
+
       serviceForm: {
         id: 0, //服务单号
         status: "", //申请状态
         orderId: 0, //订单编号
+        addTime: 0,
         applyTime: 0, //申请时间
         username: "", //用户账号
         tel: "", //联系电话
         casue: "", //退货原因
         intro: "", //问题描述
+        number: "",
+        amount: 0,
 
         price: 0.0, // 订单金额
         comment: "", // 处理备注
@@ -189,6 +182,7 @@ export default {
 
         status: 0, //退换货订单状态
       },
+      serviceFormRules: {},
     };
   },
   created() {
@@ -203,38 +197,17 @@ export default {
       );
 
       if (res.meta.status !== 200) return this.$message.error("查询失败");
-      //console.log(res);
+      console.log(res);
 
       this.goodsInfoList = res.data;
       this.serviceForm = res.data[0];
-      this.serviceForm.orderId = res.data[0].orders.id;
-      this.serviceForm.username = res.data[0].user.username;
+      this.serviceForm.number = res.data[0].orders.number;
+      this.serviceForm.addTime = res.data[0].orders.addTime;
       this.serviceForm.tel = res.data[0].user.tel;
-      console.log(this.serviceForm);
-    },
-
-    judgeStatus(status) {
-      if (status === 1) {
-        return "退货中";
-      } else if (status === 2) {
-        return "已完成";
-      } else if (status === 3) {
-        return "已拒绝";
-      } else {
-        return "待处理";
-      }
-    },
-
-    judgeType(status) {
-      if (status === 1) {
-        return "warning";
-      } else if (status === 2) {
-        return "success";
-      } else if (status === 3) {
-        return "error";
-      } else {
-        return "info";
-      }
+      this.serviceForm.price = res.data[0].price;
+      this.serviceForm.amount = res.data[0].orders.amount;
+      this.serviceForm.returnPrice = res.data[0].price;
+      // console.log(this.serviceForm);
     },
 
     async agree() {
@@ -252,7 +225,7 @@ export default {
         return this.$message.info("已取消");
       }
 
-      this.serviceForm.status = 1;
+      this.serviceForm.state = "退款完成";
 
       const { data: res } = await this.$http.put(
         `return/handle/${this.$route.query.id}`,
@@ -280,7 +253,7 @@ export default {
         return this.$message.info("已取消");
       }
 
-      this.serviceForm.status = 3;
+      this.serviceForm.state = "拒绝退款";
 
       const { data: res } = await this.$http.put(
         `return/handle/${this.$route.query.id}`,
@@ -292,11 +265,23 @@ export default {
       this.$message.success("处理成功");
       this.$router.push("/returns");
     },
+
+    judgeDisable(stateStr) {
+      if (
+        stateStr == "退款完成" ||
+        stateStr == "拒绝退款" ||
+        stateStr == "已拒绝"
+      ) {
+        return true;
+      } else {
+        return false;
+      }
+    },
   },
 
   computed: {
     totalAmount() {
-      return this.goodsInfoList[0].price * this.goodsInfoList[0].goodsNumber;
+      return this.serviceForm.price * this.serviceForm.amount;
     },
   },
 };

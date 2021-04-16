@@ -46,20 +46,20 @@
         ></el-table-column>
         <el-table-column
           label="商品编号"
-          prop="id"
-          width="70px"
+          prop="number"
+          width="130px"
           align="center"
         ></el-table-column>
         <el-table-column label="商品名称" prop="name"></el-table-column>
         <el-table-column
           label="商品分类"
-          prop="categories.catName"
+          prop="type.name"
           width="95px"
           align="center"
         ></el-table-column>
         <el-table-column
           label="商品价格（元）"
-          prop="price"
+          prop="outPrice"
           width="95px"
           align="center"
         ></el-table-column>
@@ -152,8 +152,8 @@
         ></el-table-column>
         <el-table-column
           label="商品编号"
-          width="70px"
-          prop="id"
+          width="130px"
+          prop="number"
         ></el-table-column>
         <el-table-column
           prop="name"
@@ -162,22 +162,23 @@
         ></el-table-column>
         <el-table-column
           label="商品分类"
-          prop="categories.catName"
+          prop="type.name"
           width="95px"
           align="center"
         ></el-table-column>
         <el-table-column
           label="商品价格（元）"
-          prop="price"
+          prop="outPrice"
           width="95px"
           align="center"
         ></el-table-column>
         <el-table-column
-          label="商品数量"
-          prop="number"
+          label="商品库存"
+          prop="stock"
           width="70px"
           align="center"
         ></el-table-column>
+
         <el-table-column
           label="创建时间"
           prop="addTime"

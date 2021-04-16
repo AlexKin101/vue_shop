@@ -48,8 +48,14 @@
             <el-form-item label="商品名称" prop="name">
               <el-input v-model="editForm.name"></el-input>
             </el-form-item>
-            <el-form-item label="商品价格" prop="price">
-              <el-input v-model="editForm.price" type="number"></el-input>
+            <el-form-item label="商品描述" prop="describe">
+              <el-input v-model="editForm.describe"></el-input>
+            </el-form-item>
+            <el-form-item label="商品进货价格（元）" prop="inPrice">
+              <el-input v-model="editForm.inPrice" type="number"></el-input>
+            </el-form-item>
+            <el-form-item label="商品售出价格（元）" prop="outPrice">
+              <el-input v-model="editForm.outPrice" type="number"></el-input>
             </el-form-item>
             <el-form-item label="商品重量（kg）" prop="weight">
               <el-input
@@ -58,41 +64,39 @@
                 oninput="value=value.replace(/[^\d.]/g,'')"
               ></el-input>
             </el-form-item>
-            <el-form-item label="商品数量" prop="number">
-              <el-input v-model="editForm.number"></el-input>
+            <el-form-item label="商品最低库存数量" prop="lowStock">
+              <el-input v-model="editForm.lowStock"></el-input>
+            </el-form-item>
+            <el-form-item label="商品库存数量" prop="stock">
+              <el-input v-model="editForm.stock"></el-input>
             </el-form-item>
           </el-tab-pane>
 
-          <el-tab-pane label="商品参数" name="1">
+          <el-tab-pane label="商品规格" name="1">
             <!-- 渲染表单的Item项 -->
-            <el-form-item
-              :label="item.name"
-              v-for="item in manyTableData"
-              :key="item.id"
-            >
+            <el-form-item label="商品规格">
               <!-- 复选框组 -->
-              <el-checkbox-group v-model="item.values">
+              <el-checkbox-group v-model="checkList">
                 <el-checkbox
-                  :label="cb"
-                  v-for="(cb, i) in item.values"
-                  :key="i"
+                  :label="item.id"
+                  v-for="item in tableData"
+                  :key="item.id"
                   border
-                ></el-checkbox>
+                >
+                  {{ item.name }}
+                </el-checkbox>
               </el-checkbox-group>
             </el-form-item>
           </el-tab-pane>
 
-          <el-tab-pane label="基本属性" name="2">
-            <el-form-item
-              :label="item.name"
-              v-for="item in onlyTableData"
-              :key="item.id"
-            >
-              <el-input v-model="item.values"></el-input>
-            </el-form-item>
-          </el-tab-pane>
-
           <el-tab-pane label="商品图片" name="3">
+            <el-alert
+              title="只能上传一张商品图片"
+              type="warning"
+              show-icon
+              style="margin-bottom:10px"
+              closable
+            ></el-alert>
             <!-- action 表示图片要上传的API地址 -->
             <el-upload
               :action="uploadURL"
@@ -122,7 +126,12 @@
             <!-- 富文本编辑器组件 -->
             <quill-editor v-model="editForm.intro"></quill-editor>
             <!-- 添加商品的按钮 -->
-            <el-button type="primary" class="btnEdit" @click="edit">
+            <el-button
+              type="primary"
+              class="btnedit"
+              @click="edit"
+              style="margin-top:10px"
+            >
               编辑商品
             </el-button>
           </el-tab-pane>
@@ -143,7 +152,7 @@ import _ from "lodash";
 export default {
   data() {
     return {
-      uploadDisabled: false,
+      uploeditisabled: false,
       baseURL: "http://localhost:1106/upload",
       // 已上传文件列表
       fileList: [],
@@ -151,14 +160,19 @@ export default {
       // 添加商品的表单数据对象
       editForm: {
         name: "",
-        price: 0,
+        inPrice: 0,
+        outPrice: 0,
         weight: 0.0,
-        number: 0,
-        // 图片url
+        stock: 0,
+        lowStock: 10,
+        isStockout: 0,
+        // 图片
         pics: "",
         // 商品详情描述
         intro: "",
         attrs: [],
+        describe: "",
+        goods_cat: "",
       },
       editFormRules: {
         name: [
@@ -168,10 +182,17 @@ export default {
             trigger: "blur",
           },
         ],
-        price: [
+        inPrice: [
           {
             required: true,
-            message: "请输入商品价格",
+            message: "请输入商品进货价格",
+            trigger: "blur",
+          },
+        ],
+        outPrice: [
+          {
+            required: true,
+            message: "请输入商品售出价格",
             trigger: "blur",
           },
         ],
@@ -182,11 +203,25 @@ export default {
             trigger: "blur",
           },
         ],
-        number: [
+        stock: [
           {
             required: true,
-            message: "请输入商品数量",
+            message: "请输入商品库存数量",
             trigger: "blur",
+          },
+        ],
+        lowStock: [
+          {
+            required: true,
+            message: "请输入商品最低库存数量",
+            trigger: "blur",
+          },
+        ],
+        describe: [
+          {
+            required: true,
+            message: "请输入商品描述",
+            trigger: "change",
           },
         ],
       },
@@ -196,11 +231,10 @@ export default {
       //   商品品牌列表
       brandsList: [],
 
-      //  动态参数列表数据
-      manyTableData: [],
+      checkList: [],
 
-      //  静态属性列表数据
-      onlyTableData: [],
+      //  规格列表数据
+      tableData: [],
       //  上传图片的URL
       uploadURL: "http://localhost:1106/upload",
 
@@ -230,9 +264,10 @@ export default {
         return this.$message.error("获取商品信息失败");
 
       this.editForm = res.data;
-      this.editForm.pics = res.data.bigLogo;
-      // this.editForm.goods_cat = [];
-      // this.editForm.goods_brands = [];
+      this.editForm.pics = res.data.picture;
+      this.editForm.goods_cat = res.data.type.name;
+      this.editForm.goods_cat = this.editForm.type.name;
+      this.editForm.goods_brands = this.editForm.brands.name;
       console.log(res.data);
       console.log(this.editForm);
 
@@ -287,14 +322,10 @@ export default {
     // 图片添加页显示
     showFileList() {
       // console.log(this.editForm.pics);
-
-      if (this.editForm.bigLogo == "[]") {
-        this.fileList = [];
-        return;
-      }
+      console.log(this.fileList);
 
       let obj = new Object();
-      obj.url = this.editForm.pics;
+      obj.url = this.editForm.picture;
       obj.name = "pic";
       this.fileList.push(obj);
 
@@ -303,19 +334,24 @@ export default {
       // var i = 1;
     },
 
-    async getParamsList(parmas) {
-      const { data: res } = await this.$http.get(`goods/attributes`, {
-        params: { id: this.$route.query.id, sel: parmas },
-      });
+    async getParamsList() {
+      // console.log(this.addForm);
+      const { data: res } = await this.$http.get(
+        `categories/${this.editForm.type.name}/attributes`
+      );
+      this.tableData = res.data;
+      console.log(res.data);
+    },
 
+    async getParamsListById() {
+      const { data: res } = await this.$http.get(`goods/attributes`, {
+        params: { id: this.$route.query.id },
+      });
+      console.log(res.data);
       if (res.meta.status != 200) {
-        if (params === "mnay")
-          return this.$message.error("获取动态参数列表失败");
-        else {
-          return this.$message.error("获取静态属性列表失败");
-        }
+        return this.$message.error("获取规格列表失败");
       }
-      return { data: res };
+      this.checkList = res.data;
     },
 
     // async getBrandsList() {
@@ -331,22 +367,11 @@ export default {
       switch (this.activeIndex) {
         // 访问动态参数面板
         case "1": {
-          const { data: res } = await this.getParamsList("many");
-
-          res.data.forEach((item) => {
-            item.values =
-              item.values.length === 0 ? [] : item.values.split(",");
-          });
-
-          console.log(res.data);
-          this.manyTableData = res.data;
-          break;
-        }
-
-        case "2": {
-          const { data: res } = await this.getParamsList("only");
-          // console.log(res.data);
-          this.onlyTableData = res.data;
+          this.checkList = [];
+          this.tableData = [];
+          this.getParamsList();
+          // this.getParamsListById();
+          // const { data: rep } = await this.getParamsListById()
           break;
         }
       }
@@ -361,10 +386,10 @@ export default {
     // },
 
     // 处理图片预览效果
-    handlePreview(file) {
-      console.log(file);
-      this.previewPath = file.url;
-      // console.log(this.previewPath);
+    handlePreview() {
+      // console.log(file);
+      this.previewPath = this.editForm.pics;
+      console.log(this.previewPath);
       this.previewVisible = true;
     },
 
@@ -376,17 +401,17 @@ export default {
       //   2.从pics数组中，找到这个图片的索引值
       // const i = this.editForm.pics.findIndex((x) => x.pic ==-= fileUid);
       //   3.调用数组的splice方法，把图片信息对象，从pics数组中移除
-      this.editForm.pics = [];
+      this.editForm.pics = "";
     },
 
     // 监听图片上传成功的事件
     handleSuccess(response) {
       //   1.拼接得到一个图片信息对象
       // 2.将图片信息对象，push到pics数组中
-      console.log(response);
+      // console.log(response);
       // this.editForm.pics.splice(0, 1);
       // const picInfo = { pic: response.data.tmp_path };
-      if (response.meta.status !== 200) return;
+      // if (response.meta.status !== 200) return;
       this.editForm.pics = response.data;
       //console.log(this.editForm.pics);
     },
@@ -401,22 +426,15 @@ export default {
         // 执行添加的业务逻辑
         // lodash cloneDeep(obj)深拷贝
         const form = _.cloneDeep(this.editForm);
+
+        form.isStockout = form.stock > form.lowStock ? 0 : 1;
         // form.goods_cat = form.goods_cat.join(",");
         // form.goods_brands = form.goods_brands.join(",");
 
-        // 处理动态参数
-        this.manyTableData.forEach((item) => {
+        // 处理规格
+        this.checkList.forEach((item) => {
           const newInfo = {
-            id: item.id,
-            values: item.values === [] ? "" : item.values.join(","),
-          };
-          this.editForm.attrs.push(newInfo);
-        });
-        // 处理静态属性
-        this.onlyTableData.forEach((item) => {
-          const newInfo = {
-            id: item.id,
-            values: item.values === [] ? "" : item.values,
+            id: item,
           };
           this.editForm.attrs.push(newInfo);
         });
@@ -436,15 +454,6 @@ export default {
         this.$message.success("编辑商品成功");
         this.$router.push("/goods");
       });
-    },
-  },
-
-  computed: {
-    cateId() {
-      if (this.editForm.goods_cat.length === 3) {
-        return this.editForm.goods_cat[2];
-      }
-      return null;
     },
   },
 };

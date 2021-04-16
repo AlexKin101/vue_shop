@@ -46,14 +46,14 @@
         ></el-table-column>
         <el-table-column
           label="商品编号"
-          prop="id"
-          width="70px"
+          prop="number"
+          width="160px"
           align="center"
         ></el-table-column>
         <el-table-column label="商品名称" prop="name"></el-table-column>
         <el-table-column
           label="商品分类"
-          prop="categories.catName"
+          prop="type.name"
           width="95px"
           align="center"
         ></el-table-column>
@@ -64,8 +64,14 @@
           align="center"
         ></el-table-column>
         <el-table-column
-          label="商品价格（元）"
-          prop="price"
+          label="商品进货价格（元）"
+          prop="inPrice"
+          width="95px"
+          align="center"
+        ></el-table-column>
+        <el-table-column
+          label="商品售出价格（元）"
+          prop="outPrice"
           width="95px"
           align="center"
         ></el-table-column>
@@ -76,15 +82,25 @@
           align="center"
         ></el-table-column>
         <el-table-column
-          label="商品数量"
-          prop="number"
+          label="商品库存数量"
+          prop="stock"
           width="70px"
           align="center"
         ></el-table-column>
+        <el-table-column label="商品库存状态" width="80px" align="center">
+          <template slot-scope="scope">
+            <el-tag type="warning" v-if="scope.row.isStockout === 0">
+              充足
+            </el-tag>
+            <el-tag v-else>
+              缺货
+            </el-tag>
+          </template>
+        </el-table-column>
         <el-table-column
           label="创建时间"
           prop="addTime"
-          width="140px"
+          width="160px"
           align="center"
         >
           <template slot-scope="scope">
@@ -92,11 +108,11 @@
           </template>
         </el-table-column>
 
-        <el-table-column label="状态" align="center" width="100px" prop="state">
+        <el-table-column label="状态" align="center" width="100px" prop="sale">
           <template slot-scope="scope">
             <!-- {{ scope.row }} -->
             <el-switch
-              v-model="scope.row.state"
+              v-model="scope.row.sale"
               @change="goodsStateChanged(scope.row)"
             ></el-switch>
           </template>
@@ -181,12 +197,12 @@ export default {
       console.log(res);
       if (res.meta.status !== 200)
         return this.$message.error("获取商品列表失败");
-      //   为总数据条数赋值
-      //  this.$message.success("获取商品列表成功");
+
       // this.total = res.data.total;
       // this.goodsList = res.data.goods;
       this.queryInfo.pagenum = res.data.pageable.pageNumber + 1;
       this.queryInfo.pagesize = res.data.size;
+      //   为总数据条数赋值
       this.total = res.data.totalElements;
       this.goodsList = res.data.content;
     },
@@ -205,17 +221,14 @@ export default {
     //监听switch开关状态的改变
     async goodsStateChanged(goodsInfo) {
       const { data: res } = await this.$http.put(
-        `goods/${goodsInfo.id}/state/${goodsInfo.state}`
+        `goods/${goodsInfo.id}/state/${goodsInfo.sale}`
       );
       if (res.meta.status !== 200) {
-        goodsInfo.state = !goodsInfo.state;
+        goodsInfo.sale = !goodsInfo.sale;
         return this.$message.error("更新商品状态失败！");
       }
       this.$message.success("更新商品状态成功！");
     },
-
-    //显示编辑对话框
-    showEditDialog() {},
 
     // 根据Id删除商品
     async removeGoodsById(id) {

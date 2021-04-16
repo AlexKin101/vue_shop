@@ -14,7 +14,7 @@
       <el-row>
         <el-col :span="8">
           <el-input
-            placeholder="请输入内容"
+            placeholder="请输入订单编号"
             v-model="queryInfo.query"
             clearable
             @clear="getOrdersList"
@@ -39,10 +39,14 @@
         <el-table-column
           label="订单编号"
           prop="number"
-          width="250px"
+          width="150px"
           align="center"
         ></el-table-column>
-        <el-table-column label="商品名称" prop="goodsName"></el-table-column>
+        <el-table-column label="商品名称">
+          <template slot-scope="scope">
+            {{ scope.row.products.name }}
+          </template>
+        </el-table-column>
         <el-table-column
           label="订单价格（元）"
           prop="price"
@@ -50,30 +54,27 @@
           align="center"
         ></el-table-column>
         <el-table-column
-          label="是否付款"
-          prop="payStatus"
+          label="商品状态"
+          prop="state"
           width="100px"
           align="center"
         >
           <template slot-scope="scope">
-            <el-tag type="success" v-if="scope.row.payStatus === 1">
-              已付款
-            </el-tag>
-            <el-tag type="danger" v-else>未付款</el-tag>
+            <el-tag type="success">{{ scope.row.state }}</el-tag>
           </template>
         </el-table-column>
 
         <el-table-column
           label="付款方式"
-          prop="pay"
+          prop="payType"
           width="100px"
           align="center"
         >
           <template slot-scope="scope">
-            <el-tag type="Brand Color" v-if="scope.row.pay === 1">
+            <el-tag type="Brand Color" v-if="scope.row.payType === '支付宝'">
               支付宝
             </el-tag>
-            <el-tag type="success" v-else-if="scope.row.pay === 2">
+            <el-tag type="success" v-else-if="scope.row.payType === '微信'">
               微信
             </el-tag>
             <el-tag type="danger" v-else>未付款</el-tag>
@@ -95,13 +96,19 @@
           </template>
         </el-table-column>
         <el-table-column
+          label="订单来源"
+          prop="from"
+          width="90px"
+          align="center"
+        ></el-table-column>
+        <el-table-column
           label="下单时间"
           prop="createTime"
           width="150px"
           align="center"
         >
           <template slot-scope="scope">
-            {{ scope.row.createTime | dataFormat }}
+            {{ scope.row.addTime | dataFormat }}
           </template>
         </el-table-column>
 
@@ -119,7 +126,7 @@
                 type="primary"
                 icon="el-icon-edit"
                 size="mini"
-                @click="showBox"
+                @click="showBox(scope.row.id)"
               ></el-button>
             </el-tooltip>
 
@@ -182,18 +189,28 @@
         :model="addressForm"
         :rules="addressFormRules"
         ref="addressFormRef"
-        label-width="90px"
+        label-width="120px"
       >
-        <el-form-item label="省市区/县" prop="address1">
+        <el-form-item label="目前收货地址:" prop="address">
+          <el-input v-model="addressForm.address"></el-input>
+        </el-form-item>
+        <!-- <el-form-item label="省市区/县" prop="address1">
           <el-cascader
             :options="cityData"
             v-model="addressForm.address1"
+            :props="{
+              expandTrigger: 'hover',
+              value: 'value',
+              label: 'label',
+              children: 'children',
+              //checkStrictly: 'false',
+            }"
             clearable
-          ></el-cascader>
-        </el-form-item>
+          ></el-cascader> -->
+        <!-- </el-form-item>
         <el-form-item label="详细地址" prop="address2">
           <el-input v-model="addressForm.address2"></el-input>
-        </el-form-item>
+        </el-form-item> -->
       </el-form>
       <span slot="footer" class="dialog-footer">
         <el-button @click="addressDialogVisible = false">取 消</el-button>
@@ -225,9 +242,6 @@
         </el-form-item>
         <el-form-item label="订单价格" prop="price">
           <el-input type="number" v-model="statusForm.price"></el-input>
-        </el-form-item>
-        <el-form-item label="订单数量" prop="number">
-          <el-input type="number" v-model="statusForm.number"></el-input>
         </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
@@ -291,7 +305,6 @@ export default {
       statusForm: {
         isSend: 0,
         price: 0.0,
-        number: 0,
       },
 
       statusFormRules: {
@@ -302,37 +315,43 @@ export default {
             trigger: "blur",
           },
         ],
-        number: {
-          required: true,
-          message: "请输入订单数量",
-          trigger: "blur",
-        },
       },
 
       addressForm: {
-        address1: [],
-        address2: "",
+        address: "",
+        // address1: [],
+        // address2: "",
       },
       addressFormRules: {
-        address1: [
+        address: [
           {
             required: true,
-            message: "请选择省市区/县",
+            message: "请填写地址",
             trigger: "blur",
           },
         ],
+        // address1: [
+        //   {
+        //     required: true,
+        //     message: "请选择省市区/县",
+        //     trigger: "blur",
+        //   },
+        // ],
 
-        address2: [
-          {
-            required: true,
-            message: "请填写详细地址",
-            trigger: "blur",
-          },
-        ],
+        // address2: [
+        //   {
+        //     required: true,
+        //     message: "请填写详细地址",
+        //     trigger: "blur",
+        //   },
+        // ],
       },
 
       // 全国省市区/县数据
       cityData,
+
+      //目前订单收货地址
+      nowAddress: "",
 
       // 静态物流信息
       progress,
@@ -364,15 +383,13 @@ export default {
       if (res.meta.status !== 200) return this.$message.error("查询失败");
       console.log(res.data);
       this.statusForm = res.data;
-      this.statusForm.number = res.data.goodsNumber;
+      this.addressForm = res.data;
 
       if (this.statusForm.isSend === 1) {
         this.statusForm.isSend = true;
       } else {
         this.statusForm.isSend = false;
       }
-
-      this.editStatusDialogVisible = true;
     },
 
     // 监听pagesize改变
@@ -387,7 +404,8 @@ export default {
     },
 
     // 展示修改地址的对话框
-    showBox() {
+    showBox(id) {
+      this.getOrder(id);
       this.addressDialogVisible = true;
     },
 
@@ -398,6 +416,27 @@ export default {
 
     // 修改地址
     editAddress() {
+      this.$refs.addressFormRef.validate(async (valid) => {
+        // console.log(valid);
+        if (!valid) return;
+        //可以发起修改订单地址的网络请求
+        // console.log(this.statusForm);
+        const { data: res } = await this.$http.put(
+          `orders/${this.addressForm.id}/address`,
+          null,
+          {
+            params: {
+              address: this.addressForm.address,
+            },
+          }
+        );
+        if (res.meta.status !== 200)
+          return this.$message.error("修改订单地址失败");
+        //重新获取列表
+        this.getOrdersList();
+        //提示修改订单地址成功
+        this.$message.success("修改订单地址成功");
+      });
       this.addressDialogVisible = false;
     },
 
@@ -420,8 +459,8 @@ export default {
     // 展示修改订单状态的对话框
     showStatusBox(id) {
       this.getOrder(id);
-      console.log(this.statusForm);
       this.editStatusDialogVisible = true;
+      console.log(this.statusForm);
     },
 
     // 修改订单状态的对话框关闭
@@ -450,7 +489,6 @@ export default {
             params: {
               isSend: this.statusForm.isSend,
               price: this.statusForm.price,
-              numbers: this.statusForm.number,
             },
           }
         );

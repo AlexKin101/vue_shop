@@ -49,8 +49,14 @@
             <el-form-item label="商品名称" prop="name">
               <el-input v-model="addForm.name"></el-input>
             </el-form-item>
-            <el-form-item label="商品价格" prop="price">
-              <el-input v-model="addForm.price" type="number"></el-input>
+            <el-form-item label="商品描述" prop="describe">
+              <el-input v-model="addForm.describe"></el-input>
+            </el-form-item>
+            <el-form-item label="商品进货价格（元）" prop="inPrice">
+              <el-input v-model="addForm.inPrice" type="number"></el-input>
+            </el-form-item>
+            <el-form-item label="商品售出价格（元）" prop="outPrice">
+              <el-input v-model="addForm.outPrice" type="number"></el-input>
             </el-form-item>
             <el-form-item label="商品重量（kg）" prop="weight">
               <el-input
@@ -59,8 +65,11 @@
                 oninput="value=value.replace(/[^\d.]/g,'')"
               ></el-input>
             </el-form-item>
-            <el-form-item label="商品数量" prop="number">
-              <el-input v-model="addForm.number"></el-input>
+            <el-form-item label="商品最低库存数量" prop="lowStock">
+              <el-input v-model="addForm.lowStock"></el-input>
+            </el-form-item>
+            <el-form-item label="商品库存数量" prop="stock">
+              <el-input v-model="addForm.stock"></el-input>
             </el-form-item>
 
             <el-row :gutter="20">
@@ -73,9 +82,8 @@
                     @change="handleChange"
                     :props="{
                       expandTrigger: 'hover',
-                      value: 'id',
-                      label: 'catName',
-                      children: 'children',
+                      value: 'name',
+                      label: 'name',
                       //checkStrictly: 'false',
                     }"
                     clearable
@@ -92,7 +100,7 @@
                     @change="handleChange"
                     :props="{
                       expandTrigger: 'hover',
-                      value: 'id',
+                      value: 'name',
                       label: 'name',
                       //checkStrictly: 'false',
                     }"
@@ -103,32 +111,20 @@
             </el-row>
           </el-tab-pane>
 
-          <el-tab-pane label="商品参数" name="1">
+          <el-tab-pane label="商品规格" name="1">
             <!-- 渲染表单的Item项 -->
-            <el-form-item
-              :label="item.name"
-              v-for="item in manyTableData"
-              :key="item.id"
-            >
+            <el-form-item label="商品规格">
               <!-- 复选框组 -->
-              <el-checkbox-group v-model="item.values">
+              <el-checkbox-group v-model="checkList">
                 <el-checkbox
-                  :label="cb"
-                  v-for="(cb, i) in item.values"
-                  :key="i"
+                  :label="item.id"
+                  v-for="item in tableData"
+                  :key="item.id"
                   border
-                ></el-checkbox>
+                >
+                  {{ item.name }}
+                </el-checkbox>
               </el-checkbox-group>
-            </el-form-item>
-          </el-tab-pane>
-
-          <el-tab-pane label="基本属性" name="2">
-            <el-form-item
-              :label="item.name"
-              v-for="item in onlyTableData"
-              :key="item.id"
-            >
-              <el-input v-model="item.values"></el-input>
             </el-form-item>
           </el-tab-pane>
 
@@ -159,7 +155,12 @@
             <!-- 富文本编辑器组件 -->
             <quill-editor v-model="addForm.intro"></quill-editor>
             <!-- 添加商品的按钮 -->
-            <el-button type="primary" class="btnAdd" @click="add">
+            <el-button
+              type="primary"
+              class="btnAdd"
+              @click="add"
+              style="margin-top:10px"
+            >
               添加商品
             </el-button>
           </el-tab-pane>
@@ -184,16 +185,21 @@ export default {
       // 添加商品的表单数据对象
       addForm: {
         name: "",
-        price: 0,
+        number: "", //商品编号
+        inPrice: 0,
+        outPrice: 0,
         weight: 0.0,
-        number: 0,
-        goods_cat: [], //  商品所属的分类数组
-        // 图片数组
+        stock: 0,
+        lowStock: 10,
+        isStockout: 0,
+        goods_cat: "",
+        // 图片
         pics: "",
         // 商品详情描述
         intro: "",
         attrs: [],
-        goods_brands: [],
+        goods_brands: "",
+        describe: "",
       },
       addFormRules: {
         name: [
@@ -203,10 +209,17 @@ export default {
             trigger: "blur",
           },
         ],
-        price: [
+        inPrice: [
           {
             required: true,
-            message: "请输入商品价格",
+            message: "请输入商品进货价格",
+            trigger: "blur",
+          },
+        ],
+        outPrice: [
+          {
+            required: true,
+            message: "请输入商品售出价格",
             trigger: "blur",
           },
         ],
@@ -217,11 +230,25 @@ export default {
             trigger: "blur",
           },
         ],
-        number: [
+        stock: [
           {
             required: true,
-            message: "请输入商品数量",
+            message: "请输入商品库存数量",
             trigger: "blur",
+          },
+        ],
+        lowStock: [
+          {
+            required: true,
+            message: "请输入商品最低库存数量",
+            trigger: "blur",
+          },
+        ],
+        describe: [
+          {
+            required: true,
+            message: "请输入商品描述",
+            trigger: "change",
           },
         ],
         goods_cat: [
@@ -245,11 +272,11 @@ export default {
       //   商品品牌列表
       brandsList: [],
 
-      //  动态参数列表数据
-      manyTableData: [],
+      //  规格列表数据
+      tableData: [],
 
-      //  静态属性列表数据
-      onlyTableData: [],
+      checkList: [],
+
       //  上传图片的URL
       uploadURL: "http://localhost:1106/upload",
 
@@ -268,6 +295,7 @@ export default {
   created() {
     this.getCateList();
     this.getBrandsList();
+    this.getDateNow();
   },
   methods: {
     //   获取所有商品分类数据
@@ -286,21 +314,15 @@ export default {
     // 级联选择框选中项变化，会触发这个函数
     handleChange() {
       console.log(this.addForm.goods_cat);
-      if (!this.cateId && this.addForm.goods_cat.length !== 0) {
-        this.addForm.goods_cat = [];
-        this.$message.warning("注意：只允许选择第三级分类");
-      }
+      // this.addForm.goods_cat = [];
     },
 
     beforeTabLeave(activeName, oldActiveName) {
-      //   console.log("即将离开的标签页名字是" + oldActiveName);
-      //   console.log("即将进入的标签页名字是" + activeName);
-      //   return false;
-
-      if (oldActiveName === "0" && this.addForm.goods_cat.length !== 3) {
+      if (oldActiveName === "0" && this.addForm.goods_cat.length === 0) {
         this.$message.error("请先选择商品分类");
         return false;
       }
+      return true;
     },
 
     async getBrandsList() {
@@ -312,22 +334,12 @@ export default {
       this.brandsList = res.data;
     },
 
-    async getParamsList(parmas) {
+    async getParamsList() {
       // console.log(this.addForm);
       const { data: res } = await this.$http.get(
-        `categories/${this.cateId}/attributes`,
-        {
-          params: { sel: parmas },
-        }
+        `categories/${this.addForm.goods_cat}/attributes`
       );
       console.log(res.data);
-      if (res.meta.status != 200) {
-        if (params === "mnay")
-          return this.$message.error("获取动态参数列表失败");
-        else {
-          return this.$message.error("获取静态属性列表失败");
-        }
-      }
       return { data: res };
     },
 
@@ -335,20 +347,10 @@ export default {
       switch (this.activeIndex) {
         // 访问动态参数面板
         case "1": {
-          const { data: res } = await this.getParamsList("many");
-          res.data.forEach((item) => {
-            item.values =
-              item.values.length === 0 ? [] : item.values.split(",");
-          });
-          this.manyTableData = res.data;
+          this.checkList = [];
+          const { data: res } = await this.getParamsList();
+          this.tableData = res.data;
           console.log(res.data);
-          break;
-        }
-
-        case "2": {
-          const { data: res } = await this.getParamsList("only");
-          console.log(res.data);
-          this.onlyTableData = res.data;
           break;
         }
       }
@@ -383,8 +385,38 @@ export default {
       // console.log(this.addForm.pics);
     },
 
+    //根据时间获取商品编号
+    async getDateNow() {
+      let time = new Date(); // 时间戳
+      let year = String(time.getFullYear()); // 年
+      let mouth = String(time.getMonth() + 1); // 月
+      let day = String(time.getDate()); // 日
+      let hours = String(time.getHours()); // 时
+      if (hours.length < 2) {
+        hours = "0" + hours;
+      }
+      let minutes = String(time.getMinutes()); // 分
+      if (minutes.length < 2) {
+        minutes = "0" + minutes;
+      }
+      let seconds = String(time.getSeconds()); // 秒
+      if (seconds.length < 2) {
+        seconds = "0" + seconds;
+      }
+      const { data: res } = await this.$http.get("goods/findCount");
+      if (res.meta.status === 200) {
+        let count = res.data;
+        this.addForm.number =
+          year + mouth + day + hours + minutes + seconds + count;
+      } else {
+        this.$msg.error(res.meta.msg);
+      }
+    },
+
     // 添加商品
     add() {
+      // console.log(this.checkList);
+
       this.$refs.addFormRef.validate(async (valid) => {
         if (!valid) {
           return this.$message.error("请填写必要的表单项");
@@ -395,19 +427,12 @@ export default {
         form.goods_cat = form.goods_cat.join(",");
         form.goods_brands = form.goods_brands.join(",");
 
-        // 处理动态参数
-        this.manyTableData.forEach((item) => {
+        form.isStockout = form.stock > form.lowStock ? 0 : 1;
+
+        // 处理规格
+        this.checkList.forEach((item) => {
           const newInfo = {
-            id: item.id,
-            values: item.values === [] ? "" : item.values.join(","),
-          };
-          this.addForm.attrs.push(newInfo);
-        });
-        // 处理静态属性
-        this.onlyTableData.forEach((item) => {
-          const newInfo = {
-            id: item.id,
-            values: item.values === [] ? "" : item.values,
+            id: item,
           };
           this.addForm.attrs.push(newInfo);
         });
@@ -428,14 +453,7 @@ export default {
     },
   },
 
-  computed: {
-    cateId() {
-      if (this.addForm.goods_cat.length === 3) {
-        return this.addForm.goods_cat[2];
-      }
-      return null;
-    },
-  },
+  computed: {},
 };
 </script>
 

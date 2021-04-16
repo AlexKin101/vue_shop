@@ -52,19 +52,36 @@ Vue.component("tree-table", TreeTable);
 // 将富文本编辑器注册为全局可用的组件
 Vue.use(VueQuillEditor /* { default global options } */);
 
-Vue.filter("dataFormat", function(originVal) {
-  const dt = new Date(originVal * 1000);
+Vue.filter(
+  "dataFormat",
+  function(originVal) {
+    let date = new Date(originVal); //这个是纳秒的，想要毫秒的可以不用除以1000000
+    let y = date.getFullYear();
+    let MM = date.getMonth() + 1;
+    MM = MM < 10 ? "0" + MM : MM;
+    let d = date.getDate();
+    d = d < 10 ? "0" + d : d;
+    let h = date.getHours();
+    h = h < 10 ? "0" + h : h;
+    let m = date.getMinutes();
+    m = m < 10 ? "0" + m : m;
+    let s = date.getSeconds();
+    s = s < 10 ? "0" + s : s;
+    return y + "-" + MM + "-" + d + " " + h + ":" + m + ":" + s;
+  }
 
-  const y = dt.getFullYear();
-  const m = (dt.getMonth() + 1 + "").padStart(2, "0");
-  //padStart（） 第一位参数：数据应有的位数；第二位参数：数据若不足时，所使用的填充符号
-  const d = (dt.getDate() + "").padStart(2, "0");
-  const hh = (dt.getHours() + "").padStart(2, "0");
-  const mm = (dt.getMinutes() + "").padStart(2, "0");
-  const ss = (dt.getSeconds() + "").padStart(2, "0");
+  // const dt = new Date(originVal * 1000);
 
-  return `${y}-${m}-${d} ${hh}:${mm}:${ss}`;
-});
+  // const y = dt.getFullYear();
+  // const m = (dt.getMonth() + 1 + "").padStart(2, "0");
+  // //padStart（） 第一位参数：数据应有的位数；第二位参数：数据若不足时，所使用的填充符号
+  // const d = (dt.getDate() + "").padStart(2, "0");
+  // const hh = (dt.getHours() + "").padStart(2, "0");
+  // const mm = (dt.getMinutes() + "").padStart(2, "0");
+  // const ss = (dt.getSeconds() + "").padStart(2, "0");
+
+  // return `${y}-${m}-${d} ${hh}:${mm}:${ss}`;
+);
 
 new Vue({
   router,
