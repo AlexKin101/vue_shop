@@ -47,7 +47,7 @@
         <el-table-column
           label="轮播图编号"
           prop="id"
-          width="70px"
+          width="90px"
           align="center"
         ></el-table-column>
         <el-table-column label="商品名称" prop="name"></el-table-column>

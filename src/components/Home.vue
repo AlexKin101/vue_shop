@@ -6,7 +6,7 @@
     <el-header>
       <div id="app">
         <img src="../assets/vue.png" alt="" />
-        <span>电商后台管理系统</span>
+        <span>社区商城商家服务平台</span>
       </div>
       <el-button type="info" @click="logout">退出</el-button>
     </el-header>

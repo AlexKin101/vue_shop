@@ -359,7 +359,7 @@ export default {
         {
           icon: "icon-showpassword",
           title: "总访问量",
-          data: null,
+          data: "123456",
           color: "#40C9C6",
         },
         {

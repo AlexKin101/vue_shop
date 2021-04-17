@@ -49,7 +49,7 @@
         ></el-table-column>
         <el-table-column
           label="用户账号"
-          prop="user.username"
+          prop="customer.username"
           align="center"
           width="100px"
         ></el-table-column>

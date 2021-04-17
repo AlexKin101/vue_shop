@@ -32,7 +32,7 @@
             >
               <!-- 渲染一级权限 -->
               <el-col :span="5">
-                <el-tag closable @close="removeRightById(scope.row, item1.id)">
+                <el-tag>
                   {{ item1.name }}
                 </el-tag>
                 <i class="el-icon-caret-right"></i>
@@ -46,11 +46,7 @@
                   :key="item2.id"
                 >
                   <el-col :span="6">
-                    <el-tag
-                      type="success"
-                      closable
-                      @close="removeRightById(scope.row, item2.id)"
-                    >
+                    <el-tag type="success">
                       {{ item2.name }}
                     </el-tag>
                     <i class="el-icon-caret-right"></i>
@@ -60,8 +56,6 @@
                       v-for="(item3, i3) in item2.children"
                       :key="item3.id"
                       type="warning"
-                      closable
-                      @close="removeRightById(scope.row, item3.id)"
                     >
                       {{ item3.name }}
                     </el-tag>
@@ -207,7 +201,6 @@
         :props="treeProps"
         show-checkbox
         node-key="id"
-        default-expand-all
         :default-checked-keys="defKeys"
         ref="treeRef"
       ></el-tree>

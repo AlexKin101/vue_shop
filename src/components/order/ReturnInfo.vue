@@ -115,10 +115,9 @@
             </el-form-item>
             <el-form-item label="确认退款金额:" label-width="100px">
               <el-input
-                oninput="value=value.replace(/[^\d.]/g,'')"
-                placeholder="请输入退款金额"
+                :placeholder="serviceForm.price"
                 v-model="serviceForm.returnPrice"
-                :disabled="this.judgeDisable(this.serviceForm.state)"
+                :disabled="judgeDisable(this.serviceForm.state)"
                 clearable
               ></el-input>
             </el-form-item>
@@ -203,10 +202,10 @@ export default {
       this.serviceForm = res.data[0];
       this.serviceForm.number = res.data[0].orders.number;
       this.serviceForm.addTime = res.data[0].orders.addTime;
-      this.serviceForm.tel = res.data[0].user.tel;
+      this.serviceForm.tel = res.data[0].customer.tel;
       this.serviceForm.price = res.data[0].price;
       this.serviceForm.amount = res.data[0].orders.amount;
-      this.serviceForm.returnPrice = res.data[0].price;
+      // this.serviceForm.returnPrice = res.data[0].price;
       // console.log(this.serviceForm);
     },
 

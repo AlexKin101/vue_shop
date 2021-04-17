@@ -53,6 +53,11 @@
           width="90px"
           align="center"
         ></el-table-column>
+        <el-table-column label="用户名称" width="90px" align="center">
+          <template slot-scope="scope">
+            {{ scope.row.userName }}
+          </template>
+        </el-table-column>
         <el-table-column
           label="商品状态"
           prop="state"

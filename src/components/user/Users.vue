@@ -274,6 +274,7 @@ export default {
       roleName: "",
       //   添加用户的表单数据
       addForm: {
+        account: "",
         username: "",
         password: "",
         email: "",
@@ -392,6 +393,8 @@ export default {
     addUser() {
       this.$refs.addFormRef.validate(async (valid) => {
         if (!valid) return;
+
+        this.addForm.account = this.addForm.email;
         // 可以发起添加用户的网络请求
         const { data: res } = await this.$http.post("users", this.addForm);
 
