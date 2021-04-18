@@ -15,6 +15,7 @@ import Add from "../components/goods/Add";
 import Edit from "../components/goods/Edit";
 import Order from "../components/order/Order";
 import Return from "../components/order/Return";
+import ReturnReason from "../components/order/ReturnReason";
 import ReturnInfo from "../components/order/ReturnInfo";
 import Report from "../components/report/Report";
 import Brand from "../components/goods/Brand";
@@ -48,6 +49,7 @@ const router = new Router({
         { path: "/returns/returninfo", component: ReturnInfo },
         { path: "/activities", component: Activity },
         { path: "/carousel", component: Carousel },
+        { path: "/reason", component: ReturnReason },
       ],
     },
   ],

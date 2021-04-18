@@ -136,7 +136,10 @@ export default {
       // 4、准备数据和配置项
       var options = {
         title: {
-          text: this.selectYear + "年的月销售额(元)",
+          text: this.selectYear + "年的月销售额一览",
+          textStyle: {
+            fontSize: "28",
+          },
         },
         tooltip: {
           trigger: "axis",
@@ -154,11 +157,20 @@ export default {
         },
         grid: {
           top: "20%",
-          left: "5%",
-          right: "5%",
-          bottom: "5%",
+          left: "0%",
+          right: "2%",
+          bottom: "0%",
           // 把x轴和y轴纳入 grid
           containLabel: true,
+        },
+        // 工具提示
+        tooltip: {
+          // 当鼠标移入坐标轴的显示提示
+          trigger: "axis",
+          // 鼠标放上去十字交叉指示器
+          axisPointer: {
+            type: "cross",
+          },
         },
         xAxis: [
           {

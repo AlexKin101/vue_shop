@@ -42,9 +42,13 @@
       <!-- 参数表格 -->
       <el-table :data="tableData" border stripe>
         <!-- 索引列 -->
-        <el-table-column type="index" label="#"></el-table-column>
+        <el-table-column
+          type="index"
+          label="#"
+          align="center"
+        ></el-table-column>
         <el-table-column label="规格名称" prop="name"></el-table-column>
-        <el-table-column label="操作" width="280px">
+        <el-table-column label="操作" width="280px" align="center">
           <template slot-scope="scope">
             <el-button
               type="primary"

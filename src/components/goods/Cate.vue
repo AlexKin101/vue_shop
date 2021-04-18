@@ -20,7 +20,46 @@
       </el-row>
 
       <!-- 表格 -->
-      <tree-table
+      <el-table :data="cateList" border script>
+        <el-table-column
+          label="#"
+          type="index"
+          align="center"
+        ></el-table-column>
+        <el-table-column
+          label="分类名称"
+          prop="name"
+          align="center"
+        ></el-table-column>
+        <el-table-column
+          label="分类描述"
+          prop="describe"
+          align="center"
+        ></el-table-column>
+        <el-table-column label="操作" width="300px" align="center">
+          <!-- 操作 -->
+          <template slot-scope="scope">
+            <el-button
+              type="primary"
+              icon="el-icon-edit"
+              size="mini"
+              @click="showEditDialog(scope.row.id)"
+            >
+              编辑
+            </el-button>
+            <el-button
+              type="danger"
+              icon="el-icon-delete"
+              size="mini"
+              @click="removeCateById(scope.row.id)"
+            >
+              删除
+            </el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <!-- <tree-table
         class="treeTable"
         :data="cateList"
         :columns="columns"
@@ -29,9 +68,9 @@
         border
         :show-row-hover="false"
         :selection-type="false"
-        :expand-type="false"
-      >
-        <!-- 是否有效 -->
+        :expand-type="false" -->
+
+      <!-- 是否有效
         <template v-slot:isOk="scope">
           <i
             class="el-icon-success"
@@ -39,8 +78,8 @@
             style="color:green"
           ></i>
           <i class="el-icon-error" v-else style="color:red"></i>
-        </template>
-        <!-- 排序
+        </template> -->
+      <!-- 排序
         <template v-slot:order="scope">
           <el-tag v-if="scope.row.level === 0" size="mini">一级</el-tag>
           <el-tag v-else-if="scope.row.level === 1" type="success" size="mini">
@@ -48,26 +87,7 @@
           </el-tag>
           <el-tag v-else type="warning" size="mini">三级</el-tag>
         </template> -->
-        <!-- 操作 -->
-        <template v-slot:opt="scope">
-          <el-button
-            type="primary"
-            icon="el-icon-edit"
-            size="mini"
-            @click="showEditDialog(scope.row.id)"
-          >
-            编辑
-          </el-button>
-          <el-button
-            type="danger"
-            icon="el-icon-delete"
-            size="mini"
-            @click="removeCateById(scope.row.id)"
-          >
-            删除
-          </el-button>
-        </template>
-      </tree-table>
+
       <!-- 分页区域 -->
       <el-pagination
         @size-change="handleSizeChange"
@@ -155,37 +175,21 @@ export default {
       //   总数据条数
       total: 0,
       //   为table指定列的定义
-      columns: [
-        {
-          label: "分类名称",
-          prop: "name",
-        },
-        {
-          label: "分类描述",
-          prop: "describe",
-        },
-        // {
-        //   label: "是否有效",
-        //   // 表示将当前列定义为模版列
-        //   type: "template",
-        //   // 表示当前这一列使用的模版名称
-        //   template: "isOk",
-        // },
-        // {
-        //   label: "排序",
-        //   // 表示将当前列定义为模版列
-        //   type: "template",
-        //   // 表示当前这一列使用的模版名称
-        //   template: "order",
-        // },
-        {
-          label: "操作",
-          // 表示将当前列定义为模版列
-          type: "template",
-          // 表示当前这一列使用的模版名称
-          template: "opt",
-        },
-      ],
+      // {
+      //   label: "是否有效",
+      //   // 表示将当前列定义为模版列
+      //   type: "template",
+      //   // 表示当前这一列使用的模版名称
+      //   template: "isOk",
+      // },
+      // {
+      //   label: "排序",
+      //   // 表示将当前列定义为模版列
+      //   type: "template",
+      //   // 表示当前这一列使用的模版名称
+      //   template: "order",
+      // },
+
       //   控制添加分类对话框的显示与隐藏
       addCateDialogVisible: false,
       // 添加分类的表单数据对象

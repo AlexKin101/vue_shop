@@ -337,7 +337,7 @@ export default {
     async getParamsList() {
       // console.log(this.addForm);
       const { data: res } = await this.$http.get(
-        `categories/${this.addForm.goods_cat}/attributes`
+        `categories/${this.goods_cat}/attributes`
       );
       console.log(res.data);
       return { data: res };
