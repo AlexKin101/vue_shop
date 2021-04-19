@@ -84,6 +84,13 @@
         </el-table-column>
 
         <el-table-column
+          label="操作员名称"
+          prop="opName"
+          width="150px"
+          align="center"
+        ></el-table-column>
+
+        <el-table-column
           label="处理时间"
           prop="handleTime"
           width="150px"

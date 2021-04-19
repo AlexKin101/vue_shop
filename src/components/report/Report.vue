@@ -24,26 +24,23 @@
         ></el-option>
       </el-select>
       <div style="align:center">
-        <el-table :data="monthData" border>
-          <el-table-column
-            label="年份"
-            prop="year"
-            align="center"
-          ></el-table-column>
-          <el-table-column
-            label="月份"
-            prop="month"
-            align="center"
-          ></el-table-column>
+        <el-table :data="monthData" border show-summary>
+          <el-table-column label="时间" align="center">
+            <template slot-scope="scope">
+              {{ scope.row.year + "年 " + scope.row.month + "月" }}
+            </template>
+          </el-table-column>
           <el-table-column
             label="月营销额（元）"
             prop="price"
             align="center"
+            sortable
           ></el-table-column>
           <el-table-column
             label="月销量"
             prop="number"
             align="center"
+            sortable
           ></el-table-column>
         </el-table>
       </div>

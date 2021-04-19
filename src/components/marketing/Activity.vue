@@ -56,12 +56,14 @@
           prop="type.name"
           width="95px"
           align="center"
+          sortable
         ></el-table-column>
         <el-table-column
           label="商品价格（元）"
           prop="outPrice"
           width="95px"
           align="center"
+          sortable
         ></el-table-column>
 
         <el-table-column label="状态" align="center" width="100px" prop="state">
@@ -154,6 +156,7 @@
           label="商品编号"
           width="130px"
           prop="number"
+          sortable
         ></el-table-column>
         <el-table-column
           prop="name"
@@ -165,18 +168,21 @@
           prop="type.name"
           width="95px"
           align="center"
+          sortable
         ></el-table-column>
         <el-table-column
           label="商品价格（元）"
           prop="outPrice"
           width="95px"
           align="center"
+          sortable
         ></el-table-column>
         <el-table-column
           label="商品库存"
           prop="stock"
           width="70px"
           align="center"
+          sortable
         ></el-table-column>
 
         <el-table-column
@@ -184,6 +190,7 @@
           prop="addTime"
           width="140px"
           align="center"
+          sortable
         >
           <template slot-scope="scope">
             {{ scope.row.addTime | dataFormat }}

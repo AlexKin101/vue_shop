@@ -173,6 +173,8 @@ export default {
         intro: "", //问题描述
         number: "",
         amount: 0,
+        opName: "",
+        opNumber: "",
 
         price: 0.0, // 订单金额
         comment: "", // 处理备注
@@ -223,6 +225,9 @@ export default {
       if (confirmResult !== "confirm") {
         return this.$message.info("已取消");
       }
+
+      this.serviceForm.opName = window.sessionStorage.getItem("name");
+      this.serviceForm.opNumber = window.sessionStorage.getItem("account");
 
       this.serviceForm.state = "退款完成";
 

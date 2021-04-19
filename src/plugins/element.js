@@ -41,6 +41,10 @@ import {
   Upload,
   Timeline,
   TimelineItem,
+  Dropdown,
+  DropdownItem,
+  DropdownMenu,
+  Avatar,
 } from "element-ui";
 // 导入弹框提示组建
 
@@ -81,6 +85,10 @@ Vue.use(Button)
   .use(CheckboxGroup)
   .use(Upload)
   .use(Timeline)
-  .use(TimelineItem);
+  .use(TimelineItem)
+  .use(Dropdown)
+  .use(DropdownItem)
+  .use(DropdownMenu)
+  .use(Avatar);
 Vue.prototype.$message = Message;
 Vue.prototype.$confirm = MessageBox.confirm;

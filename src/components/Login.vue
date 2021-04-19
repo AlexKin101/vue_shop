@@ -83,6 +83,9 @@ export default {
         //1.1 项目中除了登录之外的其他API接口,必须在登录之后才能访问
         //1.2 token只应在当前网站打开期间生效,所以将token保存着sessionStorage中
         window.sessionStorage.setItem("token", res.data.token);
+        window.sessionStorage.setItem("name", res.data.username);
+        window.sessionStorage.setItem("account", res.data.account);
+
         //2. 通过编程式导航跳转到后台主页,路由地址是 /home
         this.$router.push("/home");
       }); //对整个表单进行校验的方法，参数为一个回调函数。

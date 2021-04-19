@@ -110,7 +110,7 @@
         @size-change="handleCarouselSizeChange"
         @current-change="handleCarouselCurrentChange"
         :current-page="carouselQueryInfo.pagenum"
-        :page-sizes="[10, 20, 30, 50]"
+        :page-sizes="[10, 20, 30, this.carouselTotal]"
         :page-size="carouselQueryInfo.pagesize"
         layout="total, sizes, prev, pager, next, jumper"
         :total="carouselTotal"
@@ -194,24 +194,28 @@
                 prop="type.name"
                 width="95px"
                 align="center"
+                sortable
               ></el-table-column>
               <el-table-column
                 label="商品价格（元）"
                 prop="outPrice"
                 width="95px"
                 align="center"
+                sortable
               ></el-table-column>
               <el-table-column
                 label="商品数量"
                 prop="stock"
                 width="70px"
                 align="center"
+                sortable
               ></el-table-column>
               <el-table-column
                 label="创建时间"
                 prop="addTime"
                 width="140px"
                 align="center"
+                sortable
               >
                 <template slot-scope="scope">
                   {{ scope.row.addTime | dataFormat }}

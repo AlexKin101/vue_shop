@@ -29,7 +29,41 @@
       </el-row>
 
       <!-- 订单列表区域 -->
-      <el-table :data="ordersList" border script>
+      <el-table :data="ordersList" border script style="width: 100%">
+        <!-- 展开项 -->
+        <el-table-column type="expand">
+          <template slot-scope="scope">
+            <el-form label-position="left" inline class="demo-table-expand">
+              <el-form-item label="商品名称：">
+                {{ scope.row.products.name }}
+              </el-form-item>
+              <el-form-item label="商品数量：">
+                <span>{{ scope.row.amount }}</span>
+              </el-form-item>
+              <el-form-item label="商品分类：">
+                <span>{{ scope.row.products.type.name }}</span>
+              </el-form-item>
+              <el-form-item label="商品规格：">
+                <span>{{ scope.row.specs }}</span>
+              </el-form-item>
+              <el-form-item label="商品售价：">
+                <span>{{ scope.row.products.outPrice + " 元" }}</span>
+              </el-form-item>
+              <el-form-item label="当前商品库存：">
+                <span>{{ scope.row.products.stock }}</span>
+              </el-form-item>
+              <el-form-item label="收货人名称：">
+                <span>{{ scope.row.userName }}</span>
+              </el-form-item>
+              <el-form-item label="收货人地址：">
+                <span>{{ scope.row.address }}</span>
+              </el-form-item>
+              <el-form-item label="收货人联系方式：">
+                <span>{{ scope.row.contactWay }}</span>
+              </el-form-item>
+            </el-form>
+          </template>
+        </el-table-column>
         <!-- 索引列 -->
         <el-table-column
           label="#"
@@ -41,6 +75,7 @@
           prop="number"
           width="150px"
           align="center"
+          sortable
         ></el-table-column>
         <el-table-column label="商品名称">
           <template slot-scope="scope">
@@ -52,8 +87,9 @@
           prop="price"
           width="90px"
           align="center"
+          sortable
         ></el-table-column>
-        <el-table-column label="用户名称" width="90px" align="center">
+        <el-table-column label="用户名称" width="90px" align="center" sortable>
           <template slot-scope="scope">
             {{ scope.row.userName }}
           </template>
@@ -63,6 +99,7 @@
           prop="state"
           width="100px"
           align="center"
+          sortable
         >
           <template slot-scope="scope">
             <el-tag type="success">{{ scope.row.state }}</el-tag>
@@ -74,6 +111,7 @@
           prop="payType"
           width="100px"
           align="center"
+          sortable
         >
           <template slot-scope="scope">
             <el-tag type="Brand Color" v-if="scope.row.payType === '支付宝'">
@@ -90,6 +128,7 @@
           prop="isSend"
           width="90px"
           align="center"
+          sortable
         >
           <template slot-scope="scope">
             <el-tag type="Brand Color" v-if="scope.row.isSend === 0">
@@ -105,12 +144,14 @@
           prop="from"
           width="90px"
           align="center"
+          sortable
         ></el-table-column>
         <el-table-column
           label="下单时间"
           prop="createTime"
           width="150px"
           align="center"
+          sortable
         >
           <template slot-scope="scope">
             {{ scope.row.addTime | dataFormat }}
@@ -175,7 +216,7 @@
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
         :current-page="queryInfo.pagenum"
-        :page-sizes="[5, 10, 30, 50]"
+        :page-sizes="[5, 10, 30, this.total]"
         :page-size="queryInfo.pagesize"
         layout="total, sizes, prev, pager, next, jumper"
         :total="total"
@@ -529,5 +570,17 @@ export default {
 }
 .el-cascader-menu {
   height: 300px;
+}
+.demo-table-expand {
+  font-size: 0;
+}
+.demo-table-expand label {
+  width: 90px;
+  color: #99a9bf;
+}
+.demo-table-expand .el-form-item {
+  margin-right: 0;
+  margin-bottom: 0;
+  width: 50%;
 }
 </style>

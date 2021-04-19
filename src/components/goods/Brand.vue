@@ -158,30 +158,6 @@
 <script>
 export default {
   data() {
-    // 验证邮箱的规则
-    var checkEmail = (rule, value, callback) => {
-      const regEmail = /\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*/;
-
-      if (regEmail.test(value)) {
-        // 合法的邮箱
-        return callback();
-      }
-
-      callback(new Error("请输入合法的邮箱"));
-    };
-
-    // 验证手机号的规则
-    var checkMobile = (rule, value, callback) => {
-      const regMobile = /^(0|86|17951)?(13[0-9]|15[012356789]|166|17[3678]|18[0-9]|14[57])[0-9]{8}$/;
-
-      if (regMobile.test(value)) {
-        // 合法的手机号
-        return callback();
-      }
-
-      callback(new Error("请输入合法的手机号"));
-    };
-
     return {
       //获取用户列表的参数
       queryInfo: {

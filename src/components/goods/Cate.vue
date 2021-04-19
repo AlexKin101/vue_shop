@@ -26,16 +26,8 @@
           type="index"
           align="center"
         ></el-table-column>
-        <el-table-column
-          label="分类名称"
-          prop="name"
-          align="center"
-        ></el-table-column>
-        <el-table-column
-          label="分类描述"
-          prop="describe"
-          align="center"
-        ></el-table-column>
+        <el-table-column label="分类名称" prop="name"></el-table-column>
+        <el-table-column label="分类描述" prop="describe"></el-table-column>
         <el-table-column label="操作" width="300px" align="center">
           <!-- 操作 -->
           <template slot-scope="scope">

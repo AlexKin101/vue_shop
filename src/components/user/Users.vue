@@ -55,6 +55,7 @@
             <el-switch
               v-model="scope.row.mg_state"
               @change="userStateChanged(scope.row)"
+              :disabled="scope.row.id === 1 ? true : false"
             ></el-switch>
           </template>
         </el-table-column>
@@ -73,6 +74,7 @@
                 icon="el-icon-edit"
                 size="small"
                 @click="showEditDialog(scope.row.id)"
+                :disabled="scope.row.id === 1 ? true : false"
               ></el-button>
             </el-tooltip>
 
@@ -89,6 +91,7 @@
                 icon="el-icon-delete"
                 size="small"
                 @click="removeUserById(scope.row.id)"
+                :disabled="scope.row.id === 1 ? true : false"
               ></el-button>
             </el-tooltip>
 
@@ -105,6 +108,7 @@
                 icon="el-icon-setting"
                 size="small"
                 @click="setRole(scope.row, scope.row.role.name)"
+                :disabled="scope.row.id === 1 ? true : false"
               ></el-button>
             </el-tooltip>
           </template>
@@ -374,6 +378,7 @@ export default {
 
     //监听switch开关状态的改变
     async userStateChanged(userInfo) {
+      if (userInfo.id === 1) return;
       const { data: res } = await this.$http.put(
         `users/${userInfo.id}/state/${userInfo.mg_state}`
       );
@@ -449,6 +454,7 @@ export default {
 
     // 根据Id删除对应的用户信息
     async removeUserById(id) {
+      if (id === 1) return;
       //弹窗询问用户是否删除数据
       const confirmResult = await this.$confirm(
         "此操作将永久删除该用户, 是否继续?",

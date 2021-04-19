@@ -14,9 +14,9 @@
       <!-- 添加角色按钮区域 -->
       <el-row>
         <el-col>
-          <el-button type="primary" @click="addDialogVisible = true">
+          <!-- <el-button type="primary" @click="addDialogVisible = true">
             添加角色
-          </el-button>
+          </el-button> -->
         </el-col>
       </el-row>
 
@@ -85,6 +85,7 @@
                 icon="el-icon-edit"
                 size="mini"
                 @click="showEditDialog(scope.row.id)"
+                :disabled="scope.row.id === 1 ? true : false"
               >
                 编辑
               </el-button>
@@ -103,6 +104,7 @@
                 icon="el-icon-delete"
                 size="mini"
                 @click="removeRoleById(scope.row.id)"
+                :disabled="scope.row.id === 1 ? true : false"
               >
                 删除
               </el-button>
@@ -121,6 +123,7 @@
                 icon="el-icon-setting"
                 size="mini"
                 @click="showSetRightDialog(scope.row)"
+                :disabled="scope.row.id === 1 ? true : false"
               >
                 分配权限
               </el-button>

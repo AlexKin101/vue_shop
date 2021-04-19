@@ -8,7 +8,30 @@
         <img src="../assets/vue.png" alt="" />
         <span>社区商城商家服务平台</span>
       </div>
-      <el-button type="info" @click="logout">退出</el-button>
+      <el-dropdown>
+        <div class="block">
+          <el-avatar
+            :size="50"
+            :src="require('../assets/商家默认头像.jpeg')"
+            style="cursor: pointer;"
+            @error="errorHandler"
+          ></el-avatar>
+        </div>
+        <el-dropdown-menu slot="dropdown" trigger="click">
+          <el-dropdown-item>
+            <span type="danger" @click="gotoWelcome()">
+              <span class="el-icon-house"></span>
+              &nbsp;系统首页
+            </span>
+          </el-dropdown-item>
+          <el-dropdown-item>
+            <span type="danger" @click="logout">
+              <span class="el-icon-switch-button"></span>
+              &nbsp;退出登入
+            </span>
+          </el-dropdown-item>
+        </el-dropdown-menu>
+      </el-dropdown>
     </el-header>
     <!-- 页面主体区 -->
     <el-container>
@@ -125,6 +148,15 @@ export default {
     saveNavState(activePath) {
       window.sessionStorage.setItem("activePath", activePath);
       this.activePath = activePath;
+    },
+
+    //回到首页
+    gotoWelcome() {
+      this.$router.push("/welcome");
+    },
+
+    errorHandler() {
+      return true;
     },
   },
 };

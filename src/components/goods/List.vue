@@ -25,13 +25,16 @@
             <el-button
               slot="append"
               icon="el-icon-search"
-              @click="getGoodsList"
+              @click="getStockOutGoodsList"
             ></el-button>
           </el-input>
         </el-col>
         <el-col :span="4">
           <el-button type="primary" @click="goAddPage">
             添加商品
+          </el-button>
+          <el-button type="primary" @click="showDialog">
+            查看缺货产品
           </el-button>
         </el-col>
       </el-row>
@@ -56,36 +59,42 @@
           prop="type.name"
           width="95px"
           align="center"
+          sortable
         ></el-table-column>
         <el-table-column
           label="商品品牌"
           prop="brands.name"
           width="95px"
           align="center"
+          sortable
         ></el-table-column>
         <el-table-column
-          label="商品进货价格（元）"
+          label="进货价格（元）"
           prop="inPrice"
           width="95px"
           align="center"
+          sortable
         ></el-table-column>
         <el-table-column
-          label="商品售出价格（元）"
+          label="售出价格（元）"
           prop="outPrice"
           width="95px"
           align="center"
+          sortable
         ></el-table-column>
         <el-table-column
           label="商品重量（kg）"
           prop="weight"
-          width="70px"
+          width="85px"
           align="center"
+          sortable
         ></el-table-column>
         <el-table-column
           label="商品库存数量"
           prop="stock"
           width="70px"
           align="center"
+          sortable
         ></el-table-column>
         <el-table-column label="商品库存状态" width="80px" align="center">
           <template slot-scope="scope">
@@ -102,6 +111,7 @@
           prop="addTime"
           width="160px"
           align="center"
+          sortable
         >
           <template slot-scope="scope">
             {{ scope.row.addTime | dataFormat }}
@@ -160,17 +170,167 @@
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
         :current-page="queryInfo.pagenum"
-        :page-sizes="[10, 20, 30, 50]"
         :page-size="queryInfo.pagesize"
-        layout="total, sizes, prev, pager, next, jumper"
+        :page-sizes="[10, 20, 30, this.total]"
+        layout="total,sizes, prev, pager, next, jumper"
         :total="total"
         background
       ></el-pagination>
     </el-card>
+
+    <el-dialog
+      title="缺货商品"
+      :visible.sync="showStockoutDialogVisible"
+      width="75%"
+      :close="showStockoutDialogClosed"
+    >
+      <!-- 内容主体区域 -->
+      <el-table
+        ref="singleTable"
+        :data="stockoutGoodsList"
+        style="width: 100%"
+        highlight-current-row
+        center
+      >
+        <el-table-column
+          label="#"
+          type="index"
+          align="center"
+        ></el-table-column>
+        <el-table-column
+          label="商品编号"
+          width="130px"
+          prop="number"
+          align="center"
+        ></el-table-column>
+        <el-table-column
+          prop="name"
+          label="商品名称"
+          :show-overflow-tooltip="true"
+        ></el-table-column>
+        <el-table-column
+          label="商品分类"
+          prop="type.name"
+          width="95px"
+          align="center"
+          sortable
+        ></el-table-column>
+        <el-table-column
+          label="商品价格（元）"
+          prop="outPrice"
+          width="95px"
+          align="center"
+          sortable
+        ></el-table-column>
+        <el-table-column
+          label="当前商品库存"
+          prop="stock"
+          width="70px"
+          align="center"
+          sortable
+        ></el-table-column>
+        <el-table-column
+          label="商品最低库存"
+          prop="lowStock"
+          width="70px"
+          align="center"
+          sortable
+        ></el-table-column>
+        <el-table-column label="商品库存状态" width="80px" align="center">
+          <template slot-scope="scope">
+            <el-tag type="warning" v-if="scope.row.isStockout === 0">
+              充足
+            </el-tag>
+            <el-tag v-else>
+              缺货
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column
+          label="创建时间"
+          prop="addTime"
+          width="140px"
+          align="center"
+          sortable
+        >
+          <template slot-scope="scope">
+            {{ scope.row.addTime | dataFormat }}
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="130px" align="center">
+          <template slot-scope="scope">
+            <!-- 编辑按钮 -->
+            <el-tooltip
+              class="item"
+              effect="dark"
+              content="补货"
+              placement="top"
+              :enterable="false"
+            >
+              <el-button
+                type="primary"
+                icon="el-icon-edit"
+                size="mini"
+                @click="
+                  showEditStockDialog(
+                    scope.row.id,
+                    scope.row.stock,
+                    scope.row.lowStock
+                  )
+                "
+              ></el-button>
+            </el-tooltip>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <!-- 分页区域 -->
+      <el-pagination
+        @current-change="handleStockoutCurrentChange"
+        :current-page="stockoutQueryInfo.pagenum"
+        layout="total, prev, pager, next, jumper"
+        :total="stockoutTotal"
+        background
+      ></el-pagination>
+    </el-dialog>
+
+    <!-- 修改库存的对话框 -->
+    <el-dialog
+      title="补充商品库存"
+      :visible.sync="editStockDialogVisible"
+      width="50%"
+      @close="editStockDialogClosed"
+    >
+      <!-- 内容主体区域 -->
+      <el-form
+        :model="stockForm"
+        :rules="stockFormRules"
+        ref="stockFormRef"
+        label-width="140px"
+      >
+        <el-form-item label="当前库存数量：" prop="stock">
+          {{ this.addStock(this.stockForm.stock, this.stockForm.supplyStock) }}
+        </el-form-item>
+        <el-form-item label="当前最低库存数量：" prop="lowStock">
+          {{ this.stockForm.lowStock }}
+        </el-form-item>
+        <el-form-item label="补充库存数量：" prop="supplyStock">
+          <el-input v-model="stockForm.supplyStock" type="number"></el-input>
+        </el-form-item>
+      </el-form>
+      <!-- 底部区域 -->
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="editStockDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="supply">
+          确 定
+        </el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
 <script>
+import { number } from "_echarts@5.0.2@echarts";
 export default {
   data() {
     return {
@@ -184,10 +344,40 @@ export default {
       },
       //   总数据条数
       total: 0,
+
+      // 缺货商品的数据列表，默认为空
+      stockoutGoodsList: [],
+      // 查询条件
+      stockoutQueryInfo: {
+        query: "",
+        pagenum: 1,
+        pagesize: 5,
+      },
+      //   总数据条数
+      stockoutTotal: 0,
+
+      showStockoutDialogVisible: false,
+
+      editStockDialogVisible: false,
+
+      stockForm: {
+        id: 0,
+        lowStock: 0,
+        stock: 0,
+        supplyStock: 0,
+      },
+
+      // 添加表单的验证规则对象
+      stockFormRules: {
+        supplyStock: [
+          { required: true, message: "请输入补充的库存数量", trigger: "blur" },
+        ],
+      },
     };
   },
   created() {
     this.getGoodsList();
+    this.getStockOutGoodsList();
   },
   methods: {
     async getGoodsList() {
@@ -207,6 +397,24 @@ export default {
       this.goodsList = res.data.content;
     },
 
+    async getStockOutGoodsList() {
+      const { data: res } = await this.$http.get("goods/stockout", {
+        params: this.stockoutQueryInfo,
+      });
+      console.log(res);
+      if (res.meta.status !== 200)
+        return this.$message.error("获取商品列表失败");
+
+      console.log(res.data);
+      // this.total = res.data.total;
+      // this.goodsList = res.data.goods;
+      this.stockoutQueryInfo.pagenum = res.data.pageable.pageNumber + 1;
+      this.stockoutQueryInfo.pagesize = res.data.size;
+      //   为总数据条数赋值
+      this.stockoutTotal = res.data.totalElements;
+      this.stockoutGoodsList = res.data.content;
+    },
+
     // 监听pagesize改变
     handleSizeChange(newSize) {
       this.queryInfo.pagesize = newSize;
@@ -215,6 +423,23 @@ export default {
     // 监听pagenum的改变
     handleCurrentChange(newPage) {
       this.queryInfo.pagenum = newPage;
+      this.getGoodsList();
+    },
+
+    // 监听pagenum的改变
+    handleStockoutCurrentChange(newPage) {
+      this.stockoutQueryInfo.pagenum = newPage;
+      this.getStockOutGoodsList();
+    },
+
+    //打开展示缺货商品的对话框
+    showDialog() {
+      this.getStockOutGoodsList();
+      this.showStockoutDialogVisible = true;
+    },
+
+    showStockoutDialogClosed() {
+      this.getStockOutGoodsList();
       this.getGoodsList();
     },
 
@@ -254,6 +479,54 @@ export default {
       this.getGoodsList();
     },
 
+    showEditStockDialog(id, stock, lowStock) {
+      this.editStockDialogVisible = true;
+
+      this.stockForm.id = id;
+      this.stockForm.lowStock = lowStock;
+      this.stockForm.stock = stock;
+      this.showStockoutDialogVisible = false;
+    },
+
+    //监听修改品牌对话框的关闭事件
+    editStockDialogClosed() {
+      this.$refs.stockFormRef.resetFields();
+      this.getGoodsList();
+    },
+
+    supply() {
+      this.$refs.stockFormRef.validate(async (valid) => {
+        // console.log(valid);
+        if (!valid) return;
+        //可以发起修改库存的网络请求
+
+        const { data: res } = await this.$http.put(
+          `goods/${this.stockForm.id}/stock`,
+          null,
+          {
+            params: {
+              supplyStock: this.addStock(
+                this.stockForm.stock,
+                this.stockForm.supplyStock
+              ),
+            },
+          }
+        );
+        if (res.meta.status !== 200)
+          return this.$message.error("修改库存信息失败");
+      });
+      //重新获取库存列表
+      this.$message.success("修改库存信息成功");
+      this.$nextTick(() => {
+        this.getStockOutGoodsList();
+        this.editStockDialogVisible = false;
+        this.$nextTick(() => {
+          this.showStockoutDialogVisible = true;
+        });
+        this.getGoodsList();
+      });
+    },
+
     goAddPage() {
       this.$router.push("/goods/add");
     },
@@ -266,7 +539,12 @@ export default {
         query: { id: id },
       });
     },
+
+    addStock(stock, supply) {
+      return Number(stock) + Number(supply);
+    },
   },
+  computed: {},
 };
 </script>
 
