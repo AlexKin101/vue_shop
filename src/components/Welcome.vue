@@ -29,43 +29,55 @@
     <el-card id="work">
       <div class="layout-title">待处理事务</div>
       <div class="un-handle-content">
-        <el-col :gutter="20">
+        <el-row :gutter="20">
           <el-col :span="8">
             <div class="un-handle-item">
               <span class="font-medium">待付款订单</span>
-              <span style="float: right" class="color-danger">(10)</span>
+              <span style="float: right" class="color-danger">
+                {{ this.pendingData.pendingPay }}
+              </span>
             </div>
           </el-col>
           <el-col :span="8">
             <div class="un-handle-item">
               <span class="font-medium">已完成订单</span>
-              <span style="float: right" class="color-danger">(10)</span>
+              <span style="float: right" class="color-danger">
+                {{ this.pendingData.finish }}
+              </span>
             </div>
           </el-col>
           <el-col :span="8">
             <div class="un-handle-item">
-              <span class="font-medium">待确认收货订单</span>
-              <span style="float: right" class="color-danger">(10)</span>
+              <span class="font-medium">待评价订单</span>
+              <span style="float: right" class="color-danger">
+                {{ this.pendingData.pendingEvaluate }}
+              </span>
             </div>
           </el-col>
-        </el-col>
+        </el-row>
         <el-row :gutter="20">
           <el-col :span="8">
             <div class="un-handle-item">
               <span class="font-medium">待发货订单</span>
-              <span style="float: right" class="color-danger">(10)</span>
+              <span style="float: right" class="color-danger">
+                {{ this.pendingData.pendingDeliver }}
+              </span>
             </div>
           </el-col>
           <el-col :span="8">
             <div class="un-handle-item">
               <span class="font-medium">待处理退款申请</span>
-              <span style="float: right" class="color-danger">(10)</span>
+              <span style="float: right" class="color-danger">
+                {{ this.pendingData.pendingHandle }}
+              </span>
             </div>
           </el-col>
           <el-col :span="8">
             <div class="un-handle-item">
               <span class="font-medium">已发货订单</span>
-              <span style="float: right" class="color-danger">(10)</span>
+              <span style="float: right" class="color-danger">
+                {{ this.pendingData.finishDeliver }}
+              </span>
             </div>
           </el-col>
         </el-row>
@@ -83,16 +95,16 @@
               <div style="padding: 40px">
                 <el-col>
                   <el-col :span="6" class="color-danger overview-item-value">
-                    100
+                    {{ this.productInfo.noSale }}
                   </el-col>
                   <el-col :span="6" class="color-danger overview-item-value">
-                    400
+                    {{ this.productInfo.Sale }}
                   </el-col>
                   <el-col :span="6" class="color-danger overview-item-value">
-                    50
+                    {{ this.productInfo.isStockout }}
                   </el-col>
                   <el-col :span="6" class="color-danger overview-item-value">
-                    500
+                    {{ this.productInfo.total }}
                   </el-col>
                 </el-col>
                 <el-col class="font-medium">
@@ -119,16 +131,16 @@
               <div style="padding: 40px">
                 <el-col>
                   <el-col :span="6" class="color-danger overview-item-value">
-                    100
+                    {{ this.userInfo.today }}
                   </el-col>
                   <el-col :span="6" class="color-danger overview-item-value">
-                    200
+                    {{ this.userInfo.yesterday }}
                   </el-col>
                   <el-col :span="6" class="color-danger overview-item-value">
-                    1000
+                    {{ this.userInfo.month }}
                   </el-col>
                   <el-col :span="6" class="color-danger overview-item-value">
-                    5000
+                    {{ this.userInfo.total }}
                   </el-col>
                 </el-col>
                 <el-col class="font-medium">
@@ -173,11 +185,21 @@ export default {
     return {
       // 折线图实例
       chartInstance: null,
+
+      //待处理数据
+      pendingData: [],
+
+      //商品总览
+      productInfo: [],
+
+      //用户总览
+      userInfo: [],
+
       // 折线图数据
       lineData: [
         {
           title: "2021年访问量一览",
-          legendData: ["真实访问量", "预估访问量"],
+          legendData: ["真实访问量"],
           xData: [
             "1月",
             "2月",
@@ -207,26 +229,11 @@ export default {
             800,
             600,
           ],
-          // 推测数据
-          guessData: [
-            1200,
-            1400,
-            1800,
-            2500,
-            800,
-            700,
-            900,
-            1000,
-            800,
-            600,
-            2000,
-            2400,
-          ],
           icon: "",
         },
         {
           title: "2021年总成交量",
-          legendData: ["真实成交量", "预估成交量"],
+          legendData: ["真实成交量"],
           xData: [
             "1月",
             "2月",
@@ -256,27 +263,12 @@ export default {
             104813,
             84510,
           ],
-          // 推测数据
-          guessData: [
-            75418,
-            85123,
-            68203,
-            68415,
-            38502,
-            64312,
-            41561,
-            11432,
-            85210,
-            71062,
-            114813,
-            89510,
-          ],
           // icon
           icon: "￥",
         },
         {
           title: "昨日成交量",
-          legendData: ["真实成交量", "预估成交量"],
+          legendData: ["真实成交量"],
           xData: [
             "0点",
             "2点",
@@ -293,23 +285,7 @@ export default {
             "24点",
           ],
           // 真实数据
-          realData: [70, 80, 20, 10, 30, 50, 250, 300, 400, 300, 510, 680, 600],
-          // 推测数据
-          guessData: [
-            90,
-            20,
-            20,
-            10,
-            40,
-            70,
-            200,
-            300,
-            500,
-            200,
-            500,
-            600,
-            600,
-          ],
+          realData: [],
           // icon
           icon: "￥",
         },
@@ -333,22 +309,6 @@ export default {
           ],
           // 真实数据
           realData: [70, 80, 20, 10, 30, 50, 250, 300, 400, 300, 510, 680, 700],
-          // 推测数据
-          guessData: [
-            90,
-            20,
-            20,
-            10,
-            40,
-            70,
-            200,
-            300,
-            500,
-            200,
-            500,
-            600,
-            600,
-          ],
           // icon
           icon: "￥",
         },
@@ -397,14 +357,7 @@ export default {
     this.chartInstance.dispose();
   },
   async created() {
-    this.getCityInfo().then(
-      (res) => {
-        this.getData(res);
-      },
-      (err) => {
-        this.getData(err);
-      }
-    );
+    this.getData();
 
     this.axiosInstance = axios.create({
       // baseURL: 'http://localhost:8997',
@@ -505,74 +458,37 @@ export default {
               },
             },
           },
-          {
-            name: currentData.legendData[1],
-            smooth: true,
-            type: "line",
-            animationDuration: 2800,
-            data: currentData.guessData,
-            animationEasing: "cubicInOut",
-            markPoint: {
-              // 最大最小值的相关配置
-              label: {
-                show: true,
-                formatter: "{c}" + currentData.icon,
-              },
-              data: [
-                {
-                  type: "max",
-                  name: "最大值",
-                },
-                {
-                  type: "min",
-                  name: "最小值",
-                },
-              ],
-              animationDuration: 2800,
-              animationEasing: "quadraticOut",
-            },
-            itemStyle: {
-              normal: {
-                color: "#FF005A",
-                lineStyle: {
-                  color: "#FF005A",
-                  width: 2,
-                },
-              },
-            },
-          },
         ],
       };
       this.chartInstance.setOption(initOption);
       // this.updateChart()
     },
-    // 获取用户所在城市信息
-    async getCityInfo() {
-      //实例化城市查询类
-      var citysearch = new AMap.CitySearch();
-      //自动获取用户IP，返回当前城市
-      return new Promise((resolve, reject) => {
-        citysearch.getLocalCity(async function(status, result) {
-          if (status === "complete" && result.info === "OK") {
-            if (result && result.city) {
-              resolve(result.city);
-            }
-          }
-          reject("未知");
-        });
-      });
+    async getData() {
+      const { data: res } = await this.$http.get("show/welcome");
+      if (res.meta.status !== 200) return this.$message.error("获取数据失败");
+      console.log(res.data);
+
+      //折线图数据
+      this.lineData[1].xData = res.data.month.month;
+      this.lineData[1].realData = res.data.month.monthPrice;
+      this.lineData[2].realData = res.data.yesterday.dayPrice;
+      this.lineData[3].realData = res.data.today.dayPrice;
+      this.lineData[3].xData = res.data.today.hour;
+
+      //页面数据
+      this.cardData[1].data = res.data.month.total + " ¥";
+      this.cardData[2].data = res.data.yesterday.total + " ¥";
+      this.cardData[3].data = res.data.today.total + " ¥";
+
+      this.pendingData = res.data.pending;
+
+      this.productInfo = res.data.products;
+
+      this.userInfo = res.data.customers;
+      // this.dayPrice = res.data.dayPrice;
+      // this.month = res.data.month;
     },
-    // 把用户城市信息发送给服务器并 获取总访问量和今日访问量
-    async getData(city) {
-      const { data: res } = await this.axiosInstance.get(
-        "/?methods=userInfo&city=" + city
-      );
-      this.lineInfo = res;
-      // this.cardData[0].data = this.lineInfo.totalPv + '次'
-      // this.cardData[1].data = this.lineInfo.todayPv + '次'
-      this.cardData[0].data = 4018153 + "次";
-      this.cardData[1].data = 21523 + "次";
-    },
+
     // 鼠标经过card该变对应样式
     change(color, index) {
       this.currentIndex = index;

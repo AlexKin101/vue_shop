@@ -33,9 +33,9 @@ import "./assets/lib/theme/westeros";
 
 import axios from "axios";
 // 配置请求的根路径
-// axios.defaults.baseURL = "http://1.15.39.179:8088/api/private/v1/";
+// axios.defaults.baseURL = "http://1.15.39.179:8082";
 // axios.defaults.baseURL = "http://127.0.0.1:8888/api/private/v1/";
-axios.defaults.baseURL = "http://localhost:1106";
+axios.defaults.baseURL = "http://localhost:8082";
 
 axios.interceptors.request.use((config) => {
   //console.log(config);

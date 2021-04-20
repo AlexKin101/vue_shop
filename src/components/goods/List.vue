@@ -29,7 +29,7 @@
             ></el-button>
           </el-input>
         </el-col>
-        <el-col :span="4">
+        <el-col :span="8">
           <el-button type="primary" @click="goAddPage">
             添加商品
           </el-button>
