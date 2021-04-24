@@ -55,7 +55,10 @@
             <el-switch
               v-model="scope.row.mg_state"
               @change="userStateChanged(scope.row)"
-              :disabled="scope.row.id === 1 ? true : false"
+              :disabled="
+                (scope.row.id === 1 ? true : false) ||
+                  (scope.row.username === name ? true : false)
+              "
             ></el-switch>
           </template>
         </el-table-column>
@@ -91,7 +94,10 @@
                 icon="el-icon-delete"
                 size="small"
                 @click="removeUserById(scope.row.id)"
-                :disabled="scope.row.id === 1 ? true : false"
+                :disabled="
+                  (scope.row.id === 1 ? true : false) ||
+                    (scope.row.username === name ? true : false)
+                "
               ></el-button>
             </el-tooltip>
 
@@ -108,7 +114,10 @@
                 icon="el-icon-setting"
                 size="small"
                 @click="setRole(scope.row, scope.row.role.name)"
-                :disabled="scope.row.id === 1 ? true : false"
+                :disabled="
+                  (scope.row.id === 1 ? true : false) ||
+                    (scope.row.username === name ? true : false)
+                "
               ></el-button>
             </el-tooltip>
           </template>
@@ -341,10 +350,12 @@ export default {
           },
         ],
       },
+      name: "",
     };
   },
   created() {
     this.getUserList();
+    this.name = window.sessionStorage.getItem("name");
   },
   methods: {
     async getUserList() {
@@ -488,6 +499,7 @@ export default {
         return this.$message.error("获取角色列表失败");
       // console.log(res.data);
       this.rolesList = res.data;
+      this.rolesList.splice(0, 1);
       this.setRoleDialogVisibile = true;
     },
 

@@ -13,14 +13,13 @@
     <el-card>
       <!-- 选择商品分类区域 -->
       <el-row class="cat_opt" :gutter="12">
-        <el-col :span="8">
+        <el-col :span="6">
           <span>选择商品分类：</span>
           <!-- 选择商品分类的级联选择框 -->
           <el-cascader
             v-model="selectedCateKeys"
             :options="cateList"
             @change="handleChange"
-            style="margin-right:24px"
             :props="{
               expandTrigger: 'hover',
               value: 'name',
@@ -28,6 +27,8 @@
               //checkStrictly: 'false',
             }"
           ></el-cascader>
+        </el-col>
+        <el-col :span="2">
           <el-button
             type="primary"
             @click="addDialogVisible = true"

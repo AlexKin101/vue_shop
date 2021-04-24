@@ -111,23 +111,23 @@
             </el-tooltip>
 
             <!-- 分配权限按钮 -->
-            <el-tooltip
+            <!-- <el-tooltip
               class="item"
               effect="dark"
               content="分配权限"
               placement="top"
               :enterable="false"
-            >
-              <el-button
+            > -->
+            <!-- <el-button
                 type="warning"
                 icon="el-icon-setting"
                 size="mini"
                 @click="showSetRightDialog(scope.row)"
                 :disabled="scope.row.id === 1 ? true : false"
-              >
-                分配权限
+              > -->
+            <!-- 分配权限
               </el-button>
-            </el-tooltip>
+            </el-tooltip> -->
           </template>
         </el-table-column>
       </el-table>
@@ -284,7 +284,6 @@ export default {
       const { data: res } = await this.$http.get("roles");
       if (res.meta.status !== 200)
         return this.$message.error("获取角色列表失败");
-
       this.roleList = res.data;
       console.log(this.roleList);
     },

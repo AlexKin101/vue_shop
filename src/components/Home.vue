@@ -10,6 +10,9 @@
       </div>
       <el-dropdown>
         <div class="block">
+          <span type="danger" class="userBanner">
+            &nbsp;您好,尊敬的{{ this.role }}
+          </span>
           <el-avatar
             :size="50"
             :src="require('../assets/商家默认头像.jpeg')"
@@ -18,6 +21,10 @@
           ></el-avatar>
         </div>
         <el-dropdown-menu slot="dropdown" trigger="click">
+          <el-dropdown-item disabled>
+            <span type="danger">&nbsp;您好，{{ this.name }}</span>
+            <br />
+          </el-dropdown-item>
           <el-dropdown-item>
             <span type="danger" @click="gotoWelcome()">
               <span class="el-icon-house"></span>
@@ -25,7 +32,7 @@
             </span>
           </el-dropdown-item>
           <el-dropdown-item>
-            <span type="danger" @click="logout">
+            <span type="danger" @click="logout()">
               <span class="el-icon-switch-button"></span>
               &nbsp;退出登入
             </span>
@@ -119,11 +126,17 @@ export default {
       isCollapse: false,
       // 被激活的链接地址
       activePath: "",
+      //用户角色
+      role: "",
+      //用户名称
+      name: "",
     };
   },
   created() {
     this.getMenuList();
     this.activePath = window.sessionStorage.getItem("activePath");
+    this.role = window.sessionStorage.getItem("role");
+    this.name = window.sessionStorage.getItem("name");
   },
   methods: {
     logout() {
@@ -152,7 +165,8 @@ export default {
 
     //回到首页
     gotoWelcome() {
-      this.$router.push("/welcome");
+      this.$router.push({ name: "Welcome" });
+      window.sessionStorage.setItem("activePath", "/welcome");
     },
 
     errorHandler() {
@@ -206,5 +220,11 @@ export default {
   color: #fff;
   letter-spacing: 0.3em;
   cursor: pointer;
+}
+.userBanner {
+  color: #fff;
+  text-align: center;
+  align-items: center;
+  font-size: 14px;
 }
 </style>

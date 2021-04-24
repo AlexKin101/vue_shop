@@ -41,6 +41,75 @@
 
       <!-- 商品列表区域 -->
       <el-table :data="goodsList" border script>
+        <!-- 展开项 -->
+
+        <el-table-column type="expand">
+          <template slot-scope="scope">
+            <div class="expandInfo">
+              <el-form label-position="left" inline style="width:80%">
+                <el-row>
+                  <el-col :span="8" margin-right="30px">
+                    <el-form-item label="商品图片：">
+                      <img
+                        :src="scope.row.picture"
+                        width="200px"
+                        height="200px"
+                      />
+                    </el-form-item>
+                    <br />
+                    <el-form-item label="商品名称：">
+                      <el-tag type="info">{{ scope.row.name }}</el-tag>
+                    </el-form-item>
+                  </el-col>
+
+                  <el-col :span="8" margin-right="5px">
+                    <el-form-item label="商品ID：">
+                      <span>{{ scope.row.id }}</span>
+                    </el-form-item>
+                    <br />
+                    <el-form-item label="商品编号：">
+                      <span>{{ scope.row.number }}</span>
+                    </el-form-item>
+                    <br />
+                    <el-form-item label="商品品牌：">
+                      <span>{{ scope.row.brands.name }}</span>
+                    </el-form-item>
+                    <br />
+                    <el-form-item label="商品分类：">
+                      <span>{{ scope.row.type.name }}</span>
+                    </el-form-item>
+                    <br />
+                    <el-form-item label="商品上架时间：">
+                      {{ scope.row.addTime | dataFormat }}
+                    </el-form-item>
+                  </el-col>
+
+                  <el-col :span="8">
+                    <el-form-item label="商品进价：">
+                      <span>{{ scope.row.inPrice + " 元" }}</span>
+                    </el-form-item>
+                    <br />
+                    <el-form-item label="商品售价：">
+                      <span>{{ scope.row.outPrice + " 元" }}</span>
+                    </el-form-item>
+                    <br />
+                    <el-form-item label="商品重量：">
+                      <span>{{ scope.row.weight + " Kg" }}</span>
+                    </el-form-item>
+                    <br />
+                    <el-form-item label="商品最低库存：">
+                      <span>{{ scope.row.lowStock }}</span>
+                    </el-form-item>
+                    <br />
+                    <el-form-item label="当前商品库存：">
+                      <span>{{ scope.row.stock }}</span>
+                    </el-form-item>
+                  </el-col>
+                </el-row>
+              </el-form>
+            </div>
+          </template>
+        </el-table-column>
         <!-- 索引列 -->
         <el-table-column
           label="#"
@@ -69,23 +138,9 @@
           sortable
         ></el-table-column>
         <el-table-column
-          label="进货价格（元）"
-          prop="inPrice"
-          width="95px"
-          align="center"
-          sortable
-        ></el-table-column>
-        <el-table-column
           label="售出价格（元）"
           prop="outPrice"
           width="95px"
-          align="center"
-          sortable
-        ></el-table-column>
-        <el-table-column
-          label="商品重量（kg）"
-          prop="weight"
-          width="85px"
           align="center"
           sortable
         ></el-table-column>
@@ -358,6 +413,17 @@ export default {
 
       showStockoutDialogVisible: false,
 
+      //商品详情
+      showGoodsInfoDialogVisible: false,
+
+      goodsInfoForm: {
+        name: "",
+        describe: "",
+        inPrice: "",
+        outPrice: "",
+        weight: "",
+      },
+
       editStockDialogVisible: false,
 
       stockForm: {
@@ -548,4 +614,13 @@ export default {
 };
 </script>
 
-<style lang="less" scoped></style>
+<style lang="less" scoped>
+.expandInfo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.demo-table-expand {
+  font-size: 0;
+}
+</style>

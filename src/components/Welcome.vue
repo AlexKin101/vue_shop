@@ -89,7 +89,7 @@
         <el-col :span="12">
           <el-card>
             <el-row :span="12">
-              <div class="layout-title">商品总览</div>
+              <div class="layout-title" @click="gotoGoodsList()">商品总览</div>
             </el-row>
             <el-row>
               <div style="padding: 40px">
@@ -125,7 +125,9 @@
         <el-col :span="12">
           <el-card>
             <el-row :span="12">
-              <div class="layout-title">用户总览</div>
+              <div class="layout-title" @click="gotoBusinessList()">
+                用户总览
+              </div>
             </el-row>
             <el-row>
               <div style="padding: 40px">
@@ -343,6 +345,10 @@ export default {
       ],
       // axios实例对象
       axiosInstance: null,
+
+      // 被激活的链接地址
+      activePath: "",
+
       // 折线图信息
       lineInfo: null,
       // 用于设置鼠标悬停在card上的高亮
@@ -357,6 +363,8 @@ export default {
     this.chartInstance.dispose();
   },
   async created() {
+    this.activePath = window.sessionStorage.getItem("activePath");
+
     this.getData();
 
     this.axiosInstance = axios.create({
@@ -501,6 +509,18 @@ export default {
       this.activeLine = index;
       this.chartInstance.dispose();
       this.initChart();
+    },
+
+    //回到商品列表
+    gotoGoodsList() {
+      window.sessionStorage.setItem("activePath", "/goods");
+      this.$router.push("/goods");
+    },
+
+    //回到用户列表
+    gotoBusinessList() {
+      window.sessionStorage.setItem("activePath", "/users");
+      this.$router.push("/users");
     },
   },
 };

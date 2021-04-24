@@ -33,35 +33,58 @@
         <!-- 展开项 -->
         <el-table-column type="expand">
           <template slot-scope="scope">
-            <el-form label-position="left" inline class="demo-table-expand">
-              <el-form-item label="商品名称：">
-                {{ scope.row.products.name }}
-              </el-form-item>
-              <el-form-item label="商品数量：">
-                <span>{{ scope.row.amount }}</span>
-              </el-form-item>
-              <el-form-item label="商品分类：">
-                <span>{{ scope.row.products.type.name }}</span>
-              </el-form-item>
-              <el-form-item label="商品规格：">
-                <span>{{ scope.row.specs }}</span>
-              </el-form-item>
-              <el-form-item label="商品售价：">
-                <span>{{ scope.row.products.outPrice + " 元" }}</span>
-              </el-form-item>
-              <el-form-item label="当前商品库存：">
-                <span>{{ scope.row.products.stock }}</span>
-              </el-form-item>
-              <el-form-item label="收货人名称：">
-                <span>{{ scope.row.userName }}</span>
-              </el-form-item>
-              <el-form-item label="收货人地址：">
-                <span>{{ scope.row.address }}</span>
-              </el-form-item>
-              <el-form-item label="收货人联系方式：">
-                <span>{{ scope.row.contactWay }}</span>
-              </el-form-item>
-            </el-form>
+            <div class="expandInfo">
+              <el-form label-position="left" inline style="width:80%">
+                <el-row>
+                  <el-col :span="8" margin-right="30px">
+                    <el-form-item label="商品图片：">
+                      <img
+                        :src="scope.row.products.picture"
+                        width="200px"
+                        height="200px"
+                      />
+                    </el-form-item>
+                    <el-form-item label="商品名称：">
+                      <el-tag type="info">{{ scope.row.products.name }}</el-tag>
+                    </el-form-item>
+                  </el-col>
+
+                  <el-col :span="6">
+                    <el-form-item label="商品数量：">
+                      <span>{{ scope.row.amount }}</span>
+                    </el-form-item>
+                    <br />
+                    <el-form-item label="商品分类：">
+                      <span>{{ scope.row.products.type.name }}</span>
+                    </el-form-item>
+                    <br />
+                    <el-form-item label="商品规格：">
+                      <span>{{ scope.row.specs }}</span>
+                    </el-form-item>
+                    <br />
+                    <el-form-item label="商品售价：">
+                      <span>{{ scope.row.products.outPrice + " 元" }}</span>
+                    </el-form-item>
+                    <br />
+                    <el-form-item label="当前商品库存：">
+                      <span>{{ scope.row.products.stock }}</span>
+                    </el-form-item>
+                  </el-col>
+
+                  <el-col :span="8">
+                    <el-form-item label="收货人名称：">
+                      <span>{{ scope.row.userName }}</span>
+                    </el-form-item>
+                    <el-form-item label="收货人地址：">
+                      <span>{{ scope.row.address }}</span>
+                    </el-form-item>
+                    <el-form-item label="收货人联系方式：">
+                      <span>{{ scope.row.contactWay }}</span>
+                    </el-form-item>
+                  </el-col>
+                </el-row>
+              </el-form>
+            </div>
           </template>
         </el-table-column>
         <!-- 索引列 -->
@@ -582,5 +605,10 @@ export default {
   margin-right: 0;
   margin-bottom: 0;
   width: 50%;
+}
+.expandInfo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 </style>
