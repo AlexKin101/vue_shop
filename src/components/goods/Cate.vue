@@ -264,7 +264,7 @@ export default {
     addCate() {
       this.$refs.addCateFormRef.validate(async (valid) => {
         if (!valid) return;
-        console.log(this.addCateForm);
+        // console.log(this.addCateForm);
         const { data: res } = await this.$http.post(
           "categories",
           this.addCateForm

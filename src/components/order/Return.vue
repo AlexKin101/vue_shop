@@ -179,7 +179,7 @@ export default {
         params: this.queryInfo,
       });
 
-      console.log(res);
+      // console.log(res);
       if (res.meta.status !== 200)
         return this.$message.error("获取订单列表失败");
       //   为总数据条数赋值

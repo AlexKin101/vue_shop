@@ -94,7 +94,10 @@
                     </el-form-item>
                     <br />
                     <el-form-item label="商品重量：">
-                      <span>{{ scope.row.weight + " Kg" }}</span>
+                      <span v-if="scope.row.weight === ''">
+                        NULL
+                      </span>
+                      <span v-else>{{ scope.row.weight + " Kg" }}</span>
                     </el-form-item>
                     <br />
                     <el-form-item label="商品最低库存：">
@@ -385,7 +388,7 @@
 </template>
 
 <script>
-import { number } from "_echarts@5.0.2@echarts";
+// import { number } from "_echarts@5.0.2@echarts";
 export default {
   data() {
     return {
@@ -450,7 +453,7 @@ export default {
       const { data: res } = await this.$http.get("goods", {
         params: this.queryInfo,
       });
-      console.log(res);
+      // console.log(res);
       if (res.meta.status !== 200)
         return this.$message.error("获取商品列表失败");
 
@@ -467,11 +470,11 @@ export default {
       const { data: res } = await this.$http.get("goods/stockout", {
         params: this.stockoutQueryInfo,
       });
-      console.log(res);
+      // console.log(res);
       if (res.meta.status !== 200)
         return this.$message.error("获取商品列表失败");
 
-      console.log(res.data);
+      // console.log(res.data);
       // this.total = res.data.total;
       // this.goodsList = res.data.goods;
       this.stockoutQueryInfo.pagenum = res.data.pageable.pageNumber + 1;

@@ -198,7 +198,7 @@ export default {
       );
 
       if (res.meta.status !== 200) return this.$message.error("查询失败");
-      console.log(res);
+      // console.log(res);
 
       this.goodsInfoList = res.data;
       this.serviceForm = res.data[0];

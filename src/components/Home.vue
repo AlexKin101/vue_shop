@@ -10,9 +10,6 @@
       </div>
       <el-dropdown>
         <div class="block">
-          <span type="danger" class="userBanner">
-            &nbsp;您好,尊敬的{{ this.role }}
-          </span>
           <el-avatar
             :size="50"
             :src="require('../assets/商家默认头像.jpeg')"
@@ -22,19 +19,21 @@
         </div>
         <el-dropdown-menu slot="dropdown" trigger="click">
           <el-dropdown-item disabled>
-            <span type="danger">&nbsp;您好，{{ this.name }}</span>
-            <br />
-          </el-dropdown-item>
-          <el-dropdown-item>
-            <span type="danger" @click="gotoWelcome()">
-              <span class="el-icon-house"></span>
-              &nbsp;系统首页
+            <span type="danger" style="text-align: center;display:block;">
+              {{ this.role }}
+            </span>
+            <span type="danger" style="text-align: center;display:block;">
+              &nbsp;您好，{{ this.name }}
             </span>
           </el-dropdown-item>
           <el-dropdown-item>
-            <span type="danger" @click="logout()">
-              <span class="el-icon-switch-button"></span>
-              &nbsp;退出登入
+            <span type="danger" class="el-icon-house" @click="gotoWelcome()">
+              系统首页
+            </span>
+          </el-dropdown-item>
+          <el-dropdown-item>
+            <span type="danger" class="el-icon-switch-button" @click="logout()">
+              退出登入
             </span>
           </el-dropdown-item>
         </el-dropdown-menu>
@@ -138,6 +137,7 @@ export default {
     this.role = window.sessionStorage.getItem("role");
     this.name = window.sessionStorage.getItem("name");
   },
+
   methods: {
     logout() {
       window.sessionStorage.clear(); //清空sessionStorage
@@ -165,7 +165,7 @@ export default {
 
     //回到首页
     gotoWelcome() {
-      this.$router.push({ name: "Welcome" });
+      this.$router.push("/Welcome");
       window.sessionStorage.setItem("activePath", "/welcome");
     },
 
@@ -223,8 +223,10 @@ export default {
 }
 .userBanner {
   color: #fff;
-  text-align: center;
-  align-items: center;
+  // text-align: center;
+  // align-items: center;
   font-size: 14px;
+  width: auto;
+  height: auto;
 }
 </style>

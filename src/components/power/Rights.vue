@@ -49,7 +49,7 @@ export default {
         return this.$message.error("获取权限列表失败");
       }
       this.rightsList = res.data;
-      console.log(this.rightsList);
+      // console.log(this.rightsList);
     },
   },
 };

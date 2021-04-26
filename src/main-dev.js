@@ -22,8 +22,7 @@ import "quill/dist/quill.snow.css"; // for snow theme
 import "quill/dist/quill.bubble.css"; // for bubble theme
 
 // 把echarts挂载到 Vue原型上，以便在全局访问
-
-import echarts from "echarts";
+import * as echarts from "echarts";
 Vue.prototype.$echarts = echarts;
 
 // 引入主题
@@ -31,18 +30,46 @@ import "./assets/lib/theme/chalk";
 import "./assets/lib/theme/vintage";
 import "./assets/lib/theme/westeros";
 
+// 导入 NProgress 包对应的JS和CSS
+import NProgress from "nprogress";
+import "nprogress/nprogress.css";
+NProgress.configure({ showSpinner: false });
+
+// import { Loading } from "element-ui";
+
 import axios from "axios";
 // 配置请求的根路径
 // axios.defaults.baseURL = "http://1.15.39.179:8082";
 // axios.defaults.baseURL = "http://127.0.0.1:8888/api/private/v1/";
 axios.defaults.baseURL = "http://localhost:8082";
 
+// 在request拦截器中，展示进度条 NProgress.start();
 axios.interceptors.request.use((config) => {
-  //console.log(config);
+  // console.log(config);
+  NProgress.start();
+  config.headers.role = window.sessionStorage.getItem("role");
+  config.headers.name = window.sessionStorage.getItem("name");
   config.headers.Authorization = window.sessionStorage.getItem("token");
   //最后必须return config;
   return config;
 });
+// 在response拦截器中，隐藏进度条 NProgress.done();
+axios.interceptors.response.use(
+  (config) => {
+    NProgress.done();
+    return config;
+  },
+  (error) => {
+    NProgress.done();
+    const code = error.response.status; // 此处判断拦截需要处理的错误状态码并处理
+    // console.log(code);
+    if (code === 401) {
+      alert("抱歉，您的角色与您的账户信息不匹配，请重新登录");
+    }
+    return Promise.reject(error);
+  }
+);
+
 Vue.prototype.$http = axios;
 
 Vue.config.productionTip = false;

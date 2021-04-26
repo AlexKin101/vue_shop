@@ -435,7 +435,7 @@ export default {
         params: this.queryInfo,
       });
 
-      console.log(res);
+      // console.log(res);
       if (res.meta.status !== 200)
         return this.$message.error("获取订单列表失败");
       //   为总数据条数赋值
@@ -450,7 +450,7 @@ export default {
       const { data: res } = await this.$http.get(`orders/${id}`);
 
       if (res.meta.status !== 200) return this.$message.error("查询失败");
-      console.log(res.data);
+      // console.log(res.data);
       this.statusForm = res.data;
       this.addressForm = res.data;
 
@@ -522,14 +522,14 @@ export default {
       this.progressInfo = res.data;
       this.progressDialogVisible = true;
 
-      console.log(this.progressInfo);
+      // console.log(this.progressInfo);
     },
 
     // 展示修改订单状态的对话框
     showStatusBox(id) {
       this.getOrder(id);
       this.editStatusDialogVisible = true;
-      console.log(this.statusForm);
+      // console.log(this.statusForm);
     },
 
     // 修改订单状态的对话框关闭

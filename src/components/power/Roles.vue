@@ -285,7 +285,7 @@ export default {
       if (res.meta.status !== 200)
         return this.$message.error("获取角色列表失败");
       this.roleList = res.data;
-      console.log(this.roleList);
+      // console.log(this.roleList);
     },
 
     //监听添加角色对话框的关闭事件
@@ -398,7 +398,7 @@ export default {
 
     //展示分配权限的对话框
     async showSetRightDialog(role) {
-      console.log(role);
+      // console.log(role);
       this.roleId = role.id;
       // 获取所有权限的数据
       const { data: res } = await this.$http.get("rights/tree");

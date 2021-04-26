@@ -2,25 +2,70 @@
 
 import Vue from "vue";
 import Router from "vue-router";
-import Login from "../components/Login";
-import Home from "../components/Home";
-import Welcome from "../components/Welcome";
-import Users from "../components/user/Users";
-import Rights from "../components/power/Rights";
-import Roles from "../components/power/Roles";
-import Cate from "../components/goods/Cate";
-import Params from "../components/goods/Params";
-import GoodsList from "../components/goods/List";
-import Add from "../components/goods/Add";
-import Edit from "../components/goods/Edit";
-import Order from "../components/order/Order";
-import Return from "../components/order/Return";
-import ReturnReason from "../components/order/ReturnReason";
-import ReturnInfo from "../components/order/ReturnInfo";
-import Report from "../components/report/Report";
-import Brand from "../components/goods/Brand";
-import Activity from "../components/marketing/Activity";
-import Carousel from "../components/marketing/Carousel";
+
+// import Login from "../components/Login";
+// import Home from "../components/Home";
+// import Welcome from "../components/Welcome";
+const Login = () =>
+  import(/* webpackChunkName:"login_home_welcome" */ "../components/Login");
+const Home = () =>
+  import(/* webpackChunkName:"login_home_welcome" */ "../components/Home");
+const Welcome = () =>
+  import(/* webpackChunkName:"login_home_welcome" */ "../components/Welcome");
+
+// import Users from "../components/user/Users";
+const Users = () =>
+  import(/* webpackChunkName:"user" */ "../components/user/Users");
+
+// import Rights from "../components/power/Rights";
+// import Roles from "../components/power/Roles";
+const Rights = () =>
+  import(/* webpackChunkName:"power" */ "../components/power/Rights");
+const Roles = () =>
+  import(/* webpackChunkName:"user" */ "../components/power/Roles");
+
+// import Cate from "../components/goods/Cate";
+// import Params from "../components/goods/Params";
+// import GoodsList from "../components/goods/List";
+// import Add from "../components/goods/Add";
+// import Edit from "../components/goods/Edit";
+// import Brand from "../components/goods/Brand";
+const Cate = () =>
+  import(/* webpackChunkName:"goods" */ "../components/goods/Cate");
+const Params = () =>
+  import(/* webpackChunkName:"goods" */ "../components/goods/Params");
+const GoodsList = () =>
+  import(/* webpackChunkName:"goods" */ "../components/goods/List");
+const Add = () =>
+  import(/* webpackChunkName:"goods" */ "../components/goods/Add");
+const Edit = () =>
+  import(/* webpackChunkName:"goods" */ "../components/goods/Edit");
+const Brand = () =>
+  import(/* webpackChunkName:"goods" */ "../components/goods/Brand");
+
+// import Order from "../components/order/Order";
+// import Return from "../components/order/Return";
+// import ReturnReason from "../components/order/ReturnReason";
+// import ReturnInfo from "../components/order/ReturnInfo";
+const Order = () =>
+  import(/* webpackChunkName:"order" */ "../components/order/Order");
+const Return = () =>
+  import(/* webpackChunkName:"order" */ "../components/order/Return");
+const ReturnReason = () =>
+  import(/* webpackChunkName:"order" */ "../components/order/ReturnReason");
+const ReturnInfo = () =>
+  import(/* webpackChunkName:"order" */ "../components/order/ReturnInfo");
+
+// import Report from "../components/report/Report";
+const Report = () =>
+  import(/* webpackChunkName:"report" */ "../components/report/Report");
+
+// import Activity from "../components/marketing/Activity";
+// import Carousel from "../components/marketing/Carousel";
+const Activity = () =>
+  import(/* webpackChunkName:"marketing" */ "../components/marketing/Activity");
+const Carousel = () =>
+  import(/* webpackChunkName:"marketing" */ "../components/marketing/Carousel");
 
 // 解决ElementUI导航栏中的vue-router在3.0版本以上重复点菜单报错问题
 const originalPush = Router.prototype.push;
@@ -54,7 +99,7 @@ const router = new Router({
           component: Users,
           beforeEnter: (to, from, next) => {
             const role = window.sessionStorage.getItem("role");
-            if (role === "超级管理员" || role === "人事管理员") {
+            if (role === "superAdmin" || role === "businessAdmin") {
               next();
             } else {
               alert("抱歉，您无权限进入该页面");
@@ -67,7 +112,7 @@ const router = new Router({
           component: Rights,
           beforeEnter: (to, from, next) => {
             const role = window.sessionStorage.getItem("role");
-            if (role === "超级管理员" || role === "人事管理员") {
+            if (role === "superAdmin" || role === "businessAdmin") {
               next();
             } else {
               alert("抱歉，您无权限进入该页面");
@@ -80,7 +125,7 @@ const router = new Router({
           component: Roles,
           beforeEnter: (to, from, next) => {
             const role = window.sessionStorage.getItem("role");
-            if (role === "超级管理员" || role === "人事管理员") {
+            if (role === "superAdmin" || role === "businessAdmin") {
               next();
             } else {
               alert("抱歉，您无权限进入该页面");
@@ -93,7 +138,7 @@ const router = new Router({
           component: Cate,
           beforeEnter: (to, from, next) => {
             const role = window.sessionStorage.getItem("role");
-            if (role === "超级管理员" || role === "商品管理员") {
+            if (role === "superAdmin" || role === "productAdmin") {
               next();
             } else {
               alert("抱歉，您无权限进入该页面");
@@ -106,7 +151,7 @@ const router = new Router({
           component: Params,
           beforeEnter: (to, from, next) => {
             const role = window.sessionStorage.getItem("role");
-            if (role === "超级管理员" || role === "商品管理员") {
+            if (role === "superAdmin" || role === "productAdmin") {
               next();
             } else {
               alert("抱歉，您无权限进入该页面");
@@ -119,7 +164,7 @@ const router = new Router({
           component: GoodsList,
           beforeEnter: (to, from, next) => {
             const role = window.sessionStorage.getItem("role");
-            if (role === "超级管理员" || role === "商品管理员") {
+            if (role === "superAdmin" || role === "productAdmin") {
               next();
             } else {
               alert("抱歉，您无权限进入该页面");
@@ -132,7 +177,7 @@ const router = new Router({
           component: Add,
           beforeEnter: (to, from, next) => {
             const role = window.sessionStorage.getItem("role");
-            if (role === "超级管理员" || role === "商品管理员") {
+            if (role === "superAdmin" || role === "productAdmin") {
               next();
             } else {
               alert("抱歉，您无权限进入该页面");
@@ -145,7 +190,7 @@ const router = new Router({
           component: Edit,
           beforeEnter: (to, from, next) => {
             const role = window.sessionStorage.getItem("role");
-            if (role === "超级管理员" || role === "商品管理员") {
+            if (role === "superAdmin" || role === "productAdmin") {
               next();
             } else {
               alert("抱歉，您无权限进入该页面");
@@ -158,7 +203,7 @@ const router = new Router({
           component: Brand,
           beforeEnter: (to, from, next) => {
             const role = window.sessionStorage.getItem("role");
-            if (role === "超级管理员" || role === "商品管理员") {
+            if (role === "superAdmin" || role === "productAdmin") {
               next();
             } else {
               alert("抱歉，您无权限进入该页面");
@@ -171,7 +216,7 @@ const router = new Router({
           component: Order,
           beforeEnter: (to, from, next) => {
             const role = window.sessionStorage.getItem("role");
-            if (role === "超级管理员" || role === "订单管理员") {
+            if (role === "superAdmin" || role === "orderAdmin") {
               next();
             } else {
               alert("抱歉，您无权限进入该页面");
@@ -188,7 +233,7 @@ const router = new Router({
           component: Return,
           beforeEnter: (to, from, next) => {
             const role = window.sessionStorage.getItem("role");
-            if (role === "超级管理员" || role === "订单管理员") {
+            if (role === "superAdmin" || role === "orderAdmin") {
               next();
             } else {
               alert("抱歉，您无权限进入该页面");
@@ -201,7 +246,7 @@ const router = new Router({
           component: ReturnInfo,
           beforeEnter: (to, from, next) => {
             const role = window.sessionStorage.getItem("role");
-            if (role === "超级管理员" || role === "订单管理员") {
+            if (role === "superAdmin" || role === "orderAdmin") {
               next();
             } else {
               alert("抱歉，您无权限进入该页面");
@@ -214,7 +259,7 @@ const router = new Router({
           component: Activity,
           beforeEnter: (to, from, next) => {
             const role = window.sessionStorage.getItem("role");
-            if (role === "超级管理员") {
+            if (role === "superAdmin") {
               next();
             } else {
               alert("抱歉，您无权限进入该页面");
@@ -227,7 +272,7 @@ const router = new Router({
           component: Carousel,
           beforeEnter: (to, from, next) => {
             const role = window.sessionStorage.getItem("role");
-            if (role === "超级管理员") {
+            if (role === "superAdmin") {
               next();
             } else {
               alert("抱歉，您无权限进入该页面");
@@ -240,7 +285,7 @@ const router = new Router({
           component: ReturnReason,
           beforeEnter: (to, from, next) => {
             const role = window.sessionStorage.getItem("role");
-            if (role === "超级管理员" || role === "订单管理员") {
+            if (role === "superAdmin" || role === "orderAdmin") {
               next();
             } else {
               alert("抱歉，您无权限进入该页面");
@@ -259,6 +304,8 @@ router.beforeEach((to, from, next) => {
   //from代表从哪个路径跳转而来
   //next是一个函数,表示放行
   //  next() 放行         next('/login') 强制跳转
+  // const nameStr = window.localStorage.getItem("name");
+
   if (to.path === "/welcome") return next();
 
   if (to.path === "/login") return next();

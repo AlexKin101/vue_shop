@@ -238,13 +238,13 @@ export default {
       this.monthData = res.data.monthData;
       this.monthPrice = res.data.monthPrice;
       this.month = res.data.month;
-      console.log(res.data);
+      // console.log(res.data);
       // this.getMonthPrice(2021);
       this.initChart();
     },
 
     yearChange() {
-      console.log(this.selectYear);
+      // console.log(this.selectYear);
       this.getMonthData(this.selectYear);
       // this.getMonthPrice(this.selectYear);
     },

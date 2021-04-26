@@ -271,7 +271,7 @@ export default {
       // console.log(id);
       const { data: res } = await this.$http.get(`brands/${id}`);
       if (res.meta.status !== 200) return this.$message.error("品牌查询失败");
-      console.log(res.data);
+      // console.log(res.data);
       this.editForm = res.data;
       this.editDialogVisible = true;
       // console.log(this.editForm);

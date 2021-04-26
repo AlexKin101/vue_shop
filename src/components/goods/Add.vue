@@ -313,7 +313,7 @@ export default {
 
     // 级联选择框选中项变化，会触发这个函数
     handleChange() {
-      console.log(this.addForm.goods_cat);
+      // console.log(this.addForm.goods_cat);
       // this.addForm.goods_cat = [];
     },
 
@@ -330,7 +330,7 @@ export default {
       if (res.meta.status !== 200)
         return this.$message.error("获取商品品牌列表数据失败");
       //   把数据列表赋值给brandsList
-      console.log(res.data);
+      // console.log(res.data);
       this.brandsList = res.data;
     },
 
@@ -339,7 +339,7 @@ export default {
       const { data: res } = await this.$http.get(
         `categories/${this.goods_cat}/attributes`
       );
-      console.log(res.data);
+      // console.log(res.data);
       return { data: res };
     },
 
@@ -350,7 +350,7 @@ export default {
           this.checkList = [];
           const { data: res } = await this.getParamsList();
           this.tableData = res.data;
-          console.log(res.data);
+          // console.log(res.data);
           break;
         }
       }
@@ -358,9 +358,9 @@ export default {
 
     // 处理图片预览效果
     handlePreview(file) {
-      console.log(file);
+      // console.log(file);
       this.previewPath = file.response.data;
-      console.log(this.previewPath);
+      // console.log(this.previewPath);
       this.previewVisible = true;
     },
 
@@ -441,8 +441,8 @@ export default {
 
         // 发起请求添加商品
         // 商品的名称，必须是唯一的
-        console.log(form);
-        console.log(this.addForm);
+        // console.log(form);
+        // console.log(this.addForm);
         const { data: res } = await this.$http.post("goods", form);
         if (res.meta.status != 200) {
           return this.$message.error("添加商品失败");

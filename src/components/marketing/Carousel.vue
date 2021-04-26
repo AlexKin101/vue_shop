@@ -333,7 +333,7 @@ export default {
       const { data: res } = await this.$http.get("goods/nopromote", {
         params: this.queryInfo,
       });
-      console.log(res);
+      // console.log(res);
       if (res.meta.status !== 200)
         return this.$message.error("获取商品列表失败");
       //   为总数据条数赋值
@@ -350,7 +350,7 @@ export default {
       const { data: res } = await this.$http.get("banner", {
         params: this.carouselQueryInfo,
       });
-      console.log(res);
+      // console.log(res);
       if (res.meta.status !== 200)
         return this.$message.error("获取商品列表失败");
       //   为总数据条数赋值

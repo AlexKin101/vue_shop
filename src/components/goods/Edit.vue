@@ -268,8 +268,8 @@ export default {
       this.editForm.goods_cat = res.data.type.name;
       this.editForm.goods_cat = this.editForm.type.name;
       this.editForm.goods_brands = this.editForm.brands.name;
-      console.log(res.data);
-      console.log(this.editForm);
+      // console.log(res.data);
+      // console.log(this.editForm);
 
       this.editForm.attrs = [];
       this.showFileList();
@@ -322,7 +322,7 @@ export default {
     // 图片添加页显示
     showFileList() {
       // console.log(this.editForm.pics);
-      console.log(this.fileList);
+      // console.log(this.fileList);
 
       let obj = new Object();
       obj.url = this.editForm.picture;
@@ -340,14 +340,14 @@ export default {
         `categories/${this.editForm.type.name}/attributes`
       );
       this.tableData = res.data;
-      console.log(res.data);
+      // console.log(res.data);
     },
 
     async getParamsListById() {
       const { data: res } = await this.$http.get(`goods/attributes`, {
         params: { id: this.$route.query.id },
       });
-      console.log(res.data);
+      // console.log(res.data);
       if (res.meta.status != 200) {
         return this.$message.error("获取规格列表失败");
       }
@@ -389,7 +389,7 @@ export default {
     handlePreview() {
       // console.log(file);
       this.previewPath = this.editForm.pics;
-      console.log(this.previewPath);
+      // console.log(this.previewPath);
       this.previewVisible = true;
     },
 
@@ -418,7 +418,7 @@ export default {
 
     // 编辑商品
     edit() {
-      console.log(this.editForm);
+      // console.log(this.editForm);
       this.$refs.editFormRef.validate(async (valid) => {
         if (!valid) {
           return this.$message.error("请填写必要的表单项");
@@ -447,7 +447,7 @@ export default {
           "goods/" + this.editForm.id,
           form
         );
-        console.log(form);
+        // console.log(form);
         if (res.meta.status != 200) {
           return this.$message.error("编辑商品失败");
         }

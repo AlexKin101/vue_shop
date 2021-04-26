@@ -465,6 +465,9 @@ export default {
                 },
               },
             },
+
+            //当前时间
+            value: "",
           },
         ],
       };
@@ -472,9 +475,33 @@ export default {
       // this.updateChart()
     },
     async getData() {
-      const { data: res } = await this.$http.get("show/welcome");
+      var aData = new Date(); //当天
+      var preDate = new Date(aData.getTime() - 24 * 60 * 60 * 1000); //前一天
+
+      //当天日期
+      var currentYear = aData.getFullYear();
+      var currentMonth = aData.getMonth() + 1;
+      var currentDay = aData.getDate();
+      var currentHour = aData.getHours();
+
+      //昨天日期
+      var preYear = preDate.getFullYear();
+      var preMonth = preDate.getMonth() + 1;
+      var preDay = preDate.getDate();
+
+      const { data: res } = await this.$http.get("show/welcome", {
+        params: {
+          currentYear: currentYear,
+          currentMonth: currentMonth,
+          currentDay: currentDay,
+          currentHour: currentHour,
+          preYear: preYear,
+          preMonth: preMonth,
+          preDay: preDay,
+        },
+      });
       if (res.meta.status !== 200) return this.$message.error("获取数据失败");
-      console.log(res.data);
+      // console.log(res.data);
 
       //折线图数据
       this.lineData[1].xData = res.data.month.month;
