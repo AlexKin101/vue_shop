@@ -29,6 +29,11 @@
             {{ scope.row.orders.products.name }}
           </template>
         </el-table-column>
+        <el-table-column label="商品规格" align="center" width="120">
+          <template slot-scope="scope">
+            {{ scope.row.orders.specs }}
+          </template>
+        </el-table-column>
         <el-table-column label="价格/货号" width="180" align="center">
           <template slot-scope="scope">
             <span class="font-small">价格：</span>
@@ -121,6 +126,13 @@
                 clearable
               ></el-input>
             </el-form-item>
+            <el-form-item label="商品图片:">
+              <img
+                :src="this.serviceForm.picture"
+                width="400px"
+                height="400px"
+              />
+            </el-form-item>
           </el-col>
 
           <!--按钮-->
@@ -198,7 +210,7 @@ export default {
       );
 
       if (res.meta.status !== 200) return this.$message.error("查询失败");
-      // console.log(res);
+      console.log(res);
 
       this.goodsInfoList = res.data;
       this.serviceForm = res.data[0];
@@ -207,6 +219,7 @@ export default {
       this.serviceForm.tel = res.data[0].customer.tel;
       this.serviceForm.price = res.data[0].price;
       this.serviceForm.amount = res.data[0].orders.amount;
+      this.serviceForm.picture = res.data[0].orders.products.picture;
       // this.serviceForm.returnPrice = res.data[0].price;
       // console.log(this.serviceForm);
     },

@@ -69,7 +69,7 @@
         <el-table-column label="状态" align="center" width="100px" prop="state">
           <template slot-scope="scope">
             <!-- {{ scope.row }} -->
-            <el-tag type="success" v-if="scope.row.isPromote === 1">
+            <el-tag type="success" v-if="scope.row.isNew === 1">
               推荐中
             </el-tag>
             <el-tag type="danger" v-else>未推荐</el-tag>
@@ -102,7 +102,7 @@
         @size-change="handlePromoteSizeChange"
         @current-change="handlePromoteCurrentChange"
         :current-page="promoteQueryInfo.pagenum"
-        :page-sizes="[10, 20, 30, 50]"
+        :page-sizes="[10, 20, 30, this.promoteTotal]"
         :page-size="promoteQueryInfo.pagesize"
         layout="total, sizes, prev, pager, next, jumper"
         :total="promoteTotal"
@@ -275,7 +275,7 @@ export default {
       const { data: res } = await this.$http.get("goods/promote", {
         params: this.promoteQueryInfo,
       });
-      // console.log(res);
+      console.log(res);
       if (res.meta.status !== 200)
         return this.$message.error("获取商品列表失败");
       //   为总数据条数赋值
@@ -328,8 +328,9 @@ export default {
       const { data: res } = await this.$http.delete(
         `goods/promote/delete/${id}`
       );
-      if (res.meta.status !== 200) return this.$message.error("删除商品失败");
-      this.$message.success("删除商品成功");
+      if (res.meta.status !== 200)
+        return this.$message.error("删除商品促销失败");
+      this.$message.success("删除商品促销成功");
       //重新获取用户列表
       this.getPromoteGoodsList();
     },

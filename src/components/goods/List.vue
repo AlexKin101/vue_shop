@@ -42,7 +42,6 @@
       <!-- 商品列表区域 -->
       <el-table :data="goodsList" border script>
         <!-- 展开项 -->
-
         <el-table-column type="expand">
           <template slot-scope="scope">
             <div class="expandInfo">
@@ -122,23 +121,29 @@
         <el-table-column
           label="商品编号"
           prop="number"
-          width="160px"
+          width="140px"
           align="center"
         ></el-table-column>
         <el-table-column label="商品名称" prop="name"></el-table-column>
         <el-table-column
           label="商品分类"
           prop="type.name"
-          width="95px"
+          width="110px"
           align="center"
           sortable
+          column-key="type.name"
+          :filters="this.cateList"
+          :filter-method="filterType"
         ></el-table-column>
         <el-table-column
           label="商品品牌"
           prop="brands.name"
-          width="95px"
+          width="110px"
           align="center"
           sortable
+          column-key="brands.name"
+          :filters="this.brandsList"
+          :filter-method="filterBrand"
         ></el-table-column>
         <el-table-column
           label="售出价格（元）"
@@ -154,13 +159,41 @@
           align="center"
           sortable
         ></el-table-column>
-        <el-table-column label="商品库存状态" width="80px" align="center">
+        <el-table-column
+          label="商品库存状态"
+          width="80px"
+          align="center"
+          :filters="[
+            { text: '充足', value: 0 },
+            { text: '缺货', value: 1 },
+          ]"
+          :filter-method="filterTag"
+        >
           <template slot-scope="scope">
             <el-tag type="warning" v-if="scope.row.isStockout === 0">
               充足
             </el-tag>
             <el-tag v-else>
               缺货
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column
+          label="是否新品"
+          width="80px"
+          align="center"
+          :filters="[
+            { text: '是', value: 1 },
+            { text: '否', value: 0 },
+          ]"
+          :filter-method="filterNew"
+        >
+          <template slot-scope="scope">
+            <el-tag type="warning" v-if="scope.row.isNew === 1">
+              是
+            </el-tag>
+            <el-tag v-else>
+              否
             </el-tag>
           </template>
         </el-table-column>
@@ -176,7 +209,17 @@
           </template>
         </el-table-column>
 
-        <el-table-column label="状态" align="center" width="100px" prop="sale">
+        <el-table-column
+          label="状态"
+          align="center"
+          width="100px"
+          prop="sale"
+          :filters="[
+            { text: '已上架', value: true },
+            { text: '未上架', value: false },
+          ]"
+          :filter-method="filterSale"
+        >
           <template slot-scope="scope">
             <!-- {{ scope.row }} -->
             <el-switch
@@ -343,20 +386,22 @@
       </el-table>
 
       <!-- 分页区域 -->
-      <el-pagination
+      <!-- <el-pagination
         @current-change="handleStockoutCurrentChange"
         :current-page="stockoutQueryInfo.pagenum"
-        layout="total, prev, pager, next, jumper"
+        :page-size="stockoutQueryInfo.pagesize"
+        :page-sizes="[10, 20, 30, this.total]"
+        layout="total,sizes, prev, pager, next, jumper"
         :total="stockoutTotal"
         background
-      ></el-pagination>
+      ></el-pagination> -->
     </el-dialog>
 
     <!-- 修改库存的对话框 -->
     <el-dialog
       title="补充商品库存"
       :visible.sync="editStockDialogVisible"
-      width="50%"
+      width="40%"
       @close="editStockDialogClosed"
     >
       <!-- 内容主体区域 -->
@@ -364,16 +409,20 @@
         :model="stockForm"
         :rules="stockFormRules"
         ref="stockFormRef"
-        label-width="140px"
+        label-width="125px"
       >
         <el-form-item label="当前库存数量：" prop="stock">
           {{ this.addStock(this.stockForm.stock, this.stockForm.supplyStock) }}
         </el-form-item>
-        <el-form-item label="当前最低库存数量：" prop="lowStock">
+        <el-form-item label="最低库存数量：" prop="lowStock">
           {{ this.stockForm.lowStock }}
         </el-form-item>
         <el-form-item label="补充库存数量：" prop="supplyStock">
-          <el-input v-model="stockForm.supplyStock" type="number"></el-input>
+          <el-input
+            v-model="stockForm.supplyStock"
+            type="number"
+            style="width:20%"
+          ></el-input>
         </el-form-item>
       </el-form>
       <!-- 底部区域 -->
@@ -402,6 +451,11 @@ export default {
       },
       //   总数据条数
       total: 0,
+
+      // 品牌列表
+      brandsList: [],
+      //分类列表
+      cateList: [],
 
       // 缺货商品的数据列表，默认为空
       stockoutGoodsList: [],
@@ -446,6 +500,8 @@ export default {
   },
   created() {
     this.getGoodsList();
+    this.getBrandsList();
+    this.getCateList();
     this.getStockOutGoodsList();
   },
   methods: {
@@ -467,9 +523,7 @@ export default {
     },
 
     async getStockOutGoodsList() {
-      const { data: res } = await this.$http.get("goods/stockout", {
-        params: this.stockoutQueryInfo,
-      });
+      const { data: res } = await this.$http.get("goods/stockout");
       // console.log(res);
       if (res.meta.status !== 200)
         return this.$message.error("获取商品列表失败");
@@ -477,11 +531,47 @@ export default {
       // console.log(res.data);
       // this.total = res.data.total;
       // this.goodsList = res.data.goods;
-      this.stockoutQueryInfo.pagenum = res.data.pageable.pageNumber + 1;
-      this.stockoutQueryInfo.pagesize = res.data.size;
-      //   为总数据条数赋值
-      this.stockoutTotal = res.data.totalElements;
-      this.stockoutGoodsList = res.data.content;
+      // this.stockoutQueryInfo.pagenum = res.data.pageable.pageNumber + 1;
+      // this.stockoutQueryInfo.pagesize = res.data.size;
+      // //   为总数据条数赋值
+      // this.stockoutTotal = res.data.totalElements;
+      this.stockoutGoodsList = res.data;
+    },
+
+    //   获取所有商品分类数据
+    async getCateList() {
+      const { data: res } = await this.$http.get("categories", {
+        params: { pagenum: 0, pagesize: 0, type: 3 },
+      });
+
+      if (res.meta.status !== 200)
+        return this.$message.error("获取商品分类数据失败");
+      //   把数据列表赋值给cateList
+      // console.log(res.data);
+      res.data.forEach((item) => {
+        let obj = new Object();
+        obj.text = item.name;
+        obj.value = item.name;
+        this.cateList.push(obj);
+      });
+      console.log(this.cateList);
+      //   console.log(res.data);
+    },
+
+    // 获取品牌列表
+    async getBrandsList() {
+      const { data: res } = await this.$http.get("brands/list");
+      if (res.meta.status !== 200)
+        return this.$message.error("获取商品品牌列表数据失败");
+      //   把数据列表赋值给brandsList
+      // console.log(res.data);
+      res.data.forEach((item) => {
+        let obj = new Object();
+        obj.text = item.name;
+        obj.value = item.name;
+        this.brandsList.push(obj);
+      });
+      console.log(this.brandsList);
     },
 
     // 监听pagesize改变
@@ -589,9 +679,6 @@ export default {
       this.$nextTick(() => {
         this.getStockOutGoodsList();
         this.editStockDialogVisible = false;
-        this.$nextTick(() => {
-          this.showStockoutDialogVisible = true;
-        });
         this.getGoodsList();
       });
     },
@@ -611,6 +698,33 @@ export default {
 
     addStock(stock, supply) {
       return Number(stock) + Number(supply);
+    },
+
+    resetDateFilter() {
+      this.$refs.filterTable.clearFilter("brands.name");
+    },
+    clearFilter() {
+      this.$refs.filterTable.clearFilter();
+    },
+
+    filterBrand(value, row) {
+      return row.brands.name === value;
+    },
+
+    filterTag(value, row) {
+      return row.isStockout === value;
+    },
+
+    filterNew(value, row) {
+      return row.isNew === value;
+    },
+
+    filterSale(value, row) {
+      return row.sale === value;
+    },
+
+    filterType(value, row) {
+      return row.type.name === value;
     },
   },
   computed: {},

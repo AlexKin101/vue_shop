@@ -51,36 +51,73 @@
             <el-form-item label="商品描述" prop="describe">
               <el-input v-model="editForm.describe"></el-input>
             </el-form-item>
-            <el-form-item label="商品进货价格（元）" prop="inPrice">
-              <el-input v-model="editForm.inPrice" type="number"></el-input>
-            </el-form-item>
-            <el-form-item label="商品售出价格（元）" prop="outPrice">
-              <el-input v-model="editForm.outPrice" type="number"></el-input>
-            </el-form-item>
-            <el-form-item label="商品重量（kg）" prop="weight">
-              <el-input
-                v-model="editForm.weight"
-                type="number"
-                oninput="value=value.replace(/[^\d.]/g,'')"
-              ></el-input>
-            </el-form-item>
-            <el-form-item label="商品最低库存数量" prop="lowStock">
-              <el-input v-model="editForm.lowStock"></el-input>
-            </el-form-item>
-            <el-form-item label="商品库存数量" prop="stock">
-              <el-input v-model="editForm.stock"></el-input>
-            </el-form-item>
+
+            <el-row :gutter="20">
+              <el-col :span="10">
+                <el-form-item label="商品进货价格（元）" prop="inPrice">
+                  <el-input v-model="editForm.inPrice" type="number"></el-input>
+                </el-form-item>
+              </el-col>
+              <el-col :span="10" style="margin-left:120px">
+                <el-form-item label="商品售出价格（元）" prop="outPrice">
+                  <el-input
+                    v-model="editForm.outPrice"
+                    type="number"
+                  ></el-input>
+                </el-form-item>
+              </el-col>
+            </el-row>
+
+            <el-row :gutter="20">
+              <el-col :span="7" style="margin-right:40px">
+                <el-form-item label="商品重量（kg）" prop="weight">
+                  <el-input
+                    v-model="editForm.weight"
+                    type="number"
+                    oninput="value=value.replace(/[^\d.]/g,'')"
+                  ></el-input>
+                </el-form-item>
+              </el-col>
+              <el-col :span="7" style="margin-right:40px">
+                <el-form-item label="商品最低库存数量" prop="lowStock">
+                  <el-input
+                    v-model="editForm.lowStock"
+                    type="number"
+                  ></el-input>
+                </el-form-item>
+              </el-col>
+              <el-col :span="7">
+                <el-form-item label="商品库存数量" prop="stock">
+                  <el-input v-model="editForm.stock" type="number"></el-input>
+                </el-form-item>
+              </el-col>
+            </el-row>
           </el-tab-pane>
 
           <el-tab-pane label="商品规格" name="1">
-            <!-- 渲染表单的Item项 -->
-            <el-form-item label="商品规格">
+            <!-- 渲染表单的Item项
+            <el-form-item label="目前的商品规格">
+              <el-col
+                :span="2"
+                v-for="item in checkList"
+                :key="item.id"
+                style="margin-right:15px"
+              >
+                <el-tag>
+                  {{ item.name }}
+                </el-tag>
+              </el-col>
+              <br />
+            </el-form-item> -->
+
+            <el-form-item label="可选商品规格" prop="attrs">
               <!-- 复选框组 -->
               <el-checkbox-group v-model="checkList">
                 <el-checkbox
                   :label="item.id"
-                  v-for="item in tableData"
+                  v-for="item in newJson"
                   :key="item.id"
+                  :checked="item.isSelect"
                   border
                 >
                   {{ item.name }}
@@ -95,7 +132,7 @@
               type="warning"
               show-icon
               style="margin-bottom:10px"
-              closable
+              :closable="false"
             ></el-alert>
             <!-- action 表示图片要上传的API地址 -->
             <el-upload
@@ -233,13 +270,17 @@ export default {
 
       checkList: [],
 
+      newJson: [],
+
       //  规格列表数据
       tableData: [],
       //  上传图片的URL
-      uploadURL: "http://localhost:1106/upload",
+      uploadURL: "http://localhost:8082/upload",
 
       // 图片上传组件的headers请求头
       headerObj: {
+        role: window.sessionStorage.getItem("role"),
+        name: window.sessionStorage.getItem("name"),
         Authorization: window.sessionStorage.getItem("token"),
       },
 
@@ -266,12 +307,15 @@ export default {
       this.editForm = res.data;
       this.editForm.pics = res.data.picture;
       this.editForm.goods_cat = res.data.type.name;
-      this.editForm.goods_cat = this.editForm.type.name;
+      // this.editForm.goods_cat = this.editForm.type.name;
       this.editForm.goods_brands = this.editForm.brands.name;
       // console.log(res.data);
       // console.log(this.editForm);
 
-      this.editForm.attrs = [];
+      // this.editForm.attrs = [];
+      this.getParamsList();
+      this.getParamsListById();
+
       this.showFileList();
     },
 
@@ -308,22 +352,24 @@ export default {
     //   }
     // },
 
-    // beforeTabLeave(activeName, oldActiveName) {
-    //   // console.log("即将离开的标签页名字是" + oldActiveName);
-    //   // console.log("即将进入的标签页名字是" + activeName);
-    //   // return false;
+    beforeTabLeave(activeName, oldActiveName) {
+      // console.log("即将离开的标签页名字是" + oldActiveName);
+      // console.log("即将进入的标签页名字是" + activeName);
+      // return false;
 
-    //   if (oldActiveName === "0" && this.editForm.goods_cat.length !== 3) {
-    //     this.$message.error("请先选择商品分类");
-    //     return false;
-    //   }
-    // },
+      if (activeName === "1") {
+        this.getParamsList();
+        this.getParamsListById();
+
+        return true;
+      }
+    },
 
     // 图片添加页显示
     showFileList() {
       // console.log(this.editForm.pics);
       // console.log(this.fileList);
-
+      if (this.editForm.picture === "") return;
       let obj = new Object();
       obj.url = this.editForm.picture;
       obj.name = "pic";
@@ -334,10 +380,53 @@ export default {
       // var i = 1;
     },
 
+    // 显示商品规格
+    showParamsList() {
+      this.newJson = [];
+      // console.log(this.tableData);
+      // console.log(this.checkList);
+      // newJson = []; //盛放去重后数据的新数组
+      this.tableData.forEach((item1) => {
+        let obj = new Object();
+        obj.id = item1.id;
+        obj.name = item1.name;
+        obj.isSelect = false;
+        this.checkList.forEach((item2) => {
+          if (obj.name == item2.name) {
+            obj.isSelect = true;
+          }
+        });
+        this.newJson.push(obj);
+        // console.log(this.newJson);
+      });
+      // this.checkList = [];
+      // for (item1 of this.tableData) {
+      //   let obj = new Object();
+      //   obj.id = item1.id;
+      //   obj.name = item.name;
+      //   //循环json数组对象的内容
+      //   // let flag = true; //建立标记，判断数据是否重复，true为不重复
+      //   for (item2 of this.checkList) {
+      //     //循环新数组的内容
+      //     if (item1.name == item2.name) {
+      //       //让json数组对象的内容与新数组的内容作比较，相同的话，改变标记为false
+      //       // flag = false;
+      //       obj.isSelect = true;
+      //       // item1.isSelect = true;
+      //     }
+      //     this.newJson.push(obj);
+      //   }
+
+      // if (flag) {
+      //   //判断是否重复
+      //   //不重复的放入新数组。  新数组的内容会继续进行上边的循环。
+      // }
+    },
+
     async getParamsList() {
       // console.log(this.addForm);
       const { data: res } = await this.$http.get(
-        `categories/${this.editForm.type.name}/attributes`
+        `categories/${this.editForm.goods_cat}/attributes`
       );
       this.tableData = res.data;
       // console.log(res.data);
@@ -367,11 +456,10 @@ export default {
       switch (this.activeIndex) {
         // 访问动态参数面板
         case "1": {
-          this.checkList = [];
-          this.tableData = [];
-          this.getParamsList();
-          // this.getParamsListById();
-          // const { data: rep } = await this.getParamsListById()
+          // this.checkList = [];
+          // console.log(this.checkList);
+          // console.log(this.tableData);
+          this.showParamsList();
           break;
         }
       }
@@ -419,6 +507,9 @@ export default {
     // 编辑商品
     edit() {
       // console.log(this.editForm);
+      this.editForm.attrs = [];
+      console.log(this.checkList);
+      // console.log(this.checkList.length);
       this.$refs.editFormRef.validate(async (valid) => {
         if (!valid) {
           return this.$message.error("请填写必要的表单项");
@@ -433,13 +524,21 @@ export default {
 
         // 处理规格
         this.checkList.forEach((item) => {
+          if (item.hasOwnProperty("name")) {
+            return;
+          }
           const newInfo = {
             id: item,
           };
           this.editForm.attrs.push(newInfo);
         });
-
+        console.log(this.editForm.attrs);
         form.attrs = this.editForm.attrs;
+        if (this.tableData.length !== 0) {
+          if (form.attrs.length < 1) {
+            return this.$message.error("商品规格不能为空");
+          }
+        }
 
         // 发起请求编辑商品
         // 商品的名称，必须是唯一的
@@ -452,6 +551,7 @@ export default {
           return this.$message.error("编辑商品失败");
         }
         this.$message.success("编辑商品成功");
+        this.$refs.editFormRef.resetFields();
         this.$router.push("/goods");
       });
     },

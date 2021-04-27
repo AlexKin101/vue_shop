@@ -21,6 +21,31 @@
 
       <!-- 表格 -->
       <el-table :data="cateList" border script>
+        <el-table-column type="expand">
+          <template slot-scope="scope">
+            <div class="expandInfo">
+              <el-form label-position="left" inline style="width:80%">
+                <el-row>
+                  <el-col :span="8">
+                    <el-form-item label="左侧宣传图：">
+                      <img
+                        :src="scope.row.leftURL"
+                        height="400px"
+                        width="200px"
+                      />
+                    </el-form-item>
+                  </el-col>
+                  <el-col :span="8">
+                    <el-form-item label="顶部宣传图：">
+                      <img :src="scope.row.topURL" width="800px" />
+                    </el-form-item>
+                  </el-col>
+                </el-row>
+              </el-form>
+            </div>
+          </template>
+        </el-table-column>
+
         <el-table-column
           label="#"
           type="index"
@@ -35,7 +60,7 @@
               type="primary"
               icon="el-icon-edit"
               size="mini"
-              @click="showEditDialog(scope.row.id)"
+              @click="showEditDialog(scope.row)"
             >
               编辑
             </el-button>
@@ -85,7 +110,7 @@
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
         :current-page="queryInfo.pagenum"
-        :page-sizes="[3, 5, 10, 15]"
+        :page-sizes="[3, 5, 10, this.total]"
         :page-size="queryInfo.pagesize"
         layout="total, sizes, prev, pager, next, jumper"
         :total="total"
@@ -104,13 +129,55 @@
         :model="addCateForm"
         :rules="addCateFormRules"
         ref="addCateFormRef"
-        label-width="100px"
+        label-width="95px"
       >
         <el-form-item label="分类名称：" prop="name">
           <el-input v-model="addCateForm.name"></el-input>
         </el-form-item>
         <el-form-item label="分类描述：" prop="describe">
           <el-input v-model="addCateForm.describe"></el-input>
+        </el-form-item>
+
+        <el-alert
+          title="每个只能上传一张商品图片"
+          type="warning"
+          show-icon
+          style="margin-bottom:10px"
+          :closable="false"
+        ></el-alert>
+
+        <el-form-item label="左侧宣传图：" prop="leftURL">
+          <el-upload
+            :class="{ hide: hideUpload }"
+            drag
+            :limit="1"
+            ref="myUpload"
+            :action="uploadURL"
+            :file-list="addLeftList"
+            :on-remove="handleAddLeftRemove"
+            list-type="picture-card"
+            :on-success="handleAddLeftSuccess"
+            :headers="headerObj"
+          >
+            <i class="el-icon-upload"></i>
+          </el-upload>
+        </el-form-item>
+
+        <el-form-item label="顶部宣传图：" prop="topURL">
+          <el-upload
+            style="margin-top:30px"
+            drag
+            :limit="1"
+            ref="myUpload"
+            :action="uploadURL"
+            :file-list="addTopList"
+            :on-remove="handleAddTopRemove"
+            list-type="picture-card"
+            :on-success="handleAddTopSuccess"
+            :headers="headerObj"
+          >
+            <i class="el-icon-upload"></i>
+          </el-upload>
         </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
@@ -141,6 +208,49 @@
         <el-form-item label="分类描述：" prop="describe">
           <el-input v-model="editForm.describe"></el-input>
         </el-form-item>
+
+        <el-alert
+          title="每个只能上传一张商品图片"
+          type="warning"
+          show-icon
+          style="margin-bottom:10px"
+          :closable="false"
+        ></el-alert>
+
+        <el-form-item label="左侧宣传图：" prop="leftURL">
+          <el-upload
+            drag
+            :limit="1"
+            ref="myUpload"
+            :action="uploadURL"
+            :file-list="editLeftList"
+            :on-remove="handleEditLeftRemove"
+            :on-preview="handlePreview"
+            list-type="picture-card"
+            :on-success="handleEditLeftSuccess"
+            :headers="headerObj"
+          >
+            <i class="el-icon-upload"></i>
+          </el-upload>
+        </el-form-item>
+
+        <el-form-item label="顶部宣传图：" prop="topURL">
+          <el-upload
+            drag
+            :limit="1"
+            ref="myUpload"
+            :action="uploadURL"
+            :file-list="editTopList"
+            :on-remove="handleEditTopRemove"
+            :on-preview="handlePreview"
+            list-type="picture-card"
+            :on-success="handleEditTopSuccess"
+            :headers="headerObj"
+            style="margin-top:30px"
+          >
+            <i class="el-icon-upload"></i>
+          </el-upload>
+        </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
         <el-button @click="editCateDialogVisible = false">取 消</el-button>
@@ -148,6 +258,17 @@
           确 定
         </el-button>
       </span>
+    </el-dialog>
+
+    <!-- 图片预览 -->
+    <el-dialog title="轮播图预览 " :visible.sync="previewVisible" width="50%">
+      <img
+        :src="previewPath"
+        alt=""
+        class="previewImg"
+        width="100%"
+        height="100%"
+      />
     </el-dialog>
   </div>
 </template>
@@ -162,6 +283,14 @@ export default {
         pagenum: 1,
         pagesize: 5,
       },
+
+      hideUpload: false,
+
+      addLeftList: [],
+      addTopList: [],
+      editLeftList: [],
+      editTopList: [],
+
       // 商品分类的数据列表，默认为空
       cateList: [],
       //   总数据条数
@@ -184,15 +313,26 @@ export default {
 
       //   控制添加分类对话框的显示与隐藏
       addCateDialogVisible: false,
+
+      //预览
+      previewVisible: false,
+
+      // 预览图片URL
+      previewPath: "",
+
       // 添加分类的表单数据对象
       addCateForm: {
         //将要添加的分类的名称
         name: "",
         describe: "",
+        leftURL: "", //左侧宣传图
+        topURL: "", //横幅宣传图
       },
       // 添加分类的表单的验证规则对象
       addCateFormRules: {
         name: [{ required: true, message: "请输入分类名称", trigger: "blur" }],
+        leftURL: [{ required: true }],
+        topURL: [{ required: true }],
       },
       //   父级分类的列表
       parentCateList: [],
@@ -205,10 +345,27 @@ export default {
         id: 0,
         name: "",
         describe: "",
+        leftURL: "", //左侧宣传图
+        topURL: "", //横幅宣传图
       },
       // 编辑分类的表单的验证规则对象
       editFormRules: {
         name: [{ required: true, message: "请输入分类名称", trigger: "blur" }],
+        leftURL: [{ required: true }],
+        topURL: [{ required: true }],
+      },
+
+      // 预览
+      previewPath: "",
+
+      //  上传图片的URL
+      uploadURL: "http://localhost:8082/upload",
+
+      // 图片上传组件的headers请求头
+      headerObj: {
+        role: window.sessionStorage.getItem("role"),
+        name: window.sessionStorage.getItem("name"),
+        Authorization: window.sessionStorage.getItem("token"),
       },
     };
   },
@@ -260,6 +417,22 @@ export default {
       this.parentCateList = res.data;
     },
 
+    // 左侧图片添加页显示
+    showLeftFileList(row) {
+      let obj = new Object();
+      obj.url = row.leftURL;
+      obj.name = "pic";
+      this.editLeftList.push(obj);
+    },
+
+    // 顶部图片添加页显示
+    showTopFileList(row) {
+      let obj = new Object();
+      obj.url = row.topURL;
+      obj.name = "pic";
+      this.editTopList.push(obj);
+    },
+
     // 点击按钮，添加新的分类
     addCate() {
       this.$refs.addCateFormRef.validate(async (valid) => {
@@ -276,18 +449,93 @@ export default {
       });
     },
 
+    handleLeft() {
+      // this.hideUpload = this.addLeftList.length > 1;
+    },
+
+    // 处理图片预览效果
+    handlePreview(file) {
+      // console.log(file);
+      this.previewPath = file.url;
+      // console.log(this.previewPath);
+      this.previewVisible = true;
+    },
+
+    //添加分类
+    // 处理图片移除操作
+    handleAddLeftRemove(file) {
+      this.addCateForm.leftURL = [];
+      // this.hideUpload = this.addLeftList.length > 1;
+    },
+
+    // 监听图片上传成功的事件
+    handleAddLeftSuccess(response) {
+      //   1.拼接得到一个图片信息对象
+      // 2.将图片信息对象，push到pics数组中
+      this.addCateForm.leftURL = response.data;
+      //   console.log(response);
+    },
+
+    // 处理图片移除操作
+    handleAddTopRemove(file) {
+      this.addCateForm.topURL = [];
+    },
+
+    // 监听图片上传成功的事件
+    handleAddTopSuccess(response) {
+      //   1.拼接得到一个图片信息对象
+      // 2.将图片信息对象，push到pics数组中
+      this.addCateForm.topURL = response.data;
+      //   console.log(response);
+    },
+
+    // 编辑
+    // 处理图片移除操作
+    handleEditLeftRemove(file) {
+      this.editForm.leftURL = [];
+      // this.hideUpload = this.addLeftList.length > 1;
+    },
+
+    // 监听图片上传成功的事件
+    handleEditLeftSuccess(response) {
+      //   1.拼接得到一个图片信息对象
+      // 2.将图片信息对象，push到pics数组中
+      this.editForm.leftURL = response.data;
+      //   console.log(response);
+    },
+
+    // 处理图片移除操作
+    handleEditTopRemove(file) {
+      this.editForm.topURL = [];
+    },
+
+    // 监听图片上传成功的事件
+    handleEditTopSuccess(response) {
+      //   1.拼接得到一个图片信息对象
+      // 2.将图片信息对象，push到pics数组中
+      this.editForm.topURL = response.data;
+      //   console.log(response);
+    },
+
     // 监听对话框的关闭事件，重置表单数据
     addCateDialogClosed() {
       this.$refs.addCateFormRef.resetFields();
+      this.$nextTick(() => {
+        this.$refs["myUpload"].clearFiles();
+      });
+      this.addLeftList = [];
+      this.addTopList = [];
     },
 
     // 展示编辑分类的对话框
-    async showEditDialog(id) {
+    async showEditDialog(row) {
       // console.log(id);
-      const { data: res } = await this.$http.get(`categories/${id}`);
+      const { data: res } = await this.$http.get(`categories/${row.id}`);
       if (res.meta.status !== 200) return this.$message.error("分类查询失败");
 
       this.editForm = res.data;
+      this.showLeftFileList(row);
+      this.showTopFileList(row);
       this.editCateDialogVisible = true;
       // console.log(this.editForm);
     },
@@ -295,6 +543,11 @@ export default {
     //监听编辑分类对话框的关闭事件
     editDialogClosed() {
       this.$refs.editFormRef.resetFields();
+      this.$nextTick(() => {
+        this.$refs["myUpload"].clearFiles();
+      });
+      this.editLeftList = [];
+      this.editTopList = [];
     },
 
     // 编辑分类信息并提交
@@ -305,13 +558,7 @@ export default {
         //可以发起编辑分类的网络请求
         const { data: res } = await this.$http.put(
           `categories/${this.editForm.id}`,
-          null,
-          {
-            params: {
-              cat_name: this.editForm.name,
-              cat_desc: this.editForm.describe,
-            },
-          }
+          this.editForm
         );
 
         if (res.meta.status !== 200)
@@ -358,5 +605,13 @@ export default {
 }
 .el-cascader {
   width: 100%;
+}
+.el-icon-upload {
+  width: 178px;
+  height: 178px;
+  display: block;
+}
+.hide .el-upload--picture-card {
+  display: none;
 }
 </style>

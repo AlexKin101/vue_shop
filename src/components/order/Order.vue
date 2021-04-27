@@ -123,6 +123,14 @@
           width="100px"
           align="center"
           sortable
+          :filters="[
+            { text: '已退款', value: '已退款' },
+            { text: '已退货', value: '已退货' },
+            { text: '已拒绝', value: '已拒绝' },
+            { text: '开通成功', value: '开通成功' },
+            { text: '开通失败', value: '开通失败' },
+          ]"
+          :filter-method="filterState"
         >
           <template slot-scope="scope">
             <el-tag type="success">{{ scope.row.state }}</el-tag>
@@ -135,6 +143,11 @@
           width="100px"
           align="center"
           sortable
+          :filters="[
+            { text: '支付宝', value: '支付宝' },
+            { text: '微信', value: '微信' },
+          ]"
+          :filter-method="filterPayType"
         >
           <template slot-scope="scope">
             <el-tag type="Brand Color" v-if="scope.row.payType === '支付宝'">
@@ -152,6 +165,11 @@
           width="90px"
           align="center"
           sortable
+          :filters="[
+            { text: '未发货', value: 0 },
+            { text: '已发货', value: 1 },
+          ]"
+          :filter-method="filterIsSend"
         >
           <template slot-scope="scope">
             <el-tag type="Brand Color" v-if="scope.row.isSend === 0">
@@ -350,6 +368,7 @@ export default {
     return {
       // 商品的数据列表，默认为空
       ordersList: [],
+
       // 查询条件
       queryInfo: {
         query: "",
@@ -435,15 +454,34 @@ export default {
         params: this.queryInfo,
       });
 
-      // console.log(res);
+      console.log(res);
       if (res.meta.status !== 200)
         return this.$message.error("获取订单列表失败");
       //   为总数据条数赋值
       //  this.$message.success("获取订单列表成功");
+
       this.queryInfo.pagenum = res.data.pageable.pageNumber + 1;
       this.queryInfo.pagesize = res.data.size;
       this.total = res.data.totalElements;
       this.ordersList = res.data.content;
+    },
+
+    isCheck(arr1, arr2) {
+      // 拼接两个数组
+      let newArr = arr1.concat(arr2);
+      // 数据去重
+      let noRepetitionArr = [...new Set(newArr)];
+      // 如果 去重数组长度小于原数组长度，则表示有重复
+      if (noRepetitionArr.length < newArr.length) {
+        // 获取数组中重复的值
+        let defArr = newArr.filter(function(v, i, arr) {
+          return arr.indexOf(v) !== arr.lastIndexOf(v);
+        });
+        // 重复的值再次去重 也可省掉此步骤
+        let newdefarr = [...new Set(defArr)];
+        return newdefarr;
+      }
+      return [];
     },
 
     async getOrder(id) {
@@ -572,6 +610,29 @@ export default {
         this.$message.success("修改订单状态成功");
       });
       this.editStatusDialogVisible = false;
+    },
+
+    resetDateFilter() {
+      this.$refs.filterTable.clearFilter("brands.name");
+    },
+    clearFilter() {
+      this.$refs.filterTable.clearFilter();
+    },
+
+    filterUser(value, row) {
+      return row.userName === value;
+    },
+
+    filterState(value, row) {
+      return row.state === value;
+    },
+
+    filterPayType(value, row) {
+      return row.payType === value;
+    },
+
+    filterIsSend(value, row) {
+      return row.isSend === value;
     },
   },
 

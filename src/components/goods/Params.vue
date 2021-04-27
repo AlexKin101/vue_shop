@@ -12,11 +12,18 @@
     <!-- 卡片视图区域 -->
     <el-card>
       <!-- 选择商品分类区域 -->
-      <el-row class="cat_opt" :gutter="12">
+      <el-row class="cat_opt" :gutter="20">
+        <el-alert
+          title="需先选中商品分类后，才能查看规格"
+          type="info"
+          show-icon
+          style="margin-bottom:20px;margin-top:-15px"
+          :closable="false"
+        ></el-alert>
+        <!-- 选择商品分类的级联选择框 -->
         <el-col :span="6">
-          <span>选择商品分类：</span>
-          <!-- 选择商品分类的级联选择框 -->
           <el-cascader
+            placeholder="请选择商品分类："
             v-model="selectedCateKeys"
             :options="cateList"
             @change="handleChange"
@@ -28,7 +35,7 @@
             }"
           ></el-cascader>
         </el-col>
-        <el-col :span="2">
+        <el-col :span="3">
           <el-button
             type="primary"
             @click="addDialogVisible = true"

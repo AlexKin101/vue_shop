@@ -317,10 +317,12 @@ export default {
       addFormRules: {},
 
       //  上传图片的URL
-      uploadURL: "http://localhost:1106/upload",
+      uploadURL: "http://localhost:8082/upload",
 
       // 图片上传组件的headers请求头
       headerObj: {
+        role: window.sessionStorage.getItem("role"),
+        name: window.sessionStorage.getItem("name"),
         Authorization: window.sessionStorage.getItem("token"),
       },
     };

@@ -52,25 +52,41 @@
             <el-form-item label="商品描述" prop="describe">
               <el-input v-model="addForm.describe"></el-input>
             </el-form-item>
-            <el-form-item label="商品进货价格（元）" prop="inPrice">
-              <el-input v-model="addForm.inPrice" type="number"></el-input>
-            </el-form-item>
-            <el-form-item label="商品售出价格（元）" prop="outPrice">
-              <el-input v-model="addForm.outPrice" type="number"></el-input>
-            </el-form-item>
-            <el-form-item label="商品重量（kg）" prop="weight">
-              <el-input
-                v-model="addForm.weight"
-                type="number"
-                oninput="value=value.replace(/[^\d.]/g,'')"
-              ></el-input>
-            </el-form-item>
-            <el-form-item label="商品最低库存数量" prop="lowStock">
-              <el-input v-model="addForm.lowStock"></el-input>
-            </el-form-item>
-            <el-form-item label="商品库存数量" prop="stock">
-              <el-input v-model="addForm.stock"></el-input>
-            </el-form-item>
+
+            <el-row :gutter="20">
+              <el-col :span="10">
+                <el-form-item label="商品进货价格（元）" prop="inPrice">
+                  <el-input v-model="addForm.inPrice" type="number"></el-input>
+                </el-form-item>
+              </el-col>
+              <el-col :span="10" style="margin-left:120px">
+                <el-form-item label="商品售出价格（元）" prop="outPrice">
+                  <el-input v-model="addForm.outPrice" type="number"></el-input>
+                </el-form-item>
+              </el-col>
+            </el-row>
+
+            <el-row :gutter="20">
+              <el-col :span="7" style="margin-right:40px">
+                <el-form-item label="商品重量（kg）" prop="weight">
+                  <el-input
+                    v-model="addForm.weight"
+                    type="number"
+                    oninput="value=value.replace(/[^\d.]/g,'')"
+                  ></el-input>
+                </el-form-item>
+              </el-col>
+              <el-col :span="7" style="margin-right:40px">
+                <el-form-item label="商品最低库存数量" prop="lowStock">
+                  <el-input v-model="addForm.lowStock" type="number"></el-input>
+                </el-form-item>
+              </el-col>
+              <el-col :span="7">
+                <el-form-item label="商品库存数量" prop="stock">
+                  <el-input v-model="addForm.stock" type="number"></el-input>
+                </el-form-item>
+              </el-col>
+            </el-row>
 
             <el-row :gutter="20">
               <el-col :span="8">
@@ -91,7 +107,7 @@
                 </el-form-item>
               </el-col>
 
-              <el-col :span="4">
+              <el-col :span="7">
                 <el-form-item label="商品品牌" prop="goods_brands">
                   <!-- 选择商品品牌的级联选择框 -->
                   <el-cascader
@@ -106,6 +122,12 @@
                     }"
                     clearable
                   ></el-cascader>
+                </el-form-item>
+              </el-col>
+
+              <el-col :span="4" style="margin-left:120px">
+                <el-form-item label="是否新品" prop="isNew">
+                  <el-switch v-model="addForm.isNew"></el-switch>
                 </el-form-item>
               </el-col>
             </el-row>
@@ -200,6 +222,7 @@ export default {
         attrs: [],
         goods_brands: "",
         describe: "",
+        isNew: 0,
       },
       addFormRules: {
         name: [
@@ -278,10 +301,12 @@ export default {
       checkList: [],
 
       //  上传图片的URL
-      uploadURL: "http://localhost:1106/upload",
+      uploadURL: "http://localhost:8082/upload",
 
       // 图片上传组件的headers请求头
       headerObj: {
+        role: window.sessionStorage.getItem("role"),
+        name: window.sessionStorage.getItem("name"),
         Authorization: window.sessionStorage.getItem("token"),
       },
 
@@ -337,20 +362,21 @@ export default {
     async getParamsList() {
       // console.log(this.addForm);
       const { data: res } = await this.$http.get(
-        `categories/${this.goods_cat}/attributes`
+        `categories/${this.addForm.goods_cat}/attributes`
       );
+      this.tableData = res.data;
       // console.log(res.data);
-      return { data: res };
+      // return res.data;
     },
 
     async tabClicked() {
       switch (this.activeIndex) {
         // 访问动态参数面板
         case "1": {
-          this.checkList = [];
-          const { data: res } = await this.getParamsList();
-          this.tableData = res.data;
-          // console.log(res.data);
+          // this.checkList = [];
+          this.getParamsList();
+          //  = res.data;
+          console.log(this.tableData);
           break;
         }
       }
