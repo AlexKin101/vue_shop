@@ -92,6 +92,56 @@
                       <span>{{ scope.row.outPrice + " 元" }}</span>
                     </el-form-item>
                     <br />
+                    <el-form-item
+                      label="商品折扣价："
+                      style="margin-right: 40px"
+                    >
+                      <span v-if="scope.row.isDiscount === 1">
+                        {{ scope.row.discountPrice + " 元" }}
+                      </span>
+                      <span v-else>
+                        NULL
+                      </span>
+                    </el-form-item>
+                    <el-form-item label="商品折扣率：">
+                      <el-tooltip
+                        :disabled="
+                          scope.row.discountPrice / scope.row.outPrice <=
+                            0.75 && scope.row.isDiscount === 1
+                            ? false
+                            : true
+                        "
+                        content="该商品折扣率过低，请检查折扣定价是否合理！"
+                        placement="bottom"
+                        effect="dark"
+                      >
+                        <span
+                          v-if="
+                            scope.row.discountPrice / scope.row.outPrice <=
+                              0.75 && scope.row.isDiscount === 1
+                          "
+                          style="color:#F56C6C"
+                        >
+                          {{
+                            (
+                              scope.row.discountPrice / scope.row.outPrice
+                            ).toFixed(2) *
+                              100 +
+                              "%"
+                          }}
+                        </span>
+                        <span v-else>
+                          {{
+                            (
+                              scope.row.discountPrice / scope.row.outPrice
+                            ).toFixed(2) *
+                              100 +
+                              "%"
+                          }}
+                        </span>
+                      </el-tooltip>
+                    </el-form-item>
+                    <br />
                     <el-form-item label="商品重量：">
                       <span v-if="scope.row.weight === ''">
                         NULL
@@ -99,10 +149,13 @@
                       <span v-else>{{ scope.row.weight + " Kg" }}</span>
                     </el-form-item>
                     <br />
-                    <el-form-item label="商品最低库存：">
+                    <el-form-item
+                      label="商品最低库存："
+                      style="margin-right: 40px"
+                    >
                       <span>{{ scope.row.lowStock }}</span>
                     </el-form-item>
-                    <br />
+
                     <el-form-item label="当前商品库存：">
                       <span>{{ scope.row.stock }}</span>
                     </el-form-item>
@@ -128,7 +181,7 @@
         <el-table-column
           label="商品分类"
           prop="type.name"
-          width="110px"
+          width="100px"
           align="center"
           sortable
           column-key="type.name"
@@ -138,7 +191,7 @@
         <el-table-column
           label="商品品牌"
           prop="brands.name"
-          width="110px"
+          width="90px"
           align="center"
           sortable
           column-key="brands.name"
@@ -146,19 +199,29 @@
           :filter-method="filterBrand"
         ></el-table-column>
         <el-table-column
-          label="售出价格（元）"
+          label="当前售出价格（元）"
           prop="outPrice"
           width="95px"
           align="center"
           sortable
-        ></el-table-column>
-        <el-table-column
-          label="商品库存数量"
-          prop="stock"
-          width="70px"
-          align="center"
-          sortable
-        ></el-table-column>
+        >
+          <template slot-scope="scope">
+            <el-tooltip
+              :disabled="scope.row.isDiscount === 1 ? false : true"
+              content="该商品处于折扣状态"
+              placement="bottom"
+              effect="dark"
+            >
+              <span v-if="scope.row.isDiscount === 1" style="color:#E6A23C">
+                {{ scope.row.discountPrice }}
+              </span>
+              <span v-else>
+                {{ scope.row.outPrice }}
+              </span>
+            </el-tooltip>
+          </template>
+        </el-table-column>
+
         <el-table-column
           label="商品库存状态"
           width="80px"
@@ -198,9 +261,47 @@
           </template>
         </el-table-column>
         <el-table-column
+          label="是否新品"
+          width="80px"
+          align="center"
+          :filters="[
+            { text: '是', value: 1 },
+            { text: '否', value: 0 },
+          ]"
+          :filter-method="filterNew"
+        >
+          <template slot-scope="scope">
+            <el-tag type="warning" v-if="scope.row.isNew === 1">
+              是
+            </el-tag>
+            <el-tag v-else>
+              否
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column
+          label="是否折扣"
+          width="80px"
+          align="center"
+          :filters="[
+            { text: '是', value: 1 },
+            { text: '否', value: 0 },
+          ]"
+          :filter-method="filterDiscount"
+        >
+          <template slot-scope="scope">
+            <el-tag type="warning" v-if="scope.row.isDiscount === 1">
+              是
+            </el-tag>
+            <el-tag v-else>
+              否
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column
           label="创建时间"
           prop="addTime"
-          width="160px"
+          width="150px"
           align="center"
           sortable
         >
@@ -509,7 +610,7 @@ export default {
       const { data: res } = await this.$http.get("goods", {
         params: this.queryInfo,
       });
-      // console.log(res);
+      console.log(res);
       if (res.meta.status !== 200)
         return this.$message.error("获取商品列表失败");
 
@@ -717,6 +818,10 @@ export default {
 
     filterNew(value, row) {
       return row.isNew === value;
+    },
+
+    filterDiscount(value, row) {
+      return row.isDiscount === value;
     },
 
     filterSale(value, row) {

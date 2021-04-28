@@ -21,7 +21,7 @@
           :closable="false"
         ></el-alert>
         <!-- 选择商品分类的级联选择框 -->
-        <el-col :span="6">
+        <el-col :span="4">
           <el-cascader
             placeholder="请选择商品分类："
             v-model="selectedCateKeys"

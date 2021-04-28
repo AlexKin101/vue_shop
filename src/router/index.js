@@ -66,6 +66,8 @@ const Activity = () =>
   import(/* webpackChunkName:"marketing" */ "../components/marketing/Activity");
 const Carousel = () =>
   import(/* webpackChunkName:"marketing" */ "../components/marketing/Carousel");
+const Discount = () =>
+  import(/* webpackChunkName:"marketing" */ "../components/marketing/Discount");
 
 // 解决ElementUI导航栏中的vue-router在3.0版本以上重复点菜单报错问题
 const originalPush = Router.prototype.push;
@@ -270,6 +272,19 @@ const router = new Router({
         {
           path: "/carousel",
           component: Carousel,
+          beforeEnter: (to, from, next) => {
+            const role = window.sessionStorage.getItem("role");
+            if (role === "superAdmin") {
+              next();
+            } else {
+              alert("抱歉，您无权限进入该页面");
+              next(false);
+            }
+          },
+        },
+        {
+          path: "/discount",
+          component: Discount,
           beforeEnter: (to, from, next) => {
             const role = window.sessionStorage.getItem("role");
             if (role === "superAdmin") {

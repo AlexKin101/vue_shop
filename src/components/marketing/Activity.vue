@@ -6,7 +6,7 @@
     <el-breadcrumb separator="/">
       <el-breadcrumb-item :to="{ path: '/home' }">首页</el-breadcrumb-item>
       <el-breadcrumb-item>营销管理</el-breadcrumb-item>
-      <el-breadcrumb-item>商品推荐</el-breadcrumb-item>
+      <el-breadcrumb-item>新品推荐</el-breadcrumb-item>
     </el-breadcrumb>
 
     <!-- 卡片视图区域 -->
