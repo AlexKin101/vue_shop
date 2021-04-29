@@ -41,7 +41,7 @@
           type="index"
           align="center"
         ></el-table-column>
-        <el-table-column label="姓名" prop="username"></el-table-column>
+        <el-table-column label="用户名" prop="username"></el-table-column>
         <el-table-column label="邮箱" prop="email"></el-table-column>
         <el-table-column
           label="手机号"
@@ -189,7 +189,7 @@
           <el-input v-model="editForm.username" disabled></el-input>
         </el-form-item>
         <el-form-item label="邮箱" prop="email">
-          <el-input v-model="editForm.email"></el-input>
+          <el-input v-model="editForm.email" disabled></el-input>
         </el-form-item>
         <el-form-item label="手机号" prop="tel">
           <el-input v-model="editForm.tel"></el-input>
@@ -242,12 +242,18 @@ export default {
     var checkEmail = (rule, value, callback) => {
       const regEmail = /\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*/;
 
-      if (regEmail.test(value)) {
-        // 合法的邮箱
-        return callback();
+      if (!regEmail.test(value)) {
+        callback(new Error("请输入合法的邮箱"));
+      } else {
+        this.emailRules(value).then(function(data) {
+          console.log(data);
+          if (data == true) {
+            callback(new Error("邮箱已存在"));
+          } else {
+            return callback();
+          }
+        });
       }
-
-      callback(new Error("请输入合法的邮箱"));
     };
 
     // 验证手机号的规则
@@ -260,6 +266,28 @@ export default {
       }
 
       callback(new Error("请输入合法的手机号"));
+    };
+
+    var checkUsername = (rule, value, callback) => {
+      let reg = /^[\u4e00-\u9fa5_a-zA-Z0-9.·-]+$/;
+      if (!value) {
+        callback(new Error("用户名为必填项"));
+      } else if (value.length < 5 || value.length > 12) {
+        callback(new Error("长度在 5 到 12 个字符"));
+      } else if (!reg.test(value)) {
+        callback(new Error("姓名不支持特殊字符"));
+      } else if (this.usernameRules(value)) {
+        this.usernameRules(value).then(function(data) {
+          console.log(data);
+          if (data == true) {
+            callback(new Error("用户名已存在"));
+          } else {
+            return callback();
+          }
+        });
+      } else {
+        return callback();
+      }
     };
 
     return {
@@ -296,11 +324,9 @@ export default {
       // 添加表单的验证规则对象
       addFormRules: {
         username: [
-          { required: true, message: "请输入用户名", trigger: "blur" },
           {
-            min: 3,
-            max: 10,
-            message: "用户名的长度在3~10个字符之间",
+            required: true,
+            validator: checkUsername,
             trigger: "blur",
           },
         ],
@@ -523,6 +549,42 @@ export default {
     setRoleDialogClosed() {
       this.selectedRoleId = "";
       this.userInfo = {};
+    },
+
+    //验证用户名是否重复
+    async usernameRules(value) {
+      if (value) {
+        const { data: res } = await this.$http.post(
+          "users/checkUsername",
+          null,
+          {
+            params: { username: value },
+          }
+        );
+
+        if (res.data == true) {
+          return true;
+        } else {
+          return false;
+        }
+      }
+      return false;
+    },
+
+    //验证邮箱是否重复
+    async emailRules(value) {
+      if (value) {
+        const { data: res } = await this.$http.post("users/checkEmail", null, {
+          params: { email: value },
+        });
+
+        if (res.data == true) {
+          return true;
+        } else {
+          return false;
+        }
+      }
+      return false;
     },
   },
 };
