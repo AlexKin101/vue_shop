@@ -92,7 +92,7 @@
             </el-tooltip>
 
             <!-- 删除按钮 -->
-            <el-tooltip
+            <!-- <el-tooltip
               class="item"
               effect="dark"
               content="删除"
@@ -108,7 +108,7 @@
               >
                 删除
               </el-button>
-            </el-tooltip>
+            </el-tooltip> -->
 
             <!-- 分配权限按钮 -->
             <!-- <el-tooltip
@@ -177,7 +177,7 @@
         label-width="80px"
       >
         <el-form-item label="角色名称" prop="name">
-          <el-input v-model="editForm.name"></el-input>
+          <el-input v-model="editForm.name" disabled></el-input>
         </el-form-item>
         <el-form-item label="角色描述" prop="desc">
           <el-input v-model="editForm.desc"></el-input>
@@ -220,6 +220,26 @@
 <script>
 export default {
   data() {
+    //验证名称
+    var checkName = (rule, value, callback) => {
+      if (!value) {
+        callback(new Error("角色名称为必填项"));
+      } else if (value.length < 3 || value.length > 10) {
+        callback(new Error("长度在 3 到 10 个字符"));
+      } else if (this.nameRules(value)) {
+        this.nameRules(value).then(function(data) {
+          console.log(data);
+          if (data == true) {
+            callback(new Error("角色名称已存在"));
+          } else {
+            return callback();
+          }
+        });
+      } else {
+        return callback();
+      }
+    };
+
     return {
       //所有角色列表数据
       roleList: [],
@@ -264,15 +284,15 @@ export default {
       //修改表单的验证规则对象
       editFormRules: {
         name: [
-          { required: true, message: "请输入角色名", trigger: "blur" },
           {
-            min: 3,
-            max: 10,
-            message: "角色名的长度在3~10个字符之间",
+            required: true,
+            validator: checkName,
             trigger: "blur",
           },
         ],
       },
+
+      currentName: "",
     };
   },
   created() {
@@ -317,6 +337,7 @@ export default {
       if (res.meta.status !== 200) return this.$message.error("角色查询失败");
 
       this.editForm = res.data;
+      this.currentName = res.data.name;
       this.editDialogVisible = true;
       // console.log(this.editForm);
     },
@@ -407,6 +428,7 @@ export default {
 
       // 把获取到的权限数据保存到data中
       this.rightsList = res.data;
+
       // console.log(res.data);
 
       //递归获取三级节点的Id
@@ -448,6 +470,22 @@ export default {
       this.$message.success("分配权限成功");
       this.getRoleList();
       this.setRightDialogVisible = false;
+    },
+
+    //验证名称是否重复
+    async nameRules(value) {
+      if (value) {
+        const { data: res } = await this.$http.post("roles/checkName", null, {
+          params: { name: value, currentName: this.currentName },
+        });
+
+        if (res.data == true) {
+          return true;
+        } else {
+          return false;
+        }
+      }
+      return false;
     },
   },
 };

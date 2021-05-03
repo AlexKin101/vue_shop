@@ -197,6 +197,13 @@
                 sortable
               ></el-table-column>
               <el-table-column
+                label="商品品牌"
+                prop="brands.name"
+                width="95px"
+                align="center"
+                sortable
+              ></el-table-column>
+              <el-table-column
                 label="商品价格（元）"
                 prop="outPrice"
                 width="95px"
@@ -213,7 +220,7 @@
               <el-table-column
                 label="创建时间"
                 prop="addTime"
-                width="140px"
+                width="160px"
                 align="center"
                 sortable
               >
@@ -222,6 +229,7 @@
                 </template>
               </el-table-column>
             </el-table>
+            <br />
             <!-- 分页区域 -->
             <el-pagination
               @current-change="handleCurrentChange"
@@ -230,36 +238,39 @@
               layout="total, prev, pager, next, jumper"
               :total="total"
               background
+              style="margin-bottom:20px"
             ></el-pagination>
-            <br />
+
             <hr />
-            <el-form-item label="轮播图：">
-              <el-upload
-                drag
-                ref="myUpload"
-                :action="uploadURL"
-                :on-remove="handleRemove"
-                list-type="picture"
-                :on-success="handleSuccess"
-                :headers="headerObj"
-              >
-                <i class="el-icon-upload">轮播图</i>
-                <div class="el-upload__text">
-                  将文件拖到此处，或
-                  <em>点击上传</em>
-                </div>
-                <div class="el-upload__tip" slot="tip">
-                  只能上传jpg/png文件，且不超过500kb
-                </div>
-              </el-upload>
-            </el-form-item>
+            <div style="margin-top: 30px">
+              <el-form-item label="轮播图：">
+                <el-upload
+                  drag
+                  ref="myUpload"
+                  :action="uploadURL"
+                  :on-remove="handleRemove"
+                  list-type="picture"
+                  :on-success="handleSuccess"
+                  :headers="headerObj"
+                >
+                  <i class="el-icon-upload">轮播图</i>
+                  <div class="el-upload__text">
+                    将文件拖到此处，或
+                    <em>点击上传</em>
+                  </div>
+                  <div class="el-upload__tip" slot="tip">
+                    只能上传jpg/png文件，且不超过500kb
+                  </div>
+                </el-upload>
+              </el-form-item>
+            </div>
           </el-form>
         </el-col>
       </el-row>
 
       <!-- 底部区域 -->
       <span slot="footer" class="dialog-footer">
-        <div style="margin-top: 20px" align="right">
+        <div align="right">
           <el-button @click="addDialogVisible = false">取消</el-button>
           <el-button @click="addCarousel">确定</el-button>
         </div>

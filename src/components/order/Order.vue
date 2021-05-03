@@ -230,6 +230,10 @@
                 icon="el-icon-setting"
                 size="mini"
                 @click="showStatusBox(scope.row.id)"
+                :disabled="
+                  (scope.row.state === '已付款' ? false : true) &&
+                    (scope.row.state === '待付款' ? false : true)
+                "
               ></el-button>
             </el-tooltip>
 
@@ -279,25 +283,20 @@
         label-width="120px"
       >
         <el-form-item label="目前收货地址:" prop="address">
-          <el-input v-model="addressForm.address"></el-input>
+          {{ addressForm.address }}
+          <!-- <el-input v-model="addressForm.address"></el-input> -->
         </el-form-item>
-        <!-- <el-form-item label="省市区/县" prop="address1">
+        <el-form-item label="省市区/县" prop="address1">
           <el-cascader
-            :options="cityData"
-            v-model="addressForm.address1"
-            :props="{
-              expandTrigger: 'hover',
-              value: 'value',
-              label: 'label',
-              children: 'children',
-              //checkStrictly: 'false',
-            }"
+            :options="options"
             clearable
-          ></el-cascader> -->
-        <!-- </el-form-item>
+            @change="addressChange"
+            v-model="addressForm.address1"
+          ></el-cascader>
+        </el-form-item>
         <el-form-item label="详细地址" prop="address2">
           <el-input v-model="addressForm.address2"></el-input>
-        </el-form-item> -->
+        </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
         <el-button @click="addressDialogVisible = false">取 消</el-button>
@@ -325,10 +324,18 @@
             v-model="statusForm.isSend"
             active-text="已发货"
             inactive-text="未发货"
+            :disabled="
+              (statusForm.state === '已付款' ? false : true) &&
+                (this.isSend === false ? false : true)
+            "
           ></el-switch>
         </el-form-item>
         <el-form-item label="订单价格" prop="price">
-          <el-input type="number" v-model="statusForm.price"></el-input>
+          <el-input
+            oninput="value=value.replace(/[^0-9.]/g,'')"
+            v-model="statusForm.price"
+            :disabled="statusForm.state === '待付款' ? false : true"
+          ></el-input>
         </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
@@ -361,10 +368,24 @@
 
 <script>
 import cityData from "./city_data2017_element";
+import { regionData, CodeToText } from "element-china-area-data";
+
 import progress from "./progress";
 
 export default {
   data() {
+    const validatePrice = (rule, value, callback) => {
+      let reg = /^-?([1-9]\d*|0)(\.\d{1,2})?$/;
+      if (!value) {
+        callback(new Error("价格不能为空"));
+      } else if (!reg.test(value)) {
+        callback(new Error("请输入正确格式的价格"));
+      } else if (value.length > 10) {
+        callback(new Error("最多可输入10个字符"));
+      } else {
+        callback();
+      }
+    };
     return {
       // 商品的数据列表，默认为空
       ordersList: [],
@@ -380,6 +401,8 @@ export default {
 
       // 物流信息
       progressInfo: [],
+
+      selectedOptions: [],
 
       // 控制修改地址的对话框
       addressDialogVisible: false,
@@ -399,7 +422,8 @@ export default {
         price: [
           {
             required: true,
-            message: "请输入订单价格",
+            validator: validatePrice,
+            message: "请输入正确的订单价格",
             trigger: "blur",
           },
         ],
@@ -407,35 +431,37 @@ export default {
 
       addressForm: {
         address: "",
-        // address1: [],
-        // address2: "",
+        address1: [],
+        address2: "",
       },
       addressFormRules: {
-        address: [
+        // address: [
+        //   {
+        //     required: true,
+        //     message: "请填写地址",
+        //     trigger: "blur",
+        //   },
+        // ],
+        address1: [
           {
             required: true,
-            message: "请填写地址",
+            message: "请选择省市区/县",
             trigger: "blur",
           },
         ],
-        // address1: [
-        //   {
-        //     required: true,
-        //     message: "请选择省市区/县",
-        //     trigger: "blur",
-        //   },
-        // ],
 
-        // address2: [
-        //   {
-        //     required: true,
-        //     message: "请填写详细地址",
-        //     trigger: "blur",
-        //   },
-        // ],
+        address2: [
+          {
+            required: true,
+            message: "请填写详细地址",
+            trigger: "blur",
+          },
+        ],
       },
 
-      // 全国省市区/县数据
+      // 全国省市区/
+      options: regionData,
+      // selectedOptions: []
       cityData,
 
       //目前订单收货地址
@@ -443,6 +469,9 @@ export default {
 
       // 静态物流信息
       progress,
+
+      //是否发货
+      isSend: false,
     };
   },
   created() {
@@ -490,13 +519,19 @@ export default {
       if (res.meta.status !== 200) return this.$message.error("查询失败");
       // console.log(res.data);
       this.statusForm = res.data;
-      this.addressForm = res.data;
+      this.addressForm.id = res.data.id;
+      this.addressForm.address = res.data.address;
+
+      this.isSend = res.data.state;
 
       if (this.statusForm.isSend === 1) {
         this.statusForm.isSend = true;
+        this.isSend = true;
       } else {
         this.statusForm.isSend = false;
+        this.isSend = false;
       }
+      // console.log(this.isSend);
     },
 
     // 监听pagesize改变
@@ -513,6 +548,7 @@ export default {
     // 展示修改地址的对话框
     showBox(id) {
       this.getOrder(id);
+
       this.addressDialogVisible = true;
     },
 
@@ -527,7 +563,24 @@ export default {
         // console.log(valid);
         if (!valid) return;
         //可以发起修改订单地址的网络请求
-        // console.log(this.statusForm);
+
+        this.addressForm.address =
+          CodeToText[this.addressForm.address1[0]] +
+          " " +
+          CodeToText[this.addressForm.address1[1]] +
+          " " +
+          CodeToText[this.addressForm.address1[2]] +
+          " " +
+          " (" +
+          this.addressForm.address2 +
+          ")";
+        // console.log(this.addressForm.address);
+        // this.selectedOptions.forEach((item) => {
+        //   this.addressForm.address1 =
+        //     this.addressForm.address1 + CodeToText[item];
+        // });
+        // console.log(this.addressForm);
+
         const { data: res } = await this.$http.put(
           `orders/${this.addressForm.id}/address`,
           null,
@@ -576,9 +629,24 @@ export default {
     },
 
     // 修改订单状态
-    editStatus() {
+    async editStatus() {
+      const confirmResult = await this.$confirm(
+        "此操作将永久修改该订单, 是否继续?",
+        "提示",
+        {
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          type: "warning",
+        }
+      ).catch((err) => err);
+
+      if (confirmResult !== "confirm") {
+        return this.$message.info("已取消修改");
+      }
+
       this.$refs.statusFormRef.validate(async (valid) => {
         // console.log(valid);
+
         if (!valid) return;
 
         if (this.statusForm.isSend === true) {
@@ -633,6 +701,16 @@ export default {
 
     filterIsSend(value, row) {
       return row.isSend === value;
+    },
+
+    addressChange(arr) {
+      // console.log(arr);
+      // arr.forEach((item) => {
+      //   CodeToText[item];
+      // });
+      console.log(CodeToText[arr[0]], CodeToText[arr[1]], CodeToText[arr[2]]);
+      // this.addressForm.address1 =
+      //   CodeToText[arr[0]] + CodeToText[arr[1]] + CodeToText[arr[2]];
     },
   },
 

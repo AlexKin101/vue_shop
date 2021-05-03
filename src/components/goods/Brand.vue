@@ -158,6 +158,26 @@
 <script>
 export default {
   data() {
+    //验证名称
+    var checkName = (rule, value, callback) => {
+      if (!value) {
+        callback(new Error("品牌名称为必填项"));
+      } else if (value.length < 2 || value.length > 30) {
+        callback(new Error("长度在 2 到 30 个字符"));
+      } else if (this.nameRules(value)) {
+        this.nameRules(value).then(function(data) {
+          console.log(data);
+          if (data == true) {
+            callback(new Error("品牌名称已存在"));
+          } else {
+            return callback();
+          }
+        });
+      } else {
+        return callback();
+      }
+    };
+
     return {
       //获取用户列表的参数
       queryInfo: {
@@ -184,31 +204,15 @@ export default {
 
       // 添加表单的验证规则对象
       addFormRules: {
-        name: [
-          { required: true, message: "请输入品牌名称", trigger: "blur" },
-          {
-            min: 2,
-            max: 30,
-            message: "用户名的长度在2~30个字符之间",
-            trigger: "blur",
-          },
-        ],
+        name: [{ required: true, validator: checkName, trigger: "blur" }],
       },
-      // 查询到的品牌信息对象
-      editForm: {},
       //修改表单的验证规则对象
-      editForm: {},
+      editForm: { name: "", desc: "" },
       editFormRules: {
-        name: [
-          { required: true, message: "请输入品牌名称", trigger: "blur" },
-          {
-            min: 2,
-            max: 30,
-            message: "用户名的长度在2~30个字符之间",
-            trigger: "blur",
-          },
-        ],
+        name: [{ required: true, validator: checkName, trigger: "blur" }],
       },
+
+      currentName: "",
     };
   },
   created() {
@@ -273,6 +277,7 @@ export default {
       if (res.meta.status !== 200) return this.$message.error("品牌查询失败");
       // console.log(res.data);
       this.editForm = res.data;
+      this.currentName = res.data.name;
       this.editDialogVisible = true;
       // console.log(this.editForm);
     },
@@ -329,6 +334,22 @@ export default {
       this.$message.success("删除品牌成功");
       //重新获取品牌列表
       this.getBrandsList();
+    },
+
+    //验证名称是否重复
+    async nameRules(value) {
+      if (value) {
+        const { data: res } = await this.$http.post("brands/checkName", null, {
+          params: { name: value, currentName: this.currentName },
+        });
+
+        if (res.data == true) {
+          return true;
+        } else {
+          return false;
+        }
+      }
+      return false;
     },
   },
 };

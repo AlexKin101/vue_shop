@@ -30,7 +30,7 @@
         <el-table-column
           label="申请时间"
           prop="applyTime"
-          width="150px"
+          width="155px"
           align="center"
         >
           <template slot-scope="scope">
@@ -54,7 +54,21 @@
           width="100px"
         ></el-table-column>
 
-        <el-table-column label="状态" prop="state" width="100px" align="center">
+        <el-table-column
+          label="状态"
+          prop="state"
+          width="100px"
+          align="center"
+          :filters="[
+            { text: '退货完成', value: '退货完成' },
+            { text: '退款完成', value: '退款完成' },
+            { text: '待收货', value: '待收货' },
+            { text: '已拒绝', value: '已拒绝' },
+            { text: '已同意', value: '已同意' },
+            { text: '拒绝退款', value: '拒绝退款' },
+          ]"
+          :filter-method="filterState"
+        >
           <template slot-scope="scope">
             <el-tag type="Brand Color" v-if="scope.row.state === '退货完成'">
               退货完成
@@ -237,6 +251,10 @@ export default {
 
     //   this.getReturnOrdersList();
     // },
+
+    filterState(value, row) {
+      return row.state === value;
+    },
   },
 };
 </script>

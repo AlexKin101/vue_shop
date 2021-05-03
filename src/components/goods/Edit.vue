@@ -55,14 +55,17 @@
             <el-row :gutter="20">
               <el-col :span="10">
                 <el-form-item label="商品进货价格（元）" prop="inPrice">
-                  <el-input v-model="editForm.inPrice" type="number"></el-input>
+                  <el-input
+                    v-model="editForm.inPrice"
+                    oninput="value=value.replace(/[^0-9.]/g,'')"
+                  ></el-input>
                 </el-form-item>
               </el-col>
               <el-col :span="10" style="margin-left:120px">
                 <el-form-item label="商品售出价格（元）" prop="outPrice">
                   <el-input
                     v-model="editForm.outPrice"
-                    type="number"
+                    oninput="value=value.replace(/[^0-9.]/g,'')"
                   ></el-input>
                 </el-form-item>
               </el-col>
@@ -188,6 +191,18 @@ import _ from "lodash";
 
 export default {
   data() {
+    const validatePrice = (rule, value, callback) => {
+      let reg = /^-?([1-9]\d*|0)(\.\d{1,2})?$/;
+      if (!value) {
+        callback(new Error("价格不能为空"));
+      } else if (!reg.test(value)) {
+        callback(new Error("请输入正确格式的价格"));
+      } else if (value.length > 10) {
+        callback(new Error("最多可输入10个字符"));
+      } else {
+        callback();
+      }
+    };
     return {
       uploeditisabled: false,
       baseURL: "http://localhost:1106/upload",
@@ -199,7 +214,7 @@ export default {
         name: "",
         inPrice: 0,
         outPrice: 0,
-        weight: 0.0,
+        weight: "",
         stock: 0,
         lowStock: 10,
         isStockout: 0,
@@ -222,24 +237,20 @@ export default {
         inPrice: [
           {
             required: true,
-            message: "请输入商品进货价格",
+            message: "请输入正确的商品进货价格",
+            validator: validatePrice,
             trigger: "blur",
           },
         ],
         outPrice: [
           {
             required: true,
-            message: "请输入商品售出价格",
+            message: "请输入正确的商品售出价格",
+            validator: validatePrice,
             trigger: "blur",
           },
         ],
-        weight: [
-          {
-            required: true,
-            message: "请输入商品重量",
-            trigger: "blur",
-          },
-        ],
+
         stock: [
           {
             required: true,

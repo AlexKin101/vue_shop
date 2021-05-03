@@ -133,6 +133,24 @@
 <script>
 export default {
   data() {
+    //验证名称
+    var checkName = (rule, value, callback) => {
+      if (!value) {
+        callback(new Error("理由为必填项"));
+      } else if (this.nameRules(value)) {
+        this.nameRules(value).then(function(data) {
+          console.log(data);
+          if (data == true) {
+            callback(new Error("该理由已存在"));
+          } else {
+            return callback();
+          }
+        });
+      } else {
+        return callback();
+      }
+    };
+
     return {
       // 查询条件
       queryInfo: {
@@ -155,8 +173,11 @@ export default {
 
       // 添加表单的验证规则对象
       reasonFormRules: {
-        name: [{ required: true, message: "请输入理由", trigger: "blur" }],
+        name: [{ required: true, validator: checkName, trigger: "blur" }],
       },
+
+      // 当前名称
+      currentName: "",
     };
   },
   created() {
@@ -258,6 +279,22 @@ export default {
       } else {
         return false;
       }
+    },
+
+    //验证名称是否重复
+    async nameRules(value) {
+      if (value) {
+        const { data: res } = await this.$http.post("reason/checkName", null, {
+          params: { name: value, currentName: this.currentName },
+        });
+
+        if (res.data == true) {
+          return true;
+        } else {
+          return false;
+        }
+      }
+      return false;
     },
   },
 };

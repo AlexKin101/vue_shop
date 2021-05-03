@@ -36,10 +36,40 @@
         </el-table-column>
         <el-table-column label="价格/货号" width="180" align="center">
           <template slot-scope="scope">
-            <span class="font-small">价格：</span>
-            <span class="font-small">
-              {{ scope.row.orders.products.outPrice }}
+            <span
+              class="font-small"
+              v-if="scope.row.orders.products.isDiscount === 1"
+            >
+              折扣价：
             </span>
+            <span class="font-small" v-else>
+              价格：
+            </span>
+            <el-tooltip
+              :disabled="
+                scope.row.orders.products.isDiscount == 1 ? false : true
+              "
+              :content="
+                '该商品参加折扣！原价为' +
+                  scope.row.orders.products.outPrice +
+                  '元'
+              "
+              placement="top"
+              effect="dark"
+            >
+              <span>
+                <span
+                  class="font-small"
+                  v-if="scope.row.orders.products.isDiscount === 1"
+                  style="color:#F56C6C"
+                >
+                  {{ scope.row.orders.products.discountPrice }}
+                </span>
+                <span class="font-small" v-else>
+                  {{ scope.row.orders.products.outPrice }}
+                </span>
+              </span>
+            </el-tooltip>
             <br />
             <span class="font-small">货号：</span>
             <span class="font-small">
@@ -118,8 +148,9 @@
             <el-form-item label="订单金额:" prop="price">
               {{ this.serviceForm.price }} 元
             </el-form-item>
-            <el-form-item label="确认退款金额:" label-width="100px">
+            <el-form-item label="确认退款金额:" label-width="110px">
               <el-input
+                oninput="value=value.replace(/[^0-9.]/g,'')"
                 :placeholder="serviceForm.price"
                 v-model="serviceForm.returnPrice"
                 :disabled="judgeDisable(this.serviceForm.state)"
@@ -167,6 +198,18 @@
 <script>
 export default {
   data() {
+    const validatePrice = (rule, value, callback) => {
+      let reg = /^-?([1-9]\d*|0)(\.\d{1,2})?$/;
+      if (!value) {
+        callback(new Error("价格不能为空"));
+      } else if (!reg.test(value)) {
+        callback(new Error("请输入正确格式的价格"));
+      } else if (value.length > 10) {
+        callback(new Error("最多可输入10个字符"));
+      } else {
+        callback();
+      }
+    };
     return {
       // 商品信息
       goodsInfoList: [],
@@ -195,7 +238,16 @@ export default {
 
         status: 0, //退换货订单状态
       },
-      serviceFormRules: {},
+      serviceFormRules: {
+        price: [
+          {
+            required: true,
+            validator: validatePrice,
+            message: "请输入正确的退款金额",
+            trigger: "blur",
+          },
+        ],
+      },
     };
   },
   created() {

@@ -47,13 +47,20 @@
         <el-table-column
           label="商品编号"
           prop="number"
-          width="130px"
+          width="150px"
           align="center"
         ></el-table-column>
         <el-table-column label="商品名称" prop="name"></el-table-column>
         <el-table-column
           label="商品分类"
           prop="type.name"
+          width="95px"
+          align="center"
+          sortable
+        ></el-table-column>
+        <el-table-column
+          label="商品品牌"
+          prop="brands.name"
           width="95px"
           align="center"
           sortable
@@ -171,6 +178,13 @@
           sortable
         ></el-table-column>
         <el-table-column
+          label="商品品牌"
+          prop="brands.name"
+          width="95px"
+          align="center"
+          sortable
+        ></el-table-column>
+        <el-table-column
           label="商品价格（元）"
           prop="outPrice"
           width="95px"
@@ -188,7 +202,7 @@
         <el-table-column
           label="创建时间"
           prop="addTime"
-          width="140px"
+          width="160px"
           align="center"
           sortable
         >
@@ -197,6 +211,7 @@
           </template>
         </el-table-column>
       </el-table>
+      <br />
 
       <!-- 分页区域 -->
       <el-pagination
@@ -210,7 +225,7 @@
 
       <!-- 底部区域 -->
       <span slot="footer" class="dialog-footer">
-        <div style="margin-top: 20px" align="right">
+        <div align="right">
           <el-button @click="addDialogVisible = false">取消</el-button>
           <el-button @click="agree">确定</el-button>
         </div>

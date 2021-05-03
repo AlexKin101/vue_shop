@@ -129,7 +129,7 @@
         <el-table-column
           label="商品编号"
           prop="number"
-          width="130px"
+          width="150px"
           align="center"
         ></el-table-column>
         <el-table-column label="商品名称" prop="name"></el-table-column>
@@ -161,7 +161,24 @@
           sortable
         >
           <template slot-scope="scope">
-            <span>{{ scope.row.discountPrice }}</span>
+            <el-tooltip
+              :disabled="
+                scope.row.discountPrice / scope.row.outPrice <= 0.75
+                  ? false
+                  : true
+              "
+              content="该商品折扣率过低，请检查折扣定价是否合理！"
+              placement="bottom"
+              effect="dark"
+            >
+              <span
+                v-if="scope.row.discountPrice / scope.row.outPrice <= 0.75"
+                style="color:#F56C6C"
+              >
+                {{ scope.row.discountPrice }}
+              </span>
+              <span v-else>{{ scope.row.discountPrice }}</span>
+            </el-tooltip>
           </template>
         </el-table-column>
 
@@ -306,7 +323,7 @@
         ></el-table-column>
         <el-table-column
           label="商品编号"
-          width="130px"
+          width="140px"
           prop="number"
           sortable
         ></el-table-column>
@@ -347,7 +364,7 @@
         <el-table-column
           label="创建时间"
           prop="addTime"
-          width="140px"
+          width="160px"
           align="center"
           sortable
         >
@@ -387,7 +404,7 @@
 
       <!-- 底部区域 -->
       <span slot="footer" class="dialog-footer">
-        <div style="margin-top: 20px" align="right">
+        <div align="right">
           <el-button @click="addDialogVisible = false">取消</el-button>
           <el-button @click="agree">确定</el-button>
         </div>
@@ -458,7 +475,7 @@
             <el-form-item label="商品折扣价(元)：" prop="discountPrice">
               <el-input
                 v-model="editForm.discountPrice"
-                type="number"
+                oninput="value=value.replace(/[^0-9.]/g,'')"
               ></el-input>
             </el-form-item>
           </el-col>
@@ -477,6 +494,18 @@
 <script>
 export default {
   data() {
+    const validatePrice = (rule, value, callback) => {
+      let reg = /^-?([1-9]\d*|0)(\.\d{1,2})?$/;
+      if (!value) {
+        callback(new Error("价格不能为空"));
+      } else if (!reg.test(value)) {
+        callback(new Error("请输入正确格式的价格"));
+      } else if (value.length > 10) {
+        callback(new Error("最多可输入10个字符"));
+      } else {
+        callback();
+      }
+    };
     return {
       // 商品的数据列表，默认为空
       goodsList: [],
@@ -518,7 +547,8 @@ export default {
         discountPrice: [
           {
             required: false,
-            message: "请输入折扣价格",
+            message: "请输入正确的折扣价格",
+            validator: validatePrice,
             trigger: "blur",
           },
         ],
@@ -644,11 +674,18 @@ export default {
       ).catch((err) => err);
       //如果用户确定删除，则返回值为字符串confirm
       //如果用户取消了删除，则返回值为字符串cancel
+      if (this.multipleSelection.length == 1) {
+        if (this.multipleSelection.discountPrice === null) {
+          return this.$message.error("选中商品的折扣价格不能为空");
+        }
+      }
+
       this.multipleSelection.forEach((item) => {
         if (item.discountPrice === null) {
           return this.$message.error("选中商品的折扣价格不能为空");
         }
       });
+
       if (confirmResult !== "confirm") {
         return this.$message.info("已取消删除");
       }

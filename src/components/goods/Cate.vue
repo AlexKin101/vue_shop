@@ -276,6 +276,24 @@
 <script>
 export default {
   data() {
+    //验证名称
+    var checkName = (rule, value, callback) => {
+      if (!value) {
+        callback(new Error("分类名称为必填项"));
+      } else if (this.nameRules(value)) {
+        this.nameRules(value).then(function(data) {
+          console.log(data);
+          if (data == true) {
+            callback(new Error("分类名称已存在"));
+          } else {
+            return callback();
+          }
+        });
+      } else {
+        return callback();
+      }
+    };
+
     return {
       // 查询条件
       queryInfo: {
@@ -330,7 +348,13 @@ export default {
       },
       // 添加分类的表单的验证规则对象
       addCateFormRules: {
-        name: [{ required: true, message: "请输入分类名称", trigger: "blur" }],
+        name: [
+          {
+            required: true,
+            trigger: "blur",
+            validator: checkName,
+          },
+        ],
         leftURL: [{ required: true }],
         topURL: [{ required: true }],
       },
@@ -350,10 +374,19 @@ export default {
       },
       // 编辑分类的表单的验证规则对象
       editFormRules: {
-        name: [{ required: true, message: "请输入分类名称", trigger: "blur" }],
+        name: [
+          {
+            required: true,
+            trigger: "blur",
+            validator: checkName,
+          },
+        ],
         leftURL: [{ required: true }],
         topURL: [{ required: true }],
       },
+
+      // 当前分类名称
+      currentName: "",
 
       // 预览
       previewPath: "",
@@ -534,6 +567,7 @@ export default {
       if (res.meta.status !== 200) return this.$message.error("分类查询失败");
 
       this.editForm = res.data;
+      this.currentName = res.data.name;
       this.showLeftFileList(row);
       this.showTopFileList(row);
       this.editCateDialogVisible = true;
@@ -594,6 +628,26 @@ export default {
       this.$message.success("删除分类成功");
       //重新获取用户列表
       this.getCateList();
+    },
+
+    //验证名称是否重复
+    async nameRules(value) {
+      if (value) {
+        const { data: res } = await this.$http.post(
+          "categories/checkName",
+          null,
+          {
+            params: { name: value, currentName: this.currentName },
+          }
+        );
+
+        if (res.data == true) {
+          return true;
+        } else {
+          return false;
+        }
+      }
+      return false;
     },
   },
 };

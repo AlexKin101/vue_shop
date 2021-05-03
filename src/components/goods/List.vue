@@ -25,7 +25,7 @@
             <el-button
               slot="append"
               icon="el-icon-search"
-              @click="getStockOutGoodsList"
+              @click="getGoodsList"
             ></el-button>
           </el-input>
         </el-col>
@@ -181,7 +181,7 @@
         <el-table-column
           label="商品分类"
           prop="type.name"
-          width="100px"
+          width="80px"
           align="center"
           sortable
           column-key="type.name"
@@ -191,7 +191,7 @@
         <el-table-column
           label="商品品牌"
           prop="brands.name"
-          width="90px"
+          width="80px"
           align="center"
           sortable
           column-key="brands.name"
@@ -323,10 +323,18 @@
         >
           <template slot-scope="scope">
             <!-- {{ scope.row }} -->
-            <el-switch
-              v-model="scope.row.sale"
-              @change="goodsStateChanged(scope.row)"
-            ></el-switch>
+            <el-tooltip
+              :disabled="scope.row.stock <= 0 ? false : true"
+              content="该商品库存不足，无法上架"
+              placement="bottom"
+              effect="dark"
+            >
+              <el-switch
+                :disabled="scope.row.stock <= 0 ? true : false"
+                v-model="scope.row.sale"
+                @change="goodsStateChanged(scope.row)"
+              ></el-switch>
+            </el-tooltip>
           </template>
         </el-table-column>
 
@@ -386,6 +394,26 @@
       width="75%"
       :close="showStockoutDialogClosed"
     >
+      <!-- gutter每个格子之间的距离，相当于列间距 -->
+      <!-- span相当于列的宽度 -->
+      <el-row :gutter="20">
+        <el-col :span="8">
+          <el-input
+            placeholder="请输入内容"
+            class="input-with-select"
+            v-model="stockoutQueryInfo.query"
+            clearable
+            @clear="showStockoutDialogClosed"
+          >
+            <el-button
+              slot="append"
+              icon="el-icon-search"
+              @click="getStockOutGoodsList"
+            ></el-button>
+          </el-input>
+        </el-col>
+      </el-row>
+
       <!-- 内容主体区域 -->
       <el-table
         ref="singleTable"
@@ -449,6 +477,33 @@
           </template>
         </el-table-column>
         <el-table-column
+          label="状态"
+          align="center"
+          width="100px"
+          prop="sale"
+          :filters="[
+            { text: '已上架', value: true },
+            { text: '未上架', value: false },
+          ]"
+          :filter-method="filterSale"
+        >
+          <template slot-scope="scope">
+            <!-- {{ scope.row }} -->
+            <el-tooltip
+              :disabled="scope.row.stock <= 0 ? false : true"
+              content="该商品库存不足，无法上架"
+              placement="bottom"
+              effect="dark"
+            >
+              <el-switch
+                :disabled="scope.row.stock <= 0 ? true : false"
+                v-model="scope.row.sale"
+                @change="goodsStateChanged(scope.row)"
+              ></el-switch>
+            </el-tooltip>
+          </template>
+        </el-table-column>
+        <el-table-column
           label="创建时间"
           prop="addTime"
           width="140px"
@@ -485,17 +540,19 @@
           </template>
         </el-table-column>
       </el-table>
+      <br />
 
       <!-- 分页区域 -->
-      <!-- <el-pagination
+      <el-pagination
+        @size-change="handleStockoutSizeChange"
         @current-change="handleStockoutCurrentChange"
         :current-page="stockoutQueryInfo.pagenum"
         :page-size="stockoutQueryInfo.pagesize"
-        :page-sizes="[10, 20, 30, this.total]"
+        :page-sizes="[10, 20, 30, this.stockoutTotal]"
         layout="total,sizes, prev, pager, next, jumper"
         :total="stockoutTotal"
         background
-      ></el-pagination> -->
+      ></el-pagination>
     </el-dialog>
 
     <!-- 修改库存的对话框 -->
@@ -518,6 +575,21 @@
         <el-form-item label="最低库存数量：" prop="lowStock">
           {{ this.stockForm.lowStock }}
         </el-form-item>
+        <el-form-item label="供货商：">
+          <el-cascader
+            placeholder="请选择供货商："
+            v-model="selectedSupplierKeys"
+            :options="supplierList"
+            style="width:40%"
+            :props="{
+              expandTrigger: 'hover',
+              value: 'name',
+              label: 'name',
+              //checkStrictly: 'false',
+            }"
+          ></el-cascader>
+        </el-form-item>
+
         <el-form-item label="补充库存数量：" prop="supplyStock">
           <el-input
             v-model="stockForm.supplyStock"
@@ -557,6 +629,11 @@ export default {
       brandsList: [],
       //分类列表
       cateList: [],
+      // 供货商列表
+      supplierList: [],
+
+      // 选中的供货商
+      selectedSupplierKeys: "",
 
       // 缺货商品的数据列表，默认为空
       stockoutGoodsList: [],
@@ -564,7 +641,7 @@ export default {
       stockoutQueryInfo: {
         query: "",
         pagenum: 1,
-        pagesize: 5,
+        pagesize: 10,
       },
       //   总数据条数
       stockoutTotal: 0,
@@ -604,6 +681,7 @@ export default {
     this.getBrandsList();
     this.getCateList();
     this.getStockOutGoodsList();
+    this.getSupplierList();
   },
   methods: {
     async getGoodsList() {
@@ -624,19 +702,18 @@ export default {
     },
 
     async getStockOutGoodsList() {
-      const { data: res } = await this.$http.get("goods/stockout");
+      const { data: res } = await this.$http.get("goods/stockout", {
+        params: this.stockoutQueryInfo,
+      });
       // console.log(res);
       if (res.meta.status !== 200)
-        return this.$message.error("获取商品列表失败");
+        return this.$message.error("获取缺货商品列表失败");
 
-      // console.log(res.data);
-      // this.total = res.data.total;
-      // this.goodsList = res.data.goods;
-      // this.stockoutQueryInfo.pagenum = res.data.pageable.pageNumber + 1;
-      // this.stockoutQueryInfo.pagesize = res.data.size;
-      // //   为总数据条数赋值
-      // this.stockoutTotal = res.data.totalElements;
-      this.stockoutGoodsList = res.data;
+      this.stockoutQueryInfo.pagenum = res.data.pageable.pageNumber + 1;
+      this.stockoutQueryInfo.pagesize = res.data.size;
+      //   为总数据条数赋值
+      this.stockoutTotal = res.data.totalElements;
+      this.stockoutGoodsList = res.data.content;
     },
 
     //   获取所有商品分类数据
@@ -675,6 +752,19 @@ export default {
       console.log(this.brandsList);
     },
 
+    //   获取所有供货商数据
+    async getSupplierList() {
+      const { data: res } = await this.$http.get("supplier");
+
+      if (res.meta.status !== 200)
+        return this.$message.error("获取供货商数据失败");
+      //   把数据列表赋值给cateList
+      // console.log(res.data);
+      this.supplierList = res.data;
+      console.log(this.supplierList);
+      //   console.log(res.data);
+    },
+
     // 监听pagesize改变
     handleSizeChange(newSize) {
       this.queryInfo.pagesize = newSize;
@@ -689,6 +779,12 @@ export default {
     // 监听pagenum的改变
     handleStockoutCurrentChange(newPage) {
       this.stockoutQueryInfo.pagenum = newPage;
+      this.getStockOutGoodsList();
+    },
+
+    // 监听pagesize改变
+    handleStockoutSizeChange(newSize) {
+      this.stockoutQueryInfo.pagesize = newSize;
       this.getStockOutGoodsList();
     },
 
