@@ -5,7 +5,7 @@
     <!-- 头部区域 -->
     <el-header>
       <div id="app">
-        <img src="../assets/vue.png" alt="" />
+        <!-- <img src="../assets/vue.png" alt="" /> -->
         <span>社区商城商家服务平台</span>
       </div>
       <el-dropdown>
@@ -20,7 +20,7 @@
         <el-dropdown-menu slot="dropdown" trigger="click">
           <el-dropdown-item disabled>
             <span type="danger" style="text-align: center;display:block;">
-              {{ this.role }}
+              {{ this.judgeRole(this.role) }}
             </span>
             <span type="danger" style="text-align: center;display:block;">
               &nbsp;您好，{{ this.name }}
@@ -29,6 +29,15 @@
           <el-dropdown-item>
             <span type="danger" class="el-icon-house" @click="gotoWelcome()">
               系统首页
+            </span>
+          </el-dropdown-item>
+          <el-dropdown-item>
+            <span
+              type="danger"
+              class="el-icon-house"
+              @click="gotoChangePassword()"
+            >
+              修改密码
             </span>
           </el-dropdown-item>
           <el-dropdown-item>
@@ -163,6 +172,12 @@ export default {
       this.activePath = activePath;
     },
 
+    //修改密码
+    gotoChangePassword() {
+      this.$router.push("/changepassword");
+      window.sessionStorage.setItem("activePath", " ");
+    },
+
     //回到首页
     gotoWelcome() {
       this.$router.push("/Welcome");
@@ -171,6 +186,19 @@ export default {
 
     errorHandler() {
       return true;
+    },
+
+    judgeRole(role) {
+      switch (role) {
+        case "superAdmin":
+          return "超级管理员";
+        case "orderAdmin":
+          return "订单管理员";
+        case "productAdmin":
+          return "商品管理员";
+        case "businessAdmin":
+          return "人事管理员";
+      }
     },
   },
 };

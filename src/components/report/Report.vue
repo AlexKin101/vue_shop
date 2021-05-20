@@ -37,6 +37,12 @@
             sortable
           ></el-table-column>
           <el-table-column
+            label="月利润（元）"
+            prop="profit"
+            align="center"
+            sortable
+          ></el-table-column>
+          <el-table-column
             label="月销量"
             prop="number"
             align="center"
@@ -48,7 +54,20 @@
 
     <!-- 折线图 -->
     <el-card style="margin-top:20px">
-      <div id="main" style="height:400px;"></div>
+      <el-row :gutter="24">
+        <el-col :span="8" style="margin-right:5px">
+          <el-card>
+            <div id="pie" style="height:450px;"></div>
+            <span style="color:#F56C6C;margin-left:20px">
+              订单总数：{{ this.totalOrders }}
+            </span>
+          </el-card>
+        </el-col>
+
+        <el-col :span="15">
+          <div id="main" style="height:450px;"></div>
+        </el-col>
+      </el-row>
     </el-card>
   </div>
 </template>
@@ -77,6 +96,10 @@ export default {
       monthData: [],
 
       monthPrice: [],
+
+      typeInfo: [],
+
+      totalOrders: 0,
 
       month: [
         "第1月",
@@ -125,15 +148,20 @@ export default {
 
   methods: {
     initChart() {
-      this.chartInstance = echarts.init(
+      this.chartInstance_lie = echarts.init(
         document.getElementById("main"),
+        "macarons"
+      );
+
+      this.chartInstance_pie = echarts.init(
+        document.getElementById("pie"),
         "macarons"
       );
 
       // 4、准备数据和配置项
       var options = {
         title: {
-          text: this.selectYear + "年的月销售额一览",
+          text: this.selectYear + "年的月销售数据一览",
           textStyle: {
             fontSize: "28",
           },
@@ -150,7 +178,7 @@ export default {
         legend: {
           left: "center",
           top: "5%",
-          data: ["销售额（元）"],
+          data: ["销售额（元）", "利润（元）"],
         },
         grid: {
           top: "20%",
@@ -220,14 +248,92 @@ export default {
               },
             },
           },
+          {
+            animationDuration: 2800,
+            data: this.monthProfit,
+            type: "line",
+            name: "利润（元）",
+            animationEasing: "quadraticOut",
+            markPoint: {
+              // 最大最小值的相关配置
+              label: {
+                show: true,
+              },
+              data: [
+                {
+                  type: "max",
+                  name: "最大值",
+                },
+                {
+                  type: "min",
+                  name: "最小值",
+                },
+              ],
+
+              animationDuration: 2800,
+              animationEasing: "quadraticOut",
+            },
+            itemStyle: {
+              normal: {
+                color: "#3000fa",
+                lineStyle: {
+                  color: "#3000fa",
+                  width: 2,
+                },
+                areaStyle: {
+                  color: "#f3f8ff",
+                },
+              },
+            },
+          },
         ],
       };
-      //const result = _.merge(this.monthPrice, this.options);
 
+      var option_2 = {
+        title: {
+          text: this.selectYear + "年订单统计",
+          textStyle: {
+            fontSize: "28",
+          },
+        },
+        tooltip: {
+          trigger: "item",
+        },
+        legend: {
+          top: "87%",
+          left: "center",
+        },
+        series: [
+          {
+            name: "订单个数",
+            type: "pie",
+            radius: ["40%", "70%"],
+            avoidLabelOverlap: false,
+            label: {
+              show: false,
+              position: "center",
+            },
+            emphasis: {
+              label: {
+                show: true,
+                fontSize: "32",
+                fontWeight: "bold",
+                fontColor: "#3000fa",
+              },
+            },
+            labelLine: {
+              show: false,
+            },
+            data: this.typeInfo,
+          },
+        ],
+      };
       // console.log(options);
 
       // 5、显示数据
-      this.chartInstance.setOption(options);
+      this.chartInstance_lie.setOption(options);
+      this.chartInstance_pie.setOption(option_2);
+      // myChart.setOption(option_2);
     },
 
     async getMonthData(selectYear) {
@@ -238,7 +344,10 @@ export default {
       this.monthData = res.data.monthData;
       this.monthPrice = res.data.monthPrice;
       this.month = res.data.month;
-      // console.log(res.data);
+      this.monthProfit = res.data.monthProfit;
+      this.typeInfo = res.data.typeInfo;
+      this.totalOrders = res.data.totalOrders;
+      console.log(res.data);
       // this.getMonthPrice(2021);
       this.initChart();
     },

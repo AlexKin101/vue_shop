@@ -16,6 +16,10 @@ const Welcome = () =>
 // import Users from "../components/user/Users";
 const Users = () =>
   import(/* webpackChunkName:"user" */ "../components/user/Users");
+const ChangePassword = () =>
+  import(
+    /* webpackChunkName:"change_password"*/ "../components/user/ChangePassword"
+  );
 
 // import Rights from "../components/power/Rights";
 // import Roles from "../components/power/Roles";
@@ -82,8 +86,15 @@ const router = new Router({
     { path: "/", redirect: "/login" },
     {
       path: "/login",
+      name: "登录",
       component: Login,
+      meta: {
+        title: "登录",
+      },
       beforeEnter: (to, from, next) => {
+        if (to.meta.title) {
+          document.title = to.meta.title;
+        }
         next();
       },
     },
@@ -93,13 +104,25 @@ const router = new Router({
       redirect: "/welcome",
       children: [
         {
+          name: "首页",
           path: "/welcome",
           component: Welcome,
+          meta: {
+            title: "首页",
+          },
         },
         {
+          name: "用户管理",
           path: "/users",
           component: Users,
+          meta: {
+            title: "用户管理",
+          },
           beforeEnter: (to, from, next) => {
+            if (to.meta.title) {
+              document.title = to.meta.title;
+            }
+
             const role = window.sessionStorage.getItem("role");
             if (role === "superAdmin" || role === "businessAdmin") {
               next();
@@ -110,9 +133,24 @@ const router = new Router({
           },
         },
         {
+          name: "修改密码",
+          path: "/changepassword",
+          meta: {
+            title: "修改密码",
+          },
+          component: ChangePassword,
+        },
+        {
+          name: "权限管理",
           path: "/rights",
           component: Rights,
+          meta: {
+            title: "权限管理",
+          },
           beforeEnter: (to, from, next) => {
+            if (to.meta.title) {
+              document.title = to.meta.title;
+            }
             const role = window.sessionStorage.getItem("role");
             if (role === "superAdmin" || role === "businessAdmin") {
               next();
@@ -123,9 +161,16 @@ const router = new Router({
           },
         },
         {
+          name: "角色管理",
           path: "/roles",
           component: Roles,
+          meta: {
+            title: "角色管理",
+          },
           beforeEnter: (to, from, next) => {
+            if (to.meta.title) {
+              document.title = to.meta.title;
+            }
             const role = window.sessionStorage.getItem("role");
             if (role === "superAdmin" || role === "businessAdmin") {
               next();
@@ -138,7 +183,13 @@ const router = new Router({
         {
           path: "/categories",
           component: Cate,
+          meta: {
+            title: "分类管理",
+          },
           beforeEnter: (to, from, next) => {
+            if (to.meta.title) {
+              document.title = to.meta.title;
+            }
             const role = window.sessionStorage.getItem("role");
             if (role === "superAdmin" || role === "productAdmin") {
               next();
@@ -149,9 +200,16 @@ const router = new Router({
           },
         },
         {
+          name: "规格管理",
           path: "/params",
           component: Params,
+          meta: {
+            title: "规格管理",
+          },
           beforeEnter: (to, from, next) => {
+            if (to.meta.title) {
+              document.title = to.meta.title;
+            }
             const role = window.sessionStorage.getItem("role");
             if (role === "superAdmin" || role === "productAdmin") {
               next();
@@ -162,9 +220,16 @@ const router = new Router({
           },
         },
         {
+          name: "商品管理",
           path: "/goods",
           component: GoodsList,
+          meta: {
+            title: "商品管理",
+          },
           beforeEnter: (to, from, next) => {
+            if (to.meta.title) {
+              document.title = to.meta.title;
+            }
             const role = window.sessionStorage.getItem("role");
             if (role === "superAdmin" || role === "productAdmin") {
               next();
@@ -175,8 +240,12 @@ const router = new Router({
           },
         },
         {
+          name: "商品添加",
           path: "/goods/add",
           component: Add,
+          meta: {
+            title: "商品添加",
+          },
           beforeEnter: (to, from, next) => {
             const role = window.sessionStorage.getItem("role");
             if (role === "superAdmin" || role === "productAdmin") {
@@ -188,9 +257,13 @@ const router = new Router({
           },
         },
         {
+          name: "商品编辑",
           path: "/goods/edit",
           component: Edit,
           beforeEnter: (to, from, next) => {
+            if (to.meta.title) {
+              document.title = to.meta.title;
+            }
             const role = window.sessionStorage.getItem("role");
             if (role === "superAdmin" || role === "productAdmin") {
               next();
@@ -201,8 +274,12 @@ const router = new Router({
           },
         },
         {
+          name: "品牌管理",
           path: "/brands",
           component: Brand,
+          meta: {
+            title: "品牌管理",
+          },
           beforeEnter: (to, from, next) => {
             const role = window.sessionStorage.getItem("role");
             if (role === "superAdmin" || role === "productAdmin") {
@@ -214,9 +291,16 @@ const router = new Router({
           },
         },
         {
+          name: "订单管理",
           path: "/orders",
           component: Order,
+          meta: {
+            title: "订单管理",
+          },
           beforeEnter: (to, from, next) => {
+            if (to.meta.title) {
+              document.title = to.meta.title;
+            }
             const role = window.sessionStorage.getItem("role");
             if (role === "superAdmin" || role === "orderAdmin") {
               next();
@@ -227,13 +311,24 @@ const router = new Router({
           },
         },
         {
+          name: "数据报表",
           path: "/reports",
           component: Report,
+          meta: {
+            title: "数据报表",
+          },
         },
         {
+          name: "退换货管理",
           path: "/returns",
           component: Return,
+          meta: {
+            title: "退换货管理",
+          },
           beforeEnter: (to, from, next) => {
+            if (to.meta.title) {
+              document.title = to.meta.title;
+            }
             const role = window.sessionStorage.getItem("role");
             if (role === "superAdmin" || role === "orderAdmin") {
               next();
@@ -244,9 +339,16 @@ const router = new Router({
           },
         },
         {
+          name: "退换货订单详情",
           path: "/returns/returninfo",
           component: ReturnInfo,
+          meta: {
+            title: "退换货订单详情",
+          },
           beforeEnter: (to, from, next) => {
+            if (to.meta.title) {
+              document.title = to.meta.title;
+            }
             const role = window.sessionStorage.getItem("role");
             if (role === "superAdmin" || role === "orderAdmin") {
               next();
@@ -257,9 +359,16 @@ const router = new Router({
           },
         },
         {
+          name: "新品推荐",
           path: "/activities",
           component: Activity,
+          meta: {
+            title: "新品推荐",
+          },
           beforeEnter: (to, from, next) => {
+            if (to.meta.title) {
+              document.title = to.meta.title;
+            }
             const role = window.sessionStorage.getItem("role");
             if (role === "superAdmin") {
               next();
@@ -270,9 +379,16 @@ const router = new Router({
           },
         },
         {
+          name: "轮播图管理",
           path: "/carousel",
           component: Carousel,
+          meta: {
+            title: "轮播图管理",
+          },
           beforeEnter: (to, from, next) => {
+            if (to.meta.title) {
+              document.title = to.meta.title;
+            }
             const role = window.sessionStorage.getItem("role");
             if (role === "superAdmin") {
               next();
@@ -283,9 +399,16 @@ const router = new Router({
           },
         },
         {
+          name: "商品折扣",
           path: "/discount",
           component: Discount,
+          meta: {
+            title: "商品折扣",
+          },
           beforeEnter: (to, from, next) => {
+            if (to.meta.title) {
+              document.title = to.meta.title;
+            }
             const role = window.sessionStorage.getItem("role");
             if (role === "superAdmin") {
               next();
@@ -296,9 +419,16 @@ const router = new Router({
           },
         },
         {
+          name: "退换货原因管理",
           path: "/reason",
           component: ReturnReason,
+          meta: {
+            title: "退换货原因管理",
+          },
           beforeEnter: (to, from, next) => {
+            if (to.meta.title) {
+              document.title = to.meta.title;
+            }
             const role = window.sessionStorage.getItem("role");
             if (role === "superAdmin" || role === "orderAdmin") {
               next();
@@ -320,6 +450,9 @@ router.beforeEach((to, from, next) => {
   //next是一个函数,表示放行
   //  next() 放行         next('/login') 强制跳转
   // const nameStr = window.localStorage.getItem("name");
+  if (to.meta.title) {
+    document.title = to.meta.title;
+  }
 
   if (to.path === "/welcome") return next();
 

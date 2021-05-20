@@ -161,24 +161,33 @@
           sortable
         >
           <template slot-scope="scope">
-            <el-tooltip
-              :disabled="
-                scope.row.discountPrice / scope.row.outPrice <= 0.75
-                  ? false
-                  : true
-              "
-              content="该商品折扣率过低，请检查折扣定价是否合理！"
-              placement="bottom"
-              effect="dark"
-            >
-              <span
-                v-if="scope.row.discountPrice / scope.row.outPrice <= 0.75"
-                style="color:#F56C6C"
+            <div v-if="scope.row.discountPrice / scope.row.outPrice <= 0.75">
+              <el-tooltip
+                content="该商品折扣率过低，请检查折扣定价是否合理！"
+                placement="bottom"
+                effect="dark"
               >
+                <span style="color:#F56C6C">
+                  {{ scope.row.discountPrice }}
+                </span>
+              </el-tooltip>
+            </div>
+            <div v-else-if="scope.row.discountPrice < scope.row.inPrice">
+              <el-tooltip
+                content="该商品折扣价低于商品进价，请检查折扣定价是否合理！"
+                placement="bottom"
+                effect="dark"
+              >
+                <span style="color:#F56C6C">
+                  {{ scope.row.discountPrice }}
+                </span>
+              </el-tooltip>
+            </div>
+            <div v-else>
+              <span>
                 {{ scope.row.discountPrice }}
               </span>
-              <span v-else>{{ scope.row.discountPrice }}</span>
-            </el-tooltip>
+            </div>
           </template>
         </el-table-column>
 
@@ -189,34 +198,30 @@
           sortable
         >
           <template slot-scope="scope">
-            <el-tooltip
-              :disabled="
-                scope.row.discountPrice / scope.row.outPrice <= 0.75
-                  ? false
-                  : true
-              "
-              content="该商品折扣率过低，请检查折扣定价是否合理！"
-              placement="bottom"
-              effect="dark"
-            >
-              <span
-                v-if="scope.row.discountPrice / scope.row.outPrice <= 0.75"
-                style="color:#F56C6C"
+            <div v-if="scope.row.discountPrice / scope.row.outPrice <= 0.75">
+              <el-tooltip
+                content="该商品折扣率过低，请检查折扣定价是否合理！"
+                placement="bottom"
+                effect="dark"
               >
+                <span style="color:#F56C6C">
+                  {{
+                    (scope.row.discountPrice / scope.row.outPrice).toFixed(2) *
+                      100 +
+                      "%"
+                  }}
+                </span>
+              </el-tooltip>
+            </div>
+            <div v-else>
+              <span>
                 {{
                   (scope.row.discountPrice / scope.row.outPrice).toFixed(2) *
                     100 +
                     "%"
                 }}
               </span>
-              <span v-else>
-                {{
-                  (scope.row.discountPrice / scope.row.outPrice).toFixed(2) *
-                    100 +
-                    "%"
-                }}
-              </span>
-            </el-tooltip>
+            </div>
           </template>
         </el-table-column>
 
@@ -435,22 +440,48 @@
         <el-row>
           <el-col :span="8">
             <el-form-item label="商品折扣率：">
-              <el-tooltip
-                :disabled="
+              <div
+                v-if="
                   this.editForm.discountPrice / this.editForm.outPrice <= 0.75
-                    ? false
-                    : true
                 "
-                content="该商品折扣率过低，请检查折扣定价是否合理！"
-                placement="bottom"
-                effect="dark"
               >
-                <span
-                  v-if="
-                    this.editForm.discountPrice / this.editForm.outPrice <= 0.75
-                  "
-                  style="color:#F56C6C"
+                <el-tooltip
+                  content="该商品折扣率过低，请检查折扣定价是否合理！"
+                  placement="bottom"
+                  effect="dark"
                 >
+                  <span style="color:#F56C6C">
+                    {{
+                      (
+                        this.editForm.discountPrice / this.editForm.outPrice
+                      ).toFixed(2) *
+                        100 +
+                        "%"
+                    }}
+                  </span>
+                </el-tooltip>
+              </div>
+              <div
+                v-else-if="this.editForm.discountPrice < this.editForm.inPrice"
+              >
+                <el-tooltip
+                  content="该商品折扣价低于商品进价，请检查折扣定价是否合理！"
+                  placement="bottom"
+                  effect="dark"
+                >
+                  <span style="color:#F56C6C">
+                    {{
+                      (
+                        this.editForm.discountPrice / this.editForm.outPrice
+                      ).toFixed(2) *
+                        100 +
+                        "%"
+                    }}
+                  </span>
+                </el-tooltip>
+              </div>
+              <div v-else>
+                <span>
                   {{
                     (
                       this.editForm.discountPrice / this.editForm.outPrice
@@ -459,16 +490,7 @@
                       "%"
                   }}
                 </span>
-                <span v-else>
-                  {{
-                    (
-                      this.editForm.discountPrice / this.editForm.outPrice
-                    ).toFixed(2) *
-                      100 +
-                      "%"
-                  }}
-                </span>
-              </el-tooltip>
+              </div>
             </el-form-item>
           </el-col>
           <el-col :span="8">
@@ -643,7 +665,10 @@ export default {
 
     tableRowClassName({ row, rowIndex }) {
       //   console.log(discountRate);
-      if (row.discountPrice / row.outPrice <= 0.75) {
+      if (
+        row.discountPrice / row.outPrice <= 0.75 ||
+        row.discountPrice < row.inPrice
+      ) {
         return "warning-row";
       }
       return "";

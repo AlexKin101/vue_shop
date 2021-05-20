@@ -24,8 +24,7 @@
       <!-- 步骤条区域 -->
       <el-steps :active="activeIndex - 0" finish-status="success" align-center>
         <el-step title="基本信息"></el-step>
-        <el-step title="商品参数"></el-step>
-        <el-step title="基本属性"></el-step>
+        <el-step title="商品规格"></el-step>
         <el-step title="商品图片"></el-step>
         <el-step title="商品内容"></el-step>
         <el-step title="完成"></el-step>
@@ -316,7 +315,7 @@ export default {
       checkList: [],
 
       //  上传图片的URL
-      uploadURL: "http://localhost:8082/upload",
+      uploadURL: "http://1.15.39.179:8082/upload",
 
       // 图片上传组件的headers请求头
       headerObj: {

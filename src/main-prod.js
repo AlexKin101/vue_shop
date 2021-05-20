@@ -65,6 +65,9 @@ axios.interceptors.response.use(
     // console.log(code);
     if (code === 401) {
       alert("抱歉，您的角色与您的账户信息不匹配，请重新登录");
+      window.sessionStorage.clear(); //清空sessionStorage
+      router.replace({ path: "/login" });
+      // this.$router.push("/login"); //重定向
     }
     return Promise.reject(error);
   }

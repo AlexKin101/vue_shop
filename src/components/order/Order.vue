@@ -11,10 +11,10 @@
 
     <!-- 卡片视图区域 -->
     <el-card>
-      <el-row>
-        <el-col :span="8">
+      <el-row :gutter="18">
+        <el-col :span="6">
           <el-input
-            placeholder="请输入订单编号"
+            placeholder="请输入内容"
             v-model="queryInfo.query"
             clearable
             @clear="getOrdersList"
@@ -26,10 +26,32 @@
             ></el-button>
           </el-input>
         </el-col>
+        <el-col :span="14">
+          <el-select
+            v-model="selectedKey"
+            clearable
+            @clear="clearSelectedKey"
+            @change="handleChange"
+            placeholder="请选择订单状态"
+          >
+            <el-option
+              clearable
+              v-for="item in stateList"
+              :key="item.id"
+              :label="item.name"
+              :value="item.value"
+            ></el-option>
+          </el-select>
+        </el-col>
+        <el-col :span="4">
+          <el-button type="primary" @click="showUnFinishDialogVisible = true">
+            长时间未确认收货的订单
+          </el-button>
+        </el-col>
       </el-row>
 
       <!-- 订单列表区域 -->
-      <el-table :data="ordersList" border script style="width: 100%">
+      <el-table :data="ordersList" border :row-class-name="tableRowClassName">
         <!-- 展开项 -->
         <el-table-column type="expand">
           <template slot-scope="scope">
@@ -59,7 +81,8 @@
                     </el-form-item>
                     <br />
                     <el-form-item label="商品规格：">
-                      <span>{{ scope.row.specs }}</span>
+                      <span v-if="scope.row.specs">{{ scope.row.specs }}</span>
+                      <span v-else>NULL</span>
                     </el-form-item>
                     <br />
                     <el-form-item label="商品售价：">
@@ -72,6 +95,10 @@
                   </el-col>
 
                   <el-col :span="8">
+                    <el-form-item label="商品品牌：">
+                      <span>{{ scope.row.products.brands.name }}</span>
+                    </el-form-item>
+                    <br />
                     <el-form-item label="收货人名称：">
                       <span>{{ scope.row.userName }}</span>
                     </el-form-item>
@@ -118,22 +145,14 @@
           </template>
         </el-table-column>
         <el-table-column
-          label="商品状态"
+          label="订单状态"
           prop="state"
           width="100px"
           align="center"
           sortable
-          :filters="[
-            { text: '已退款', value: '已退款' },
-            { text: '已退货', value: '已退货' },
-            { text: '已拒绝', value: '已拒绝' },
-            { text: '开通成功', value: '开通成功' },
-            { text: '开通失败', value: '开通失败' },
-          ]"
-          :filter-method="filterState"
         >
           <template slot-scope="scope">
-            <el-tag type="success">{{ scope.row.state }}</el-tag>
+            {{ scope.row.state }}
           </template>
         </el-table-column>
 
@@ -162,7 +181,7 @@
         <el-table-column
           label="是否发货"
           prop="isSend"
-          width="90px"
+          width="100px"
           align="center"
           sortable
           :filters="[
@@ -172,12 +191,42 @@
           :filter-method="filterIsSend"
         >
           <template slot-scope="scope">
-            <el-tag type="Brand Color" v-if="scope.row.isSend === 0">
-              未发货
-            </el-tag>
-            <el-tag type="success" v-else-if="scope.row.isSend === 1">
-              已发货
-            </el-tag>
+            <span
+              v-if="
+                (scope.row.state === '待处理' ||
+                  scope.row.state === '待收货') &&
+                  scope.row.isSend === 1
+              "
+            >
+              <el-tag type="danger">
+                退货中
+              </el-tag>
+            </span>
+            <span v-else-if="scope.row.state === '已退货'">
+              <el-tag type="success">
+                已退货
+              </el-tag>
+            </span>
+            <span
+              v-else-if="scope.row.state === '待处理' && scope.row.isSend === 0"
+            >
+              <el-tag type="success">
+                退款中
+              </el-tag>
+            </span>
+            <span v-else-if="scope.row.state === '已退款'">
+              <el-tag type="success">
+                已退款
+              </el-tag>
+            </span>
+            <span v-else>
+              <el-tag type="info" v-if="scope.row.isSend === 0">
+                未发货
+              </el-tag>
+              <el-tag type="success" v-else-if="scope.row.isSend === 1">
+                已发货
+              </el-tag>
+            </span>
           </template>
         </el-table-column>
         <el-table-column
@@ -232,7 +281,8 @@
                 @click="showStatusBox(scope.row.id)"
                 :disabled="
                   (scope.row.state === '已付款' ? false : true) &&
-                    (scope.row.state === '待付款' ? false : true)
+                    (scope.row.state === '待付款' ? false : true) &&
+                    (scope.row.state === '待发货' ? false : true)
                 "
               ></el-button>
             </el-tooltip>
@@ -249,6 +299,11 @@
                 type="success"
                 icon="el-icon-location-outline"
                 size="mini"
+                :disabled="
+                  scope.row.state === '待付款' || scope.row.state === '待发货'
+                    ? true
+                    : false
+                "
                 @click="showProgressBox"
               ></el-button>
             </el-tooltip>
@@ -261,7 +316,7 @@
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
         :current-page="queryInfo.pagenum"
-        :page-sizes="[5, 10, 30, this.total]"
+        :page-sizes="[10, 15, 30, this.total]"
         :page-size="queryInfo.pagesize"
         layout="total, sizes, prev, pager, next, jumper"
         :total="total"
@@ -325,8 +380,8 @@
             active-text="已发货"
             inactive-text="未发货"
             :disabled="
-              (statusForm.state === '已付款' ? false : true) &&
-                (this.isSend === false ? false : true)
+              (statusForm.state === '待付款' ? true : false) ||
+                (this.isSend === true ? true : false)
             "
           ></el-switch>
         </el-form-item>
@@ -363,11 +418,52 @@
         </el-timeline-item>
       </el-timeline>
     </el-dialog>
+
+    <!-- 展示长时间未确认订单的对话框 -->
+    <el-dialog
+      title="失联订单"
+      :visible.sync="showUnFinishDialogVisible"
+      width="70%"
+    >
+      <el-table :data="lostOrdersList">
+        <el-table-column label="订单编号" prop="number"></el-table-column>
+        <el-table-column
+          label="商品名称"
+          prop="products.name"
+        ></el-table-column>
+        <el-table-column label="订单金额" prop="price"></el-table-column>
+        <el-table-column label="下单时间">
+          <template slot-scope="scope">
+            {{ scope.row.addTime | dataFormat }}
+          </template>
+        </el-table-column>
+        <el-table-column
+          label="买家账号"
+          prop="customer.account"
+        ></el-table-column>
+        <el-table-column
+          label="买家联系方式"
+          prop="contactWay"
+        ></el-table-column>
+      </el-table>
+
+      <!-- 分页区域 -->
+      <el-pagination
+        @size-change="handleLostSizeChange"
+        @current-change="handleLostCurrentChange"
+        :current-page="lostQueryInfo.pagenum"
+        :page-sizes="[10, 15, 30, this.lostTotal]"
+        :page-size="lostQueryInfo.pagesize"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="lostTotal"
+        background
+      ></el-pagination>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import cityData from "./city_data2017_element";
+// import cityData from "./city_data2017_element";
 import { regionData, CodeToText } from "element-china-area-data";
 
 import progress from "./progress";
@@ -390,14 +486,36 @@ export default {
       // 商品的数据列表，默认为空
       ordersList: [],
 
+      lostOrdersList: [],
+
+      selectedKey: "",
+
+      orderState: "",
+
       // 查询条件
       queryInfo: {
         query: "",
         pagenum: 1,
-        pagesize: 5,
+        pagesize: 10,
       },
+
+      // 查询条件
+      lostQueryInfo: {
+        query: "",
+        pagenum: 1,
+        pagesize: 10,
+      },
+
+      lostQueryInfo: {
+        query: "",
+        pagenum: 1,
+        pagesize: 10,
+      },
+
       //   总数据条数
       total: 0,
+
+      lostTotal: 0,
 
       // 物流信息
       progressInfo: [],
@@ -413,10 +531,25 @@ export default {
       // 控制修改订单状态的对话框
       editStatusDialogVisible: false,
 
+      // 控制展示长时间为确认订单列表的对话框
+      showUnFinishDialogVisible: false,
+
       statusForm: {
         isSend: 0,
         price: 0.0,
       },
+
+      stateList: [
+        { id: 1, name: "已退款", value: "已退款" },
+        { id: 2, name: "已退货", value: "已退货" },
+        { id: 3, name: "已拒绝", value: "已拒绝" },
+        { id: 4, name: "待付款", value: "待付款" },
+        { id: 5, name: "待发货", value: "待发货" },
+        { id: 6, name: "待处理", value: "待处理" },
+        { id: 7, name: "已发货", value: "已发货" },
+        { id: 8, name: "已收货", value: "已收货" },
+        { id: 9, name: "已评价", value: "已评价" },
+      ],
 
       statusFormRules: {
         price: [
@@ -462,7 +595,7 @@ export default {
       // 全国省市区/
       options: regionData,
       // selectedOptions: []
-      cityData,
+      // cityData,
 
       //目前订单收货地址
       nowAddress: "",
@@ -476,11 +609,22 @@ export default {
   },
   created() {
     this.getOrdersList();
+    this.getLostOrdersList();
   },
   methods: {
     async getOrdersList() {
+      console.log(this.$route.params.data);
+      if (this.$route.params.data) {
+        this.selectedKey = this.$route.params.data;
+      }
+
       const { data: res } = await this.$http.get("orders", {
-        params: this.queryInfo,
+        params: {
+          pagenum: this.queryInfo.pagenum,
+          pagesize: this.queryInfo.pagesize,
+          query: this.queryInfo.query,
+          state: this.selectedKey,
+        },
       });
 
       console.log(res);
@@ -493,6 +637,37 @@ export default {
       this.queryInfo.pagesize = res.data.size;
       this.total = res.data.totalElements;
       this.ordersList = res.data.content;
+
+      // res.data.content.forEach((item) => {
+      //   if (item.state !== "待处理") {
+      //     this.ordersList.push(item);
+      //   }
+      // });
+      console.log(this.ordersList);
+    },
+
+    // 获取失联订单信息
+    async getLostOrdersList() {
+      var date = new Date(); //当天
+      const { data: res } = await this.$http.get("orders/lost", {
+        params: {
+          pagenum: this.lostQueryInfo.pagenum,
+          pagesize: this.lostQueryInfo.pagesize,
+          query: this.lostQueryInfo.query,
+          date: date,
+        },
+      });
+
+      console.log(res);
+      if (res.meta.status !== 200)
+        return this.$message.error("获取失联订单列表失败");
+      //   为总数据条数赋值
+      //  this.$message.success("获取订单列表成功");
+
+      this.lostQueryInfo.pagenum = res.data.pageable.pageNumber + 1;
+      this.lostQueryInfo.pagesize = res.data.size;
+      this.lostTotal = res.data.totalElements;
+      this.lostOrdersList = res.data.content;
     },
 
     isCheck(arr1, arr2) {
@@ -511,6 +686,18 @@ export default {
         return newdefarr;
       }
       return [];
+    },
+
+    // 选择框选中项变化，会触发这个函数
+    handleChange() {
+      this.$route.params.data = "";
+      this.getOrdersList();
+    },
+
+    clearSelectedKey() {
+      this.$route.params.data = "";
+      this.selectedKey = "";
+      this.getOrdersList();
     },
 
     async getOrder(id) {
@@ -543,6 +730,17 @@ export default {
     handleCurrentChange(newPage) {
       this.queryInfo.pagenum = newPage;
       this.getOrdersList();
+    },
+
+    // 监听pagesize改变
+    handleLostSizeChange(newSize) {
+      this.lostQueryInfo.pagesize = newSize;
+      this.getLostOrdersList();
+    },
+    // 监听pagenum的改变
+    handleLostCurrentChange(newPage) {
+      this.lostQueryInfo.pagenum = newPage;
+      this.getLostOrdersList();
     },
 
     // 展示修改地址的对话框
@@ -597,6 +795,7 @@ export default {
         //提示修改订单地址成功
         this.$message.success("修改订单地址成功");
       });
+
       this.addressDialogVisible = false;
     },
 
@@ -644,40 +843,56 @@ export default {
         return this.$message.info("已取消修改");
       }
 
-      this.$refs.statusFormRef.validate(async (valid) => {
-        // console.log(valid);
+      if (this.statusForm.isSend === true) {
+        this.statusForm.isSend = 1;
+      } else {
+        this.statusForm.isSend = 0;
+      }
 
-        if (!valid) return;
-
-        if (this.statusForm.isSend === true) {
-          this.statusForm.isSend = 1;
-        } else {
-          this.statusForm.isSend = 0;
+      //可以发起修改订单状态的网络请求
+      // console.log(this.statusForm);
+      const { data: res } = await this.$http.put(
+        `orders/${this.statusForm.id}`,
+        null,
+        {
+          params: {
+            isSend: this.statusForm.isSend,
+            price: this.statusForm.price,
+          },
         }
+      );
 
-        //可以发起修改订单状态的网络请求
-        // console.log(this.statusForm);
-        const { data: res } = await this.$http.put(
-          `orders/${this.statusForm.id}`,
-          null,
-          {
-            params: {
-              isSend: this.statusForm.isSend,
-              price: this.statusForm.price,
-            },
-          }
-        );
-
-        if (res.meta.status !== 200)
-          return this.$message.error("修改订单状态失败");
-        //隐藏修改订单状态的对话框
-        this.editStatusDialogVisible = false;
-        //重新获取用户列表
-        this.getOrdersList();
-        //提示修改订单状态成功
-        this.$message.success("修改订单状态成功");
-      });
+      if (res.meta.status !== 200)
+        return this.$message.error("修改订单状态失败");
+      //隐藏修改订单状态的对话框
+      // this.editStatusDialogVisible = false;
+      //重新获取用户列表
+      this.getOrdersList();
+      //提示修改订单状态成功
       this.editStatusDialogVisible = false;
+
+      this.$message.success("修改订单状态成功");
+    },
+
+    tableRowClassName({ row, rowIndex }) {
+      if (
+        row.state === "待处理" ||
+        row.state === "待付款" ||
+        row.state === "待发货"
+      ) {
+        return "warning-row";
+      } else if (
+        row.state === "已收货" ||
+        row.state === "已评价" ||
+        row.state === "开通成功" ||
+        row.state === "已退款" ||
+        row.state === "已退货" ||
+        row.state === "已拒绝"
+      ) {
+        return "success-row";
+      } else {
+        return "";
+      }
     },
 
     resetDateFilter() {
@@ -726,7 +941,7 @@ export default {
 };
 </script>
 
-<style lang="less" scoped>
+<style lang="less">
 .el-cascader {
   width: 100%;
 }
@@ -749,5 +964,12 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+.el-table .warning-row {
+  background: oldlace;
+}
+
+.el-table .success-row {
+  background: #f0f9eb;
 }
 </style>

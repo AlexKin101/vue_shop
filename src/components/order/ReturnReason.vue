@@ -7,7 +7,7 @@
       <el-breadcrumb-item :to="{ path: '/home' }">首页</el-breadcrumb-item>
       <el-breadcrumb-item>订单管理</el-breadcrumb-item>
       <el-breadcrumb-item :to="{ path: '/returns' }">
-        退换货理由管理
+        退换货原因管理
       </el-breadcrumb-item>
     </el-breadcrumb>
 

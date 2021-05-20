@@ -117,15 +117,15 @@
               content="分配权限"
               placement="top"
               :enterable="false"
-            > -->
-            <!-- <el-button
+            >
+              <el-button
                 type="warning"
                 icon="el-icon-setting"
                 size="mini"
                 @click="showSetRightDialog(scope.row)"
                 :disabled="scope.row.id === 1 ? true : false"
-              > -->
-            <!-- 分配权限
+              >
+                分配权限
               </el-button>
             </el-tooltip> -->
           </template>

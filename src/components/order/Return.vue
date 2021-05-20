@@ -79,20 +79,8 @@
             >
               退款完成
             </el-tag>
-            <el-tag type="success" v-else-if="scope.row.state === '待收货'">
-              待收货
-            </el-tag>
-            <el-tag type="success" v-else-if="scope.row.state === '已拒绝'">
-              已拒绝
-            </el-tag>
-            <el-tag type="success" v-else-if="scope.row.state === '已同意'">
-              已同意
-            </el-tag>
-            <el-tag type="success" v-else-if="scope.row.state === '拒绝退款'">
-              拒绝退款
-            </el-tag>
-            <el-tag type="success" v-else-if="scope.row.state === '已完成'">
-              已完成
+            <el-tag type="success" v-else>
+              {{ scope.row.state }}
             </el-tag>
           </template>
         </el-table-column>
@@ -158,7 +146,7 @@
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
         :current-page="queryInfo.pagenum"
-        :page-sizes="[5, 10, 30, this.total]"
+        :page-sizes="[10, 20, 30, this.total]"
         :page-size="queryInfo.pagesize"
         layout="total, sizes, prev, pager, next, jumper"
         :total="total"
@@ -178,7 +166,7 @@ export default {
       queryInfo: {
         query: "",
         pagenum: 1,
-        pagesize: 5,
+        pagesize: 10,
       },
       //   总数据条数
       total: 0,

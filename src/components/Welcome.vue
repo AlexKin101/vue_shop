@@ -31,7 +31,42 @@
       <div class="un-handle-content">
         <el-row :gutter="20">
           <el-col :span="8">
-            <div class="un-handle-item">
+            <div class="un-handle-item" @click="gotoOrdersList()">
+              <span class="font-medium">全部订单</span>
+              <span style="float: right" class="color-danger">
+                {{ this.pendingData.all }}
+              </span>
+            </div>
+          </el-col>
+          <el-col :span="8">
+            <div class="un-handle-item" @click="gotoOrdersList()">
+              <span class="font-medium">新增订单</span>
+              <span style="float: right" class="color-danger">
+                {{ this.pendingData.currentDayOrder }}
+              </span>
+            </div>
+          </el-col>
+          <el-col :span="8">
+            <div class="un-handle-item" @click="gotoPendingHandle()">
+              <span class="font-medium">待处理订单</span>
+              <span style="float: right" class="color-danger">
+                {{ this.pendingData.pendingHandle }}
+              </span>
+            </div>
+          </el-col>
+        </el-row>
+
+        <el-row :gutter="20">
+          <el-col :span="8">
+            <div class="un-handle-item" @click="gotoPendingFinish()">
+              <span class="font-medium">待确认收获订单</span>
+              <span style="float: right" class="color-danger">
+                {{ this.pendingData.pendingFinish }}
+              </span>
+            </div>
+          </el-col>
+          <el-col :span="8">
+            <div class="un-handle-item" @click="gotoPendingPay()">
               <span class="font-medium">待付款订单</span>
               <span style="float: right" class="color-danger">
                 {{ this.pendingData.pendingPay }}
@@ -39,7 +74,53 @@
             </div>
           </el-col>
           <el-col :span="8">
-            <div class="un-handle-item">
+            <div class="un-handle-item" @click="gotoPendingSend()">
+              <span class="font-medium">待发货订单</span>
+              <span style="float: right" class="color-danger">
+                {{ this.pendingData.finish }}
+              </span>
+            </div>
+          </el-col>
+        </el-row>
+
+        <el-row :gutter="20">
+          <el-col :span="8">
+            <div class="un-handle-item" @click="gotoReturn()">
+              <span class="font-medium">已退款订单</span>
+              <span style="float: right" class="color-danger">
+                {{ this.pendingData.returnFinish }}
+              </span>
+            </div>
+          </el-col>
+          <el-col :span="8">
+            <div class="un-handle-item" @click="gotoReturnGoods()">
+              <span class="font-medium">已退货订单</span>
+              <span style="float: right" class="color-danger">
+                {{ this.pendingData.returnGoodsFinish }}
+              </span>
+            </div>
+          </el-col>
+          <el-col :span="8">
+            <div class="un-handle-item" @click="gotoReject()">
+              <span class="font-medium">已拒绝订单</span>
+              <span style="float: right" class="color-danger">
+                {{ this.pendingData.rejectReturn }}
+              </span>
+            </div>
+          </el-col>
+        </el-row>
+
+        <el-row :gutter="20">
+          <el-col :span="8">
+            <div class="un-handle-item" @click="gotoPendingFinish()">
+              <span class="font-medium">已发货订单</span>
+              <span style="float: right" class="color-danger">
+                {{ this.pendingData.finishDeliver }}
+              </span>
+            </div>
+          </el-col>
+          <el-col :span="8">
+            <div class="un-handle-item" @click="gotoOrdersList()">
               <span class="font-medium">已完成订单</span>
               <span style="float: right" class="color-danger">
                 {{ this.pendingData.finish }}
@@ -47,36 +128,10 @@
             </div>
           </el-col>
           <el-col :span="8">
-            <div class="un-handle-item">
-              <span class="font-medium">待评价订单</span>
+            <div class="un-handle-item" @click="gotoAssess()">
+              <span class="font-medium">已评价订单</span>
               <span style="float: right" class="color-danger">
-                {{ this.pendingData.pendingEvaluate }}
-              </span>
-            </div>
-          </el-col>
-        </el-row>
-        <el-row :gutter="20">
-          <el-col :span="8">
-            <div class="un-handle-item">
-              <span class="font-medium">待发货订单</span>
-              <span style="float: right" class="color-danger">
-                {{ this.pendingData.pendingDeliver }}
-              </span>
-            </div>
-          </el-col>
-          <el-col :span="8">
-            <div class="un-handle-item">
-              <span class="font-medium">待处理退款申请</span>
-              <span style="float: right" class="color-danger">
-                {{ this.pendingData.pendingHandle }}
-              </span>
-            </div>
-          </el-col>
-          <el-col :span="8">
-            <div class="un-handle-item">
-              <span class="font-medium">已发货订单</span>
-              <span style="float: right" class="color-danger">
-                {{ this.pendingData.finishDeliver }}
+                {{ this.pendingData.EvaluateFinish }}
               </span>
             </div>
           </el-col>
@@ -498,10 +553,11 @@ export default {
           preYear: preYear,
           preMonth: preMonth,
           preDay: preDay,
+          date: aData,
         },
       });
       if (res.meta.status !== 200) return this.$message.error("获取数据失败");
-      // console.log(res.data);
+      console.log(res.data);
 
       //折线图数据
       this.lineData[1].xData = res.data.month.month;
@@ -548,6 +604,68 @@ export default {
     gotoBusinessList() {
       window.sessionStorage.setItem("activePath", "/users");
       this.$router.push("/users");
+    },
+
+    //回到订单列表
+    gotoOrdersList() {
+      window.sessionStorage.setItem("activePath", "/orders");
+      this.$router.push("/orders");
+    },
+
+    //跳转到订单列表页，并进行筛选出待付款订单
+    gotoPendingPay() {
+      window.sessionStorage.setItem("activePath", "/orders");
+      this.$router.push({ name: "订单管理", params: { data: "待付款" } });
+    },
+
+    //跳转到订单列表页，并进行筛选出待发货订单
+    gotoPendingSend() {
+      window.sessionStorage.setItem("activePath", "/orders");
+      this.$router.push({ name: "订单管理", params: { data: "待发货" } });
+    },
+
+    //跳转到订单列表页，并进行筛选出待处理订单
+    gotoPendingHandle() {
+      window.sessionStorage.setItem("activePath", "/orders");
+      this.$router.push({ name: "订单管理", params: { data: "待处理" } });
+    },
+
+    gotoPendingFinish() {
+      window.sessionStorage.setItem("activePath", "/orders");
+      this.$router.push({ name: "订单管理", params: { data: "已发货" } });
+    },
+
+    //跳转到订单列表页，并进行筛选出已评价订单
+    gotoAssess() {
+      window.sessionStorage.setItem("activePath", "/orders");
+      this.$router.push({ name: "订单管理", params: { data: "已评价" } });
+    },
+
+    //跳转到订单列表页，并进行筛选出已发货订单
+    gotoSend() {
+      window.sessionStorage.setItem("activePath", "/orders");
+      this.$router.push({ name: "订单管理", params: { data: "已发货" } });
+    },
+
+    gotoReturn() {
+      window.sessionStorage.setItem("activePath", "/orders");
+      this.$router.push({ name: "订单管理", params: { data: "已退款" } });
+    },
+
+    gotoReject() {
+      window.sessionStorage.setItem("activePath", "/orders");
+      this.$router.push({ name: "订单管理", params: { data: "已拒绝" } });
+    },
+
+    gotoReturnGoods() {
+      window.sessionStorage.setItem("activePath", "/orders");
+      this.$router.push({ name: "订单管理", params: { data: "已退货" } });
+    },
+
+    //跳转到订单列表页，并进行筛选出已完成订单
+    gotoFinish() {
+      window.sessionStorage.setItem("activePath", "/orders");
+      this.$router.push({ name: "订单管理", params: { data: "已收货" } });
     },
   },
 };

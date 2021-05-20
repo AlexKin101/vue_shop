@@ -40,7 +40,7 @@
       </el-row>
 
       <!-- 商品列表区域 -->
-      <el-table :data="goodsList" border script>
+      <el-table :data="goodsList" border :row-class-name="tableRowClassName">
         <!-- 展开项 -->
         <el-table-column type="expand">
           <template slot-scope="scope">
@@ -96,12 +96,39 @@
                       label="商品折扣价："
                       style="margin-right: 40px"
                     >
-                      <span v-if="scope.row.isDiscount === 1">
-                        {{ scope.row.discountPrice + " 元" }}
-                      </span>
-                      <span v-else>
-                        NULL
-                      </span>
+                      <div
+                        v-if="
+                          scope.row.discountPrice < scope.row.inPrice &&
+                            scope.row.isDiscount === 1
+                        "
+                      >
+                        <el-tooltip
+                          content="该商品折扣价低于商品进价，请检查折扣定价是否合理！"
+                          placement="bottom"
+                          effect="dark"
+                        >
+                          <span style="color:#F56C6C">
+                            {{ scope.row.discountPrice + " 元" }}
+                          </span>
+                        </el-tooltip>
+                      </div>
+
+                      <div
+                        v-else-if="
+                          scope.row.discountPrice >= scope.row.inPrice &&
+                            scope.row.isDiscount === 1
+                        "
+                      >
+                        <span>
+                          {{ scope.row.discountPrice + " 元" }}
+                        </span>
+                      </div>
+
+                      <div v-else>
+                        <span>
+                          NULL
+                        </span>
+                      </div>
                     </el-form-item>
                     <el-form-item label="商品折扣率：">
                       <el-tooltip
@@ -532,7 +559,8 @@
                   showEditStockDialog(
                     scope.row.id,
                     scope.row.stock,
-                    scope.row.lowStock
+                    scope.row.lowStock,
+                    scope.row.type.name
                   )
                 "
               ></el-button>
@@ -575,12 +603,12 @@
         <el-form-item label="最低库存数量：" prop="lowStock">
           {{ this.stockForm.lowStock }}
         </el-form-item>
-        <el-form-item label="供货商：">
+        <el-form-item label="供货商：" prop="supplier">
           <el-cascader
             placeholder="请选择供货商："
             v-model="selectedSupplierKeys"
             :options="supplierList"
-            style="width:40%"
+            style="width:30%"
             :props="{
               expandTrigger: 'hover',
               value: 'name',
@@ -633,7 +661,7 @@ export default {
       supplierList: [],
 
       // 选中的供货商
-      selectedSupplierKeys: "",
+      selectedSupplierKeys: null,
 
       // 缺货商品的数据列表，默认为空
       stockoutGoodsList: [],
@@ -663,15 +691,19 @@ export default {
 
       stockForm: {
         id: 0,
+        supplier: null,
         lowStock: 0,
         stock: 0,
-        supplyStock: 0,
+        supplyStock: null,
       },
 
       // 添加表单的验证规则对象
       stockFormRules: {
         supplyStock: [
           { required: true, message: "请输入补充的库存数量", trigger: "blur" },
+        ],
+        supplier: [
+          { required: false, message: "请输入选择供货商", trigger: "blur" },
         ],
       },
     };
@@ -681,7 +713,7 @@ export default {
     this.getBrandsList();
     this.getCateList();
     this.getStockOutGoodsList();
-    this.getSupplierList();
+    // this.getSupplierList();
   },
   methods: {
     async getGoodsList() {
@@ -713,6 +745,7 @@ export default {
       this.stockoutQueryInfo.pagesize = res.data.size;
       //   为总数据条数赋值
       this.stockoutTotal = res.data.totalElements;
+
       this.stockoutGoodsList = res.data.content;
     },
 
@@ -753,8 +786,10 @@ export default {
     },
 
     //   获取所有供货商数据
-    async getSupplierList() {
-      const { data: res } = await this.$http.get("supplier");
+    async getSupplierList(type) {
+      const { data: res } = await this.$http.get("supplier", {
+        params: { type: type },
+      });
 
       if (res.meta.status !== 200)
         return this.$message.error("获取供货商数据失败");
@@ -835,12 +870,13 @@ export default {
       this.getGoodsList();
     },
 
-    showEditStockDialog(id, stock, lowStock) {
-      this.editStockDialogVisible = true;
-
+    showEditStockDialog(id, stock, lowStock, type) {
+      this.getSupplierList(type);
       this.stockForm.id = id;
       this.stockForm.lowStock = lowStock;
       this.stockForm.stock = stock;
+      this.editStockDialogVisible = true;
+
       this.showStockoutDialogVisible = false;
     },
 
@@ -850,34 +886,33 @@ export default {
       this.getGoodsList();
     },
 
-    supply() {
-      this.$refs.stockFormRef.validate(async (valid) => {
-        // console.log(valid);
-        if (!valid) return;
-        //可以发起修改库存的网络请求
+    async supply() {
+      console.log(this.stockForm);
+      console.log(this.selectedSupplierKeys);
+      //可以发起修改库存的网络请求
+      if (this.selectedSupplierKeys === null) {
+        return this.$message.error("请选择供货商");
+      }
+      const { data: res } = await this.$http.put(
+        `goods/${this.stockForm.id}/stock`,
+        null,
+        {
+          params: {
+            supplyStock:
+              parseInt(this.stockForm.stock) +
+              parseInt(this.stockForm.supplyStock),
+          },
+        }
+      );
+      if (res.meta.status !== 200)
+        return this.$message.error("修改库存信息失败");
 
-        const { data: res } = await this.$http.put(
-          `goods/${this.stockForm.id}/stock`,
-          null,
-          {
-            params: {
-              supplyStock: this.addStock(
-                this.stockForm.stock,
-                this.stockForm.supplyStock
-              ),
-            },
-          }
-        );
-        if (res.meta.status !== 200)
-          return this.$message.error("修改库存信息失败");
-      });
       //重新获取库存列表
       this.$message.success("修改库存信息成功");
-      this.$nextTick(() => {
-        this.getStockOutGoodsList();
-        this.editStockDialogVisible = false;
-        this.getGoodsList();
-      });
+
+      this.getStockOutGoodsList();
+      this.editStockDialogVisible = false;
+      this.getGoodsList();
     },
 
     goAddPage() {
@@ -897,9 +932,18 @@ export default {
       return Number(stock) + Number(supply);
     },
 
+    tableRowClassName({ row, rowIndex }) {
+      //   console.log(discountRate);
+      if (row.isStockout === 1) {
+        return "warning-row";
+      }
+      return "";
+    },
+
     resetDateFilter() {
       this.$refs.filterTable.clearFilter("brands.name");
     },
+
     clearFilter() {
       this.$refs.filterTable.clearFilter();
     },
@@ -932,7 +976,7 @@ export default {
 };
 </script>
 
-<style lang="less" scoped>
+<style lang="less">
 .expandInfo {
   display: flex;
   align-items: center;
@@ -940,5 +984,8 @@ export default {
 }
 .demo-table-expand {
   font-size: 0;
+}
+.el-table .warning-row {
+  background: oldlace;
 }
 </style>

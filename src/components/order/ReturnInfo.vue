@@ -145,10 +145,14 @@
             </el-form-item>
           </el-col>
           <el-col :span="8">
-            <el-form-item label="订单金额:" prop="price">
+            <el-form-item label="订单金额:">
               {{ this.serviceForm.price }} 元
             </el-form-item>
-            <el-form-item label="确认退款金额:" label-width="110px">
+            <el-form-item
+              label="确认退款金额:"
+              label-width="120px"
+              prop="returnPrice"
+            >
               <el-input
                 oninput="value=value.replace(/[^0-9.]/g,'')"
                 :placeholder="serviceForm.price"
@@ -170,6 +174,24 @@
           <el-col :span="8">
             <div class="btns">
               <el-form-item>
+                <el-button
+                  type="primary"
+                  @click="agreeReturn"
+                  style="margin-bottom:15px"
+                  :disabled="judgeReturnDisable(this.serviceForm.state)"
+                >
+                  同意退货
+                </el-button>
+                <br />
+                <el-button
+                  type="primary"
+                  @click="rejectReturn"
+                  style="margin-bottom:15px"
+                  :disabled="judgeReturnDisable(this.serviceForm.state)"
+                >
+                  拒绝退货
+                </el-button>
+                <br />
                 <el-button
                   type="primary"
                   @click="agree"
@@ -216,6 +238,8 @@ export default {
 
       serviceInfo: [],
 
+      activeIndex: 0,
+
       serviceForm: {
         id: 0, //服务单号
         status: "", //申请状态
@@ -239,7 +263,7 @@ export default {
         status: 0, //退换货订单状态
       },
       serviceFormRules: {
-        price: [
+        returnPrice: [
           {
             required: true,
             validator: validatePrice,
@@ -266,14 +290,48 @@ export default {
 
       this.goodsInfoList = res.data;
       this.serviceForm = res.data[0];
+      this.serviceForm.orderId = res.data[0].orders.id;
       this.serviceForm.number = res.data[0].orders.number;
       this.serviceForm.addTime = res.data[0].orders.addTime;
       this.serviceForm.tel = res.data[0].customer.tel;
       this.serviceForm.price = res.data[0].price;
       this.serviceForm.amount = res.data[0].orders.amount;
       this.serviceForm.picture = res.data[0].orders.products.picture;
+      this.serviceForm.isSend = res.data[0].orders.isSend;
       // this.serviceForm.returnPrice = res.data[0].price;
       // console.log(this.serviceForm);
+      this.judgeState(this.serviceForm.isSend, this.serviceForm.state);
+    },
+
+    async agreeReturn() {
+      const confirmResult = await this.$confirm(
+        "此操作将永久修改该服务单状态, 是否继续?",
+        "提示",
+        {
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          type: "warning",
+        }
+      ).catch((err) => err);
+
+      if (confirmResult !== "confirm") {
+        return this.$message.info("已取消");
+      }
+
+      this.serviceForm.opName = window.sessionStorage.getItem("name");
+      this.serviceForm.opNumber = window.sessionStorage.getItem("account");
+
+      this.serviceForm.state = "允许退货";
+
+      const { data: res } = await this.$http.put(
+        `return/handle/${this.$route.query.id}`,
+        this.serviceForm
+      );
+
+      if (res.meta.status !== 200) return this.$message.error("处理失败");
+
+      this.$message.success("处理成功");
+      // this.$router.push("/returns");
     },
 
     async agree() {
@@ -293,8 +351,49 @@ export default {
 
       this.serviceForm.opName = window.sessionStorage.getItem("name");
       this.serviceForm.opNumber = window.sessionStorage.getItem("account");
+      this.serviceForm.handleTime = new Date();
 
-      this.serviceForm.state = "退款完成";
+      if (this.serviceForm.state === "允许退货") {
+        this.serviceForm.state = "退货完成";
+      } else {
+        this.serviceForm.state = "退款完成";
+      }
+
+      const { data: res } = await this.$http.put(
+        `return/handle/${this.$route.query.id}`,
+        this.serviceForm
+      );
+
+      if (res.meta.status !== 200) return this.$message.error("处理失败");
+
+      this.$message.success("处理成功");
+      this.$router.push("/returns");
+    },
+
+    async rejectReturn() {
+      const confirmResult = await this.$confirm(
+        "此操作将永久修改该服务单状态, 是否继续?",
+        "提示",
+        {
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          type: "warning",
+        }
+      ).catch((err) => err);
+
+      if (confirmResult !== "confirm") {
+        return this.$message.info("已取消");
+      }
+
+      // if (this.serviceForm.state === "待处理") {
+      this.serviceForm.state = "已拒绝";
+      // } else {
+      //   this.serviceForm.state = "拒绝退款";
+      // }
+
+      this.serviceForm.opName = window.sessionStorage.getItem("name");
+      this.serviceForm.opNumber = window.sessionStorage.getItem("account");
+      this.serviceForm.handleTime = new Date();
 
       const { data: res } = await this.$http.put(
         `return/handle/${this.$route.query.id}`,
@@ -324,6 +423,10 @@ export default {
 
       this.serviceForm.state = "拒绝退款";
 
+      this.serviceForm.opName = window.sessionStorage.getItem("name");
+      this.serviceForm.opNumber = window.sessionStorage.getItem("account");
+      this.serviceForm.handleTime = new Date().Format("yyyy-MM-dd:hh:mm:ss");
+
       const { data: res } = await this.$http.put(
         `return/handle/${this.$route.query.id}`,
         this.serviceForm
@@ -339,13 +442,74 @@ export default {
       if (
         stateStr == "退款完成" ||
         stateStr == "拒绝退款" ||
-        stateStr == "已拒绝"
+        stateStr == "已拒绝" ||
+        stateStr == "退货完成"
       ) {
         return true;
       } else {
-        return false;
+        if (stateStr === "待退款" && this.serviceForm.isSend === 0) {
+          return false;
+        } else {
+          if (stateStr == "允许退货") {
+            return false;
+          } else {
+            return true;
+          }
+        }
       }
     },
+
+    judgeReturnDisable(stateStr) {
+      if (stateStr == "待处理" && this.serviceForm.isSend) {
+        return false;
+      } else {
+        if (
+          stateStr == "允许退货" ||
+          stateStr == "退货完成" ||
+          stateStr == "退款完成" ||
+          stateStr == "拒绝退款" ||
+          stateStr == "已拒绝"
+        ) {
+          return true;
+        } else {
+          if (stateStr === "待退款" && this.serviceForm.isSend === 0) {
+            return true;
+          } else {
+            return false;
+          }
+        }
+      }
+    },
+
+    // judgeState(isSendStr, stateStr) {
+    //   if (isSendStr === 1) {
+    //     // 同意退货
+    //     if (stateStr == "待处理") {
+    //       this.activeIndex = 1;
+    //     } else if (stateStr == "同意退货") {
+    //       this.activeIndex = 2;
+    //     } else if (stateStr == "同意退款") {
+    //       this.activeIndex = 3;
+    //     } else if (stateStr == "退货完成") {
+    //       this.activeIndex = 4;
+
+    //       // 同意退货 但不同意
+    //     } else if (stateStr == "拒绝退款") {
+    //       this.activeIndex = 3;
+    //     }
+    //   } else {
+    //     // 同意退款
+    //     if (stateStr == "待处理") {
+    //       this.activeIndex = 1;
+    //     } else if (stateStr == "同意退款") {
+    //       this.activeIndex = 2;
+    //     } else if (stateStr == "退款完成") {
+    //       this.activeIndex = 3;
+    //     } else if (stateStr == "拒绝退款") {
+    //       this.activeIndex = 3;
+    //     }
+    //   }
+    // },
   },
 
   computed: {

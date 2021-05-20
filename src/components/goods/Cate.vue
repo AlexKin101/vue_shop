@@ -392,7 +392,7 @@ export default {
       previewPath: "",
 
       //  上传图片的URL
-      uploadURL: "http://localhost:8082/upload",
+      uploadURL: "http://1.15.39.179:8082/upload",
 
       // 图片上传组件的headers请求头
       headerObj: {
